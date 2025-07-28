@@ -22,7 +22,6 @@
 		1DE5AA4F27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE5AA4E27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift */; };
 		7E643F7F29CB9FCE0053AD36 /* MockInsulinDeliveryPumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41F875926DFB5F8004AB7C3 /* MockInsulinDeliveryPumpManager.swift */; };
 		7E643F8129CBA03F0053AD36 /* MockInsulinDeliveryPumpManager+Scenarios.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF0681E29A5408500AF2948 /* MockInsulinDeliveryPumpManager+Scenarios.swift */; };
-		845C743A2B7D687700F71F90 /* LoopUITestingKit in Frameworks */ = {isa = PBXBuildFile; productRef = 845C74392B7D687700F71F90 /* LoopUITestingKit */; };
 		84CCDBA12B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDB9E2B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav */; };
 		84CCDBA22B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDB9F2B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav */; };
 		84CCDBA32B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDBA02B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav */; };
@@ -226,7 +225,6 @@
 		1DCEDA3428066D4600ADEE1E /* ExpirationProgressViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationProgressViewModelTests.swift; sourceTree = "<group>"; };
 		1DE5AA4E27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenVirtualPumpSettingsOnLongPressGesture.swift; sourceTree = "<group>"; };
 		7EF0681E29A5408500AF2948 /* MockInsulinDeliveryPumpManager+Scenarios.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MockInsulinDeliveryPumpManager+Scenarios.swift"; sourceTree = "<group>"; };
-		847434A72B7C13E20084BE98 /* InsulinDeliveryLoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinDeliveryLoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CCDB9E2B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "01_Tidepool_Warning_Mn_+6dB.wav"; sourceTree = "<group>"; };
 		84CCDB9F2B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "02_Tidepool_Maintenance_Mn_+3dB.wav"; sourceTree = "<group>"; };
 		84CCDBA02B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "03_Tidepool_Error_Mn_+3dB.wav"; sourceTree = "<group>"; };
@@ -345,14 +343,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		847434A42B7C13E10084BE98 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				845C743A2B7D687700F71F90 /* LoopUITestingKit in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B41F872A26DFB430004AB7C3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -682,7 +672,6 @@
 				B4D85580241BC25000ED61FF /* InsulinDeliveryLoopKitUITests.xctest */,
 				B4D8559F241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin.loopplugin */,
 				B41F872D26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin.loopplugin */,
-				847434A72B7C13E20084BE98 /* InsulinDeliveryLoopUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -837,26 +826,6 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		847434A62B7C13E10084BE98 /* InsulinDeliveryLoopUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 847434B02B7C13E20084BE98 /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopUITests" */;
-			buildPhases = (
-				847434A32B7C13E10084BE98 /* Sources */,
-				847434A42B7C13E10084BE98 /* Frameworks */,
-				847434A52B7C13E10084BE98 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = InsulinDeliveryLoopUITests;
-			packageProductDependencies = (
-				845C74392B7D687700F71F90 /* LoopUITestingKit */,
-			);
-			productName = TidepoolLoopCoastalUITests;
-			productReference = 847434A72B7C13E20084BE98 /* InsulinDeliveryLoopUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 		B41F872C26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B41F874226DFB430004AB7C3 /* Build configuration list for PBXNativeTarget "MockInsulinDeliveryPumpPlugin" */;
@@ -983,10 +952,6 @@
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Tidepool Project";
 				TargetAttributes = {
-					847434A62B7C13E10084BE98 = {
-						CreatedOnToolsVersion = 15.2;
-						LastSwiftMigration = 1520;
-					};
 					B41F872C26DFB430004AB7C3 = {
 						CreatedOnToolsVersion = 12.5;
 						LastSwiftMigration = 1250;
@@ -1035,19 +1000,11 @@
 				B4D8557F241BC25000ED61FF /* InsulinDeliveryLoopKitUITests */,
 				B4D8559E241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin */,
 				B41F872C26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */,
-				847434A62B7C13E10084BE98 /* InsulinDeliveryLoopUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		847434A52B7C13E10084BE98 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B41F872B26DFB430004AB7C3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1100,13 +1057,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		847434A32B7C13E10084BE98 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B41F872926DFB430004AB7C3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1278,78 +1228,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		847434AD2B7C13E20084BE98 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.TidepoolLoopCoastalUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		847434AE2B7C13E20084BE98 /* Testflight */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.TidepoolLoopCoastalUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Testflight;
-		};
-		847434AF2B7C13E20084BE98 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 75U4X84TEG;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.TidepoolLoopCoastalUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		B41F873E26DFB430004AB7C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2012,16 +1890,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		847434B02B7C13E20084BE98 /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				847434AD2B7C13E20084BE98 /* Debug */,
-				847434AE2B7C13E20084BE98 /* Testflight */,
-				847434AF2B7C13E20084BE98 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		B41F874226DFB430004AB7C3 /* Build configuration list for PBXNativeTarget "MockInsulinDeliveryPumpPlugin" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2122,11 +1990,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		845C74392B7D687700F71F90 /* LoopUITestingKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 845C74382B7D687700F71F90 /* XCRemoteSwiftPackageReference "LoopUITestingKit" */;
-			productName = LoopUITestingKit;
-		};
 		B45DB7F72D8CA3B800347D81 /* InsulinDeliveryServiceKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B45DB7F62D8CA3B800347D81 /* XCRemoteSwiftPackageReference "InsulinDeliveryServiceKit" */;
