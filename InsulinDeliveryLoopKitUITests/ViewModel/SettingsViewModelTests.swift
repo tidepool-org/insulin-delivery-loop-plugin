@@ -10,6 +10,8 @@ import XCTest
 import CoreBluetooth
 import LoopAlgorithm
 import LoopKit
+import InsulinDeliveryServiceKit
+import BluetoothCommonKit
 @testable import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
@@ -29,6 +31,7 @@ class SettingsViewModelTests: XCTestCase {
     private let firmwareRevision: String = "FirmwareRevision"
     private let hardwareRevision: String = "HardwareRevision"
     private let batteryLevel: Int = 50
+    private var securityManagerTestingDelegate = SecurityManagerTestingDelegate()
 
     private var mockKeychainManager: MockKeychainManager!
 
@@ -39,29 +42,33 @@ class SettingsViewModelTests: XCTestCase {
                                               serialNumber: serialNumber,
                                               firmwareRevision: firmwareRevision,
                                               hardwareRevision: hardwareRevision,
-                                              batteryLevel: batteryLevel)
+                                              batteryLevel: batteryLevel,
+                                              reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         let uuidToHandleMap: [CBUUID: UInt16] = [DeviceInfoCharacteristicUUID.firmwareRevisionString.cbUUID: 1,
                                                  DeviceInfoCharacteristicUUID.hardwareRevisionString.cbUUID: 2,
                                                  BatteryCharacteristicUUID.batteryLevel.cbUUID: 3,
                                                  InsulinDeliveryCharacteristicUUID.commandControlPoint.cbUUID: 4,
                                                  InsulinDeliveryCharacteristicUUID.statusReaderControlPoint.cbUUID: 5]
         pumpState = IDPumpState(deviceInformation: deviceInformation, uuidToHandleMap: uuidToHandleMap)
-        let securityManager = SecurityManager(securePersistentPumpAuthentication: { self.mockKeychainManager }, sharedKeyData: Data(hexadecimalString: "000102030405060708090a0b0c0d0e0f")!)
-        let bluetoothManager = BluetoothManager(restoreOptions: nil)
+        securityManagerTestingDelegate.sharedKeyData = Data(hexadecimalString: "000102030405060708090a0b0c0d0e0f")!
+        let securityManager = SecurityManager()
+        securityManager.delegate = securityManagerTestingDelegate
+        
+        let bluetoothManager = BluetoothManager(peripheralConfiguration: .insulinDeliveryServiceConfiguration, servicesToDiscover: [InsulinDeliveryCharacteristicUUID.service.cbUUID], restoreOptions: nil)
         bluetoothManager.peripheralManager = PeripheralManager()
-        let acControlPoint = ACControlPoint(securityManager: securityManager, maxRequestSize: 19)
-        let acData = ACData(securityManager: securityManager, maxRequestSize: 19)
+        let acControlPoint = ACControlPointDataHandler(securityManager: securityManager, maxRequestSize: 19)
+        let acData = ACDataDataHandler(securityManager: securityManager, maxRequestSize: 19)
         let bolusManager = BolusManager()
         let pumpHistoryEventManager = PumpHistoryEventManager()
-        pump = pump(bluetoothManager: bluetoothManager,
-                    bolusManager: bolusManager,
-                    basalManager: BasalManager(),
-                    pumpHistoryEventManager: pumpHistoryEventManager,
-                    securityManager: securityManager,
-                    acControlPoint: acControlPoint,
-                    acData: acData,
-                    state: pumpState,
-                    isConnectedHandler: { self.pumpIsConnected })
+        pump = InsulinDeliveryPump(bluetoothManager: bluetoothManager,
+                                   bolusManager: bolusManager,
+                                   basalManager: BasalManager(),
+                                   pumpHistoryEventManager: pumpHistoryEventManager,
+                                   securityManager: securityManager,
+                                   acControlPoint: acControlPoint,
+                                   acData: acData,
+                                   state: pumpState,
+                                   isConnectedHandler: { self.pumpIsConnected })
 
         basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0)])!
         pumpManager = InsulinDeliveryPumpManager(state: InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState), pump: pump)
@@ -106,14 +113,9 @@ class SettingsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.deviceInformation?.batteryLevel, anotherBatteryLevel)
     }
 
-    func testReplacePartsSelected() {
-        viewModel.replacePartsSelected()
-        XCTAssertEqual(mockNavigator.currentScreen, .replaceParts)
-    }
-
     func testAllowedExpiryWarningDurations() {
         var expectedExpiryWarningDurations: [TimeInterval] = []
-        for days in 4...30 {
+        for days in 1...4 {
             expectedExpiryWarningDurations.append(.days(days))
         }
         XCTAssertEqual(viewModel.allowedExpiryWarningDurations, expectedExpiryWarningDurations)
@@ -122,36 +124,6 @@ class SettingsViewModelTests: XCTestCase {
     func testAllowedLowReservoirWarningThresholds() {
         let expectedExpiryWarningDurations = Array(stride(from: 5, through: 40, by: 5))
         XCTAssertEqual(viewModel.allowedLowReservoirWarningThresholdsInUnits, expectedExpiryWarningDurations)
-    }
-
-    func testInitInfusionAssemblyReplacementReminderSettings() {
-        XCTAssertEqual(NotificationSetting(), viewModel.infusionAssemblyReplacementReminderSettings)
-    }
-    
-    func testSaveInfusionAssemblyReplacementReminderSettings() throws {
-        let testExpectation = XCTestExpectation()
-        pumpManager.lastReplacementDates = ComponentDates(infusionAssembly: .distantPast, reservoir: .distantPast, pumpBase: .distantPast)
-        let midnight = NotificationSetting.TimeOfDay(hour: 0, minute: 0)
-        let setting = try NotificationSetting(isEnabled: true, repeatDays: 1, timeOfDay: midnight)
-        viewModel.saveInfusionAssemblyReplacementReminderSettings(setting, { _ in
-            testExpectation.fulfill()
-        })
-
-        wait(for: [testExpectation], timeout: 30)
-
-        XCTAssertEqual(setting, viewModel.infusionAssemblyReplacementReminderSettings)
-        XCTAssertEqual(setting, pumpManager.notificationSettingsState.infusionReplacementReminder)
-    }
-
-    func testInsulinStartSoundsLabel() {
-        viewModel.insulinStartSoundsEnabled = true
-        XCTAssertTrue(viewModel.insulinStartSoundsLabel.contains("Disable"))
-        viewModel.transitioningInsulinStartSounds = true
-        XCTAssertTrue(viewModel.insulinStartSoundsLabel.contains("Disabling"))
-        viewModel.insulinStartSoundsEnabled = false
-        XCTAssertTrue(viewModel.insulinStartSoundsLabel.contains("Enabling"))
-        viewModel.transitioningInsulinStartSounds = false
-        XCTAssertTrue(viewModel.insulinStartSoundsLabel.contains("Enable"))
     }
 
     func testIsInsulinDeliverySuspendedByUser() throws {
@@ -171,14 +143,15 @@ class SettingsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.isInsulinDeliverySuspended, pumpManager.isSuspended)
     }
     
-    func testIsInsulinDeliverySuspendedByUserWithComponentsNeedingReplacement() throws {
+    func testIsInsulinDeliverySuspendedByUserWithPumpNeedingReplacement() throws {
         var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState)
-        state.replacementWorkflowState.componentsNeedingReplacement = [.infusionAssembly: .forced]
+        state.replacementWorkflowState.lastPumpReplacementDate = .distantPast
+        state.replacementWorkflowState.doesPumpNeedsReplacement = true
         state.suspendState = .suspended(Date.distantPast)
         pumpManager = InsulinDeliveryPumpManager(state: state, pump: pump)
         viewModel = SettingsViewModel(pumpManager: pumpManager,
-                                          navigator: mockNavigator,
-                                          completionHandler: { })
+                                      navigator: mockNavigator,
+                                      completionHandler: { })
         XCTAssertTrue(viewModel.isInsulinDeliverySuspended)
         XCTAssertFalse(viewModel.isInsulinDeliverySuspendedByUser)
         XCTAssertEqual(viewModel.isInsulinDeliverySuspended, pumpManager.isSuspended)
@@ -193,15 +166,17 @@ class SettingsViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.insulinDeliveryDisabled)
     }
     
-    func testInsulinDeliveryDisabledWithComponentsNeedingReplacement() throws {
+    func testInsulinDeliveryDisabledWithPumpNeedingReplacement() throws {
         pumpManager.pump.state.deviceInformation?.pumpOperationalState = .ready
         XCTAssertFalse(viewModel.insulinDeliveryDisabled)
         var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState)
-        state.replacementWorkflowState.componentsNeedingReplacement = [.infusionAssembly: .forced]
+        state.replacementWorkflowState.lastPumpReplacementDate = .distantPast
+        state.replacementWorkflowState.doesPumpNeedsReplacement = true
+        state.suspendState = .suspended(Date.distantPast)
         pumpManager = InsulinDeliveryPumpManager(state: state, pump: pump)
         viewModel = SettingsViewModel(pumpManager: pumpManager,
-                                          navigator: mockNavigator,
-                                          completionHandler: { })
+                                      navigator: mockNavigator,
+                                      completionHandler: { })
         XCTAssertTrue(viewModel.insulinDeliveryDisabled)
     }
     
@@ -227,13 +202,13 @@ class SettingsViewModelTests: XCTestCase {
         })
         waitOnMain()
 
-        var response = Data(IDControlPointOpcode.responseCode.rawValue)
-        response.append(IDControlPointOpcode.setTherapyControlState.rawValue)
-        response.append(IDControlPointResponseCode.success.rawValue)
-        response.append(pump.insulinDeliveryControlPoint.e2eCounter)
+        var response = Data(IDCommandControlPointOpcode.responseCode.rawValue)
+        response.append(IDCommandControlPointOpcode.setTherapyControlState.rawValue)
+        response.append(IDCommandControlPointResponseCode.success.rawValue)
+        response.append(pump.idCommand.e2eCounter)
         response = response.appendingCRC()
 
-        pump.manageInsulinDeliveryControlPointResponse(response)
+        pump.manageInsulinDeliveryCommandControlPointResponse(response)
         wait(for: [testExpectation], timeout: 30)
 
         XCTAssertFalse(viewModel.isInsulinDeliverySuspended)
@@ -253,112 +228,21 @@ class SettingsViewModelTests: XCTestCase {
         response = Data(IDStatusReaderOpcode.getDeliveredInsulinResponse.rawValue)
         response.append(UInt32(0))
         response.append(UInt32(0))
-        response.append(pump.insulinDeliveryStatusReader.e2eCounter)
+        response.append(pump.idStatusReader.e2eCounter)
         response = response.appendingCRC()
         pump.manageInsulinDeliveryStatusReaderResponse(response)
         
-        response = Data(IDControlPointOpcode.responseCode.rawValue)
-        response.append(IDControlPointOpcode.setTherapyControlState.rawValue)
-        response.append(IDControlPointResponseCode.success.rawValue)
-        response.append(pump.insulinDeliveryControlPoint.e2eCounter)
+        response = Data(IDCommandControlPointOpcode.responseCode.rawValue)
+        response.append(IDCommandControlPointOpcode.setTherapyControlState.rawValue)
+        response.append(IDCommandControlPointResponseCode.success.rawValue)
+        response.append(pump.idCommand.e2eCounter)
         response = response.appendingCRC()
 
-        pump.manageInsulinDeliveryControlPointResponse(response)
+        pump.manageInsulinDeliveryCommandControlPointResponse(response)
         wait(for: [testExpectation], timeout: 30)
 
         XCTAssertTrue(viewModel.isInsulinDeliverySuspended)
         XCTAssertNotNil(viewModel.suspendedAtString)
-    }
-
-    func testIsMuteWarningsActive() {
-        XCTAssertEqual(viewModel.isMuteWarningsActive, pumpManager.isMuteWarningsActive)
-    }
-
-    func testMuteWarningsEnabled() {
-        XCTAssertEqual(viewModel.muteWarningsEnabled, pumpManager.muteWarningsEnabled)
-    }
-
-    func testMuteWarningsStartTime() {
-        XCTAssertEqual(viewModel.muteWarningsStartTime, pumpManager.muteWarningsStartTime)
-    }
-
-    func testMuteWarningsEndTime() {
-    XCTAssertEqual(viewModel.muteWarningsEndTime, pumpManager.muteWarningsEndTime)
-    }
-
-    func testMuteWarningsDailyFrequency() {
-        XCTAssertEqual(viewModel.muteWarningsDailyFrequency, pumpManager.muteWarningsDailyFrequency)
-    }
-
-    func testUpdateState() {
-        // suspend insulin delivery
-        pumpManager.pump.state.deviceInformation?.pumpOperationalState = .ready
-        pumpManager.pump.state.deviceInformation?.therapyControlState = .stop
-        pumpManager.pumpDidUpdateState(pumpManager.pump)
-        waitOnMain()
-
-        XCTAssertEqual(viewModel.expiryWarningDuration, pumpManager.pumpConfiguration.expiryWarningDuration)
-        XCTAssertEqual(viewModel.lowReservoirWarningThresholdInUnits, pumpManager.lowReservoirWarningThresholdInUnits)
-        XCTAssertEqual(viewModel.insulinStartSoundsEnabled, pumpManager.insulinStartSoundsEnabled)
-        XCTAssertEqual(viewModel.suspendedAt, pumpManager.suspendedAt)
-        XCTAssertEqual(viewModel.muteWarningsEnabled, pumpManager.muteWarningsEnabled)
-        XCTAssertEqual(viewModel.muteWarningsStartTime, pumpManager.muteWarningsStartTime)
-        XCTAssertEqual(viewModel.muteWarningsEndTime, pumpManager.muteWarningsEndTime)
-        XCTAssertEqual(viewModel.muteWarningsDailyFrequency, pumpManager.muteWarningsDailyFrequency)
-
-        pumpManager.pump.state.configuration.expiryWarningDuration = .days(20)
-        pumpManager.pump.state.configuration.reservoirLevelWarningThresholdInUnits = 10
-        pumpManager.pump.state.configuration.startInsulinDeliverySoundEnabled = true
-        pumpManager.pump.state.deviceInformation?.therapyControlState = .run
-        pumpManager.pump.state.configuration.muteWarningsConfiguration.enabled = true
-        pumpManager.pump.state.configuration.muteWarningsConfiguration.startTime = Date()
-        pumpManager.pump.state.configuration.muteWarningsConfiguration.duration = .minutes(5)
-        pumpManager.pump.state.configuration.muteWarningsConfiguration.repeatStatus = .once
-        XCTAssertNotEqual(viewModel.expiryWarningDuration, pumpManager.pumpConfiguration.expiryWarningDuration)
-        XCTAssertEqual(viewModel.lowReservoirWarningThresholdInUnits, pumpManager.lowReservoirWarningThresholdInUnits)
-        XCTAssertNotEqual(viewModel.insulinStartSoundsEnabled, pumpManager.insulinStartSoundsEnabled)
-        XCTAssertNotEqual(viewModel.muteWarningsEnabled, pumpManager.muteWarningsEnabled)
-        XCTAssertNotEqual(viewModel.muteWarningsStartTime, pumpManager.muteWarningsStartTime)
-        XCTAssertNotEqual(viewModel.muteWarningsEndTime, pumpManager.muteWarningsEndTime)
-        XCTAssertNotEqual(viewModel.muteWarningsDailyFrequency, pumpManager.muteWarningsDailyFrequency)
-
-        pumpManager.pumpDidUpdateState(pumpManager.pump)
-        waitOnMain()
-
-        XCTAssertEqual(viewModel.expiryWarningDuration, pumpManager.expirationReminderTimeBeforeExpiration)
-        XCTAssertEqual(viewModel.lowReservoirWarningThresholdInUnits, pumpManager.lowReservoirWarningThresholdInUnits)
-        XCTAssertEqual(viewModel.insulinStartSoundsEnabled, pumpManager.insulinStartSoundsEnabled)
-        XCTAssertEqual(viewModel.isInsulinDeliverySuspended, pumpManager.isSuspended)
-        XCTAssertEqual(viewModel.muteWarningsEnabled, pumpManager.muteWarningsEnabled)
-        XCTAssertEqual(viewModel.muteWarningsStartTime, pumpManager.muteWarningsStartTime)
-        XCTAssertEqual(viewModel.muteWarningsEndTime, pumpManager.muteWarningsEndTime)
-        XCTAssertEqual(viewModel.muteWarningsDailyFrequency, pumpManager.muteWarningsDailyFrequency)
-    }
-    
-    func testComponentsNeedingReplacementToResolveUpdates() throws {
-        XCTAssertFalse(viewModel.wasInsulinDeliverySuspensionCausedByEMWR)
-        XCTAssertEqual(.none, viewModel.componentsNeedingReplacementToResolve)
-        XCTAssertTrue(viewModel.componentsNeedingReplacementToResolve.isEmpty)
-        
-        var state = InsulinDeliveryPumpManagerState.forPreviewsAndTests
-        state.replacementWorkflowState.addComponentsNeedingReplacement(for: .occlusionDetected)
-        viewModel.pumpManagerDidUpdateState(self.pumpManager, state)
-        XCTAssertEqual([.infusionAssembly: .forced, .reservoir: .forced], viewModel.componentsNeedingReplacementToResolve)
-        XCTAssertTrue(viewModel.wasInsulinDeliverySuspensionCausedByEMWR)
-    }
-    
-    func testComponentsNeedingReplacementDoesNotIncludeWarnings() throws {
-        var state = InsulinDeliveryPumpManagerState.forPreviewsAndTests
-        state.replacementWorkflowState.addComponentsNeedingReplacement(for: .endOfReservoirTime)
-        viewModel.pumpManagerDidUpdateState(self.pumpManager, state)
-        XCTAssertEqual([.reservoir: .soon], viewModel.componentsNeedingReplacementToResolve)
-        XCTAssertFalse(viewModel.wasInsulinDeliverySuspensionCausedByEMWR)
-    }
-
-    func testIsComponentReplacementNeededWorkflowCanceledHasNoEffect() throws {
-        XCTAssertFalse(viewModel.wasInsulinDeliverySuspensionCausedByEMWR)
-        pumpManager.replacementWorkflowState.wasWorkflowCanceled = true
-        XCTAssertFalse(viewModel.wasInsulinDeliverySuspensionCausedByEMWR)
     }
 
     func testSignalLossDescriptiveText() throws {
@@ -373,12 +257,14 @@ extension SettingsViewModelTests {
     func updateDeviceInformation(serialNumber: String? = nil,
                                  firmwareRevision: String? = nil,
                                  hardwareRevision: String? = nil,
-                                 batteryLevel: Int? = nil) {
+                                 batteryLevel: Int? = nil,
+                                 reportedRemainingLifetime: TimeInterval? = nil) {
         let deviceInformation = DeviceInformation(identifier: identifier,
                                                   serialNumber: serialNumber ?? self.serialNumber,
                                                   firmwareRevision: firmwareRevision,
                                                   hardwareRevision: hardwareRevision,
-                                                  batteryLevel: batteryLevel)
+                                                  batteryLevel: batteryLevel,
+                                                  reportedRemainingLifetime: reportedRemainingLifetime ?? InsulinDeliveryPumpManager.lifespan)
         pumpManager.pump.state.deviceInformation = deviceInformation
         viewModel.pumpDidUpdateState()
     }

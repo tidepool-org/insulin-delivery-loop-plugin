@@ -15,7 +15,7 @@ import InsulinDeliveryServiceKit
 import BluetoothCommonKit
 
 // TODO remove
-public protocol InsulinDeliveryPumpDelegate: AnyObject {
+public protocol InsulinDeliveryPumpDelegate: AnyObject, IDPumpDelegate {
     var tidepoolSecurity: TidepoolSecurity? { get }
 }
 
@@ -35,19 +35,19 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
     
     private let log = OSLog(category: "InsulinDeliveryPump")
     
-    var securePersistentPumpAuthentication: () -> SecurePersistentPumpAuthentication
+    var securePersistentAuthentication: () -> SecurePersistentAuthentication
     
     public override var sharedKeyData: Data? {
         get {
-            return securePersistentPumpAuthentication().getAuthenticationData(for: pumpKeyServiceIdentifier)
+            return securePersistentAuthentication().getAuthenticationData(for: pumpKeyServiceIdentifier)
         }
         set {            
-            try? securePersistentPumpAuthentication().setAuthenticationData(newValue, for: pumpKeyServiceIdentifier)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: pumpKeyServiceIdentifier)
         }
     }
 
-    public init(state: IDPumpState = IDPumpState(authorizationControlRequired: true),
-                securePersistentPumpAuthentication: @escaping () -> SecurePersistentPumpAuthentication = { KeychainManager() })
+    public convenience init(state: IDPumpState = IDPumpState(authorizationControlRequired: true),
+                            securePersistentAuthentication: @escaping () -> SecurePersistentAuthentication = { KeychainManager() })
     {
         let bluetoothManager = BluetoothManager(peripheralIdentifier: state.deviceInformation?.identifier, peripheralConfiguration: .pumpGeneralConfiguration, servicesToDiscover: [InsulinDeliveryCharacteristicUUID.service.cbUUID])
         let bolusManager = BolusManager(activeBolusDeliveryStatus: state.activeBolusDeliveryStatus)
@@ -56,9 +56,34 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
         let securityManager = SecurityManager(configuration: state.securityManagerConfiguration)
         let acControlPoint = ACControlPointDataHandler(securityManager: securityManager, maxRequestSize: InsulinDeliveryPumpManager.maxRequestSize)
         let acData = ACDataDataHandler(securityManager: securityManager, maxRequestSize: InsulinDeliveryPumpManager.maxRequestSize)
-        self.securePersistentPumpAuthentication = securePersistentPumpAuthentication
         var state = state
         state.isAuthorizationControlRequired = false
+        self.init(bluetoothManager: bluetoothManager,
+                  bolusManager: bolusManager,
+                  basalManager: basalManager,
+                  pumpHistoryEventManager: pumpHistoryEventManager,
+                  securityManager: securityManager,
+                  acControlPoint: acControlPoint,
+                  acData: acData,
+                  state: state,
+                  securePersistentAuthentication: securePersistentAuthentication)
+    }
+    
+    public init(bluetoothManager: BluetoothManager,
+                bolusManager: BolusManager,
+                basalManager: BasalManager,
+                pumpHistoryEventManager: PumpHistoryEventManager,
+                securityManager: SecurityManager,
+                acControlPoint: ACControlPointDataHandler,
+                acData: ACDataDataHandler,
+                state: IDPumpState,
+                securePersistentAuthentication: @escaping () -> SecurePersistentAuthentication = { KeychainManager() },
+                pendingAnnunciationCompletions: [ProcedureID : Any] = [:],
+                isConnectedHandler: (() -> Bool)? = nil,
+                isAuthenticatedHandler: (() -> Bool)? = nil,
+                getCharacteristicForUUID: ((CBUUID) -> CBCharacteristic?)? = nil)
+    {
+        self.securePersistentAuthentication = securePersistentAuthentication
         super.init(bluetoothManager: bluetoothManager,
                    bolusManager: bolusManager,
                    basalManager: basalManager,
@@ -66,7 +91,11 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
                    securityManager: securityManager,
                    acControlPoint: acControlPoint,
                    acData: acData,
-                   state: state)
+                   state: state,
+                   pendingAnnunciationCompletions: pendingAnnunciationCompletions,
+                   isConnectedHandler: isConnectedHandler,
+                   isAuthenticatedHandler: isAuthenticatedHandler,
+                   getCharacteristicForUUID: getCharacteristicForUUID)
         
         if state.isAuthorizationControlRequired == true {
             bluetoothManager.peripheralConfiguration = .pumpAuthorizationControlConfiguration

@@ -172,7 +172,8 @@ public struct MockInsulinDeliveryPumpStatus {
     mutating func setTempBasal(unitsPerHour: Double, durationInMinutes: UInt16, at now: Date = Date()) {
         updateDelivery(until: now)
         basalRateScheduleStartDate = nil
-        tempBasal = UnfinalizedDose(tempBasalRate: unitsPerHour,
+        tempBasal = UnfinalizedDose(decisionId: nil,
+                                    tempBasalRate: unitsPerHour,
                                     startTime: now,
                                     duration: .minutes(Int(durationInMinutes)),
                                     scheduledCertainty: .certain)
@@ -250,7 +251,8 @@ public struct MockInsulinDeliveryPumpStatus {
     }
 
     mutating func setBolus(_ amount: Double, at now: Date = Date()) {
-        self.bolus = UnfinalizedDose(bolusAmount: amount,
+        self.bolus = UnfinalizedDose(decisionId: nil,
+                                     bolusAmount: amount,
                                      startTime: now,
                                      scheduledCertainty: .certain)
         activeBolusDeliveryStatus = BolusDeliveryStatus(id: (activeBolusDeliveryStatus.id ?? 0) + 1,

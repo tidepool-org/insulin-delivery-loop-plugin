@@ -10,12 +10,12 @@ import XCTest
 import LoopKit
 import LoopAlgorithm
 import CoreBluetooth
+import BluetoothCommonKit
 import InsulinDeliveryServiceKit
 @testable import InsulinDeliveryLoopKit
+@testable import InsulinDeliveryLoopKitUI
 
 class InsulinDeliveryPumpManagerTests: XCTestCase {
-    typealias ComponentDates = pumpManagerState.ReplacementWorkflowState.ComponentDates
-
     private let expectationTimeout = 0.3
 
     private var issuedAlerts: [(alert: Alert, issuedDate: Date)] = []
@@ -24,6 +24,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     private var pumpManager: InsulinDeliveryPumpManager!
     private var pump: TestInsulinDeliveryPump!
     private var pumpIsConnected: Bool = true
+    private var pumpIsAuthenticated: Bool = true
     private var logEntryType: DeviceLogEntryType?
     private var logEntryMessages: [String] = []
     private var logEntryIdentifier: String?
@@ -37,14 +38,13 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     private var now: Date!
     private var pumpManagerWillDeactivateCalled = false
     internal var detectedSystemTimeOffset: TimeInterval = 0
-    private var mockKeychainManager: MockKeychainManager!
+    private var securityManagerTestingDelegate = SecurityManagerTestingDelegate()
 
     private let incompleteWorkflow = InsulinDeliveryPumpManagerState.ReplacementWorkflowState()
         .updatedWith(milestoneProgress: [1, 2],
                      pumpSetupState: .connecting,
-                     selectedComponents: .reservoirAndPumpBase,
                      wasWorkflowCanceled: false,
-                     lastReplacementDates: ComponentDates(infusionAssembly: .distantPast, reservoir: .distantPast, pumpBase: .distantPast))
+                     lastPumpReplacementDate: .distantPast)
     
     override func setUp() {
         issuedAlerts = []
@@ -61,31 +61,34 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         newPumpEventsExpectation = nil
         lastError = nil
         statusUpdates = []
-        mockKeychainManager = MockKeychainManager()
         now = Date()
-
-        let securityManager = SecurityManager(securePersistentPumpAuthentication: { self.mockKeychainManager }, sharedKeyData: Data(hexadecimalString: "000102030405060708090a0b0c0d0e0f")!)
         
-        let bluetoothManager = BluetoothManager(restoreOptions: nil)
+        securityManagerTestingDelegate.sharedKeyData = Data(hexadecimalString: "000102030405060708090a0b0c0d0e0f")!
+        let securityManager = SecurityManager()
+        securityManager.delegate = securityManagerTestingDelegate
+        
+        let bluetoothManager = BluetoothManager(peripheralConfiguration: .insulinDeliveryServiceConfiguration, servicesToDiscover: [InsulinDeliveryCharacteristicUUID.service.cbUUID], restoreOptions: nil)
         bluetoothManager.peripheralManager = PeripheralManager()
-        let acControlPoint = ACControlPoint(securityManager: securityManager, maxRequestSize: 19)
-        let acData = ACData(securityManager: securityManager, maxRequestSize: 19)
+        let acControlPoint = ACControlPointDataHandler(securityManager: securityManager, maxRequestSize: 19)
+        let acData = ACDataDataHandler(securityManager: securityManager, maxRequestSize: 19)
         let bolusManager = BolusManager()
         let pumpHistoryEventManager = PumpHistoryEventManager()
 
-        let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
+        var pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
+        pumpManagerState.pumpState.features = [.supportedE2EProtection]
         pump = TestInsulinDeliveryPump(bluetoothManager: bluetoothManager,
-                                           bolusManager: bolusManager,
-                                           basalManager: BasalManager(),
-                                           pumpHistoryEventManager: pumpHistoryEventManager,
-                                           securityManager: securityManager,
-                                           acControlPoint: acControlPoint,
-                                           acData: acData,
-                                           state: pumpManagerState.pumpState,
-                                           isConnectedHandler: { self.pumpIsConnected })
+                                       bolusManager: bolusManager,
+                                       basalManager: BasalManager(),
+                                       pumpHistoryEventManager: pumpHistoryEventManager,
+                                       securityManager: securityManager,
+                                       acControlPoint: acControlPoint,
+                                       acData: acData,
+                                       state: pumpManagerState.pumpState,
+                                       isConnectedHandler: { self.pumpIsConnected },
+                                       isAuthenticatedHandler: { self.pumpIsAuthenticated })
         pump.setupUUIDToHandleMap()
-
-        pumpManager = pumpManager(state: pumpManagerState, pump: pump, dateGenerator: { [weak self] in return self!.now })
+        
+        pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump, dateGenerator: { [weak self] in return self!.now })
         pumpManager.pumpManagerDelegate = self
         waitOnThread() // when the pump manager delegate is set, the delegate may be notified of a status update. wait until that is done before preceeding with tests
     }
@@ -130,7 +133,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         alertExpectation = expectation(description: #function)
         alertExpectation?.assertForOverFulfill = false
         let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
         wait(for: [alertExpectation!], timeout: expectationTimeout)
 
@@ -146,7 +149,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testDeviceAlertIssue() {
         alertExpectation = expectation(description: #function)
-        let annunciation = GeneralAnnunciation(type: .batteryLow, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .batteryLow, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
 
         wait(for: [alertExpectation!], timeout: expectationTimeout)
@@ -155,7 +158,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testDeviceAlertRemoval() {
         alertExpectation = expectation(description: #function)
-        let annunciation = GeneralAnnunciation(type: .batteryLow, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .batteryLow, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
 
         wait(for: [alertExpectation!], timeout: expectationTimeout)
@@ -171,7 +174,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testAllowedExpiryWarningDurations() {
         var expectedAllowedDurations: [TimeInterval] = []
-        for days in 4...30 {
+        for days in 1...4 {
             expectedAllowedDurations.append(.days(days))
         }
         XCTAssertEqual(pumpManager.allowedExpiryWarningDurations, expectedAllowedDurations)
@@ -193,7 +196,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
 
     func testLowReservoirWarningThreshold() {
-        XCTAssertEqual(pumpManager.lowReservoirWarningThresholdInUnits, pump.state.configuration.reservoirLevelWarningThresholdInUnits)
+        XCTAssertEqual(pumpManager.lowReservoirWarningThresholdInUnits, pumpManager.pumpConfiguration.reservoirLevelWarningThresholdInUnits)
     }
 
     func testAllowedLowReservoirWarningThresholds() {
@@ -210,23 +213,23 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
 
     func testIsSuspended() {
-        var pumpManagerState = pumpManagerState.forPreviewsAndTests
+        var pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         pumpManagerState.suspendState = .suspended(Date())
-        pumpManager = pumpManager(state: pumpManagerState, pump: pump)
+        pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
         XCTAssertTrue(pumpManager.isSuspended)
         pumpManagerState.suspendState = .resumed(Date())
-        pumpManager = pumpManager(state: pumpManagerState, pump: pump)
+        pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
         XCTAssertFalse(pumpManager.isSuspended)
     }
 
     func testIsSuspendedAt() {
         let now = Date()
-        var pumpManagerState = pumpManagerState.forPreviewsAndTests
+        var pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         pumpManagerState.suspendState = .suspended(now)
-        pumpManager = pumpManager(state: pumpManagerState, pump: pump)
+        pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
         XCTAssertEqual(pumpManager.suspendedAt, now)
         pumpManagerState.suspendState = .resumed(Date())
-        pumpManager = pumpManager(state: pumpManagerState, pump: pump)
+        pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
         XCTAssertNil(pumpManager.suspendedAt)
     }
 
@@ -251,7 +254,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let bolusAmountProgrammed = 5.0
         let bolusID: BolusID = 1
         pumpManager.pumpDidInitiateBolus(pump, bolusID: bolusID, insulinProgrammed: bolusAmountProgrammed, startTime: bolusStartTime)
-        pumpManager.enactTempBasal(unitsPerHour: 2, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -286,7 +289,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let testExpectation = XCTestExpectation()
         pump.setupDeviceInformation()
 
-        pumpManager.enactTempBasal(unitsPerHour: 2, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -315,52 +318,6 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         wait(for: [testExpectation], timeout: expectationTimeout)
         XCTAssertFalse(pumpManager.isSuspended)
-    }
-
-    func testMuteWarningsEnabled() {
-        let now = Date()
-        let startOfDay = Calendar.current.startOfDay(for: now)
-        pump.state.configuration.muteWarningsConfiguration.repeatStatus = .everyDay
-        pump.state.configuration.muteWarningsConfiguration.startTime = startOfDay
-        pump.state.configuration.muteWarningsConfiguration.duration = .days(1)
-        XCTAssertEqual(pumpManager.muteWarningsEnabled, pump.state.configuration.muteWarningsConfiguration.enabled)
-
-        pump.state.configuration.muteWarningsConfiguration.enabled = true
-        pump.state.configuration.muteWarningsConfiguration.repeatStatus = .once
-        pump.state.configuration.muteWarningsConfiguration.startTime = startOfDay
-        pump.state.configuration.muteWarningsConfiguration.duration = now.addingTimeInterval(-.minutes(5)).timeIntervalFromStartOfDay
-        XCTAssertFalse(pumpManager.muteWarningsEnabled)
-
-        pump.state.configuration.muteWarningsConfiguration.duration = now.addingTimeInterval(.minutes(5)).timeIntervalFromStartOfDay
-        XCTAssertTrue(pumpManager.muteWarningsEnabled)
-    }
-
-    func testMuteWarningsStartTime() {
-        XCTAssertEqual(pumpManager.muteWarningsStartTime, pump.state.configuration.muteWarningsConfiguration.startTime)
-    }
-
-    func testUpdateMuteWarningsSettings() {
-        let now = Date()
-        pumpManager.updateMuteWarningsSettings(enabled: true,
-                                                   startTime: now,
-                                                   endTime: now.addingTimeInterval(.minutes(5)),
-                                                   dailyFrequency: true,
-                                                   completion: { _ in })
-        XCTAssertTrue(pumpManager.pump.state.configuration.muteWarningsConfiguration.enabled)
-        XCTAssertEqual(pumpManager.pump.state.configuration.muteWarningsConfiguration.startTime, now)
-        XCTAssertEqual(pumpManager.pump.state.configuration.muteWarningsConfiguration.duration, .minutes(5))
-        XCTAssertEqual(pumpManager.pump.state.configuration.muteWarningsConfiguration.repeatStatus, .everyDay)
-        
-        // disconnect error
-        pumpManager.updateMuteWarningsSettings(enabled: true,
-                                                   startTime: now,
-                                                   endTime: now.addingTimeInterval(.minutes(5)),
-                                                   dailyFrequency: true,
-                                                   completion: { _ in })
-        XCTAssertTrue(pumpManager.pump.state.configuration.muteWarningsConfiguration.enabled)
-        XCTAssertEqual(pumpManager.pump.state.configuration.muteWarningsConfiguration.startTime, now)
-        XCTAssertEqual(pumpManager.pump.state.configuration.muteWarningsConfiguration.duration, .minutes(5))
-        XCTAssertEqual(pumpManager.v.state.configuration.muteWarningsConfiguration.repeatStatus, .everyDay)
     }
 
     func testLoggingDeviceEvents() {
@@ -458,260 +415,6 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         wait(for: [alertExpectation!], timeout: expectationTimeout)
         XCTAssertTrue(retractedAlerts.contains { $0.alertIdentifier == pumpManager.insulinSuspensionReminderAlertIdentifier })
     }
-
-    func testReplacementOfInfusionAssemblySetsLastInfusionAssemblyReplacementDateOnly() throws {
-        var state = pumpManagerState.forPreviewsAndTests
-        state.replacementWorkflowState.selectedComponents = [.infusionAssembly]
-        state.replacementWorkflowState.lastReplacementDates = ComponentDates(infusionAssembly: .distantPast, reservoir: .distantPast, pumpBase: .distantPast)
-        let now = Date.distantFuture
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        pumpIsConnected = true
-
-        completeReplacementWorkflow()
-        XCTAssertEqual(.distantFuture, pumpManager.lastReplacementDates?.infusionAssembly)
-        XCTAssertEqual(.distantPast, pumpManager.lastReplacementDates?.reservoir)
-        XCTAssertEqual(.distantPast, pumpManager.lastReplacementDates?.pumpBase)
-    }
-
-    func testReplacementOfInfusionAssemblyRestartsInfusionAssemblyReplacementReminder() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        var state = pumpManagerState.forPreviewsAndTests
-        state.replacementWorkflowState.selectedComponents = [.infusionAssembly]
-        state.notificationSettingsState.infusionReplacementReminder.isEnabled = true
-        state.notificationSettingsState.infusionReplacementReminder.repeatDays = 1
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        state.notificationSettingsState.infusionReplacementReminder.timeOfDay = noon
-        state.replacementWorkflowState.lastReplacementDates = ComponentDates(infusionAssembly: .distantPast, reservoir: .distantPast, pumpBase: .distantPast)
-        let now = Date.distantPast
-        let nextDate = try now.next(daysLater: 1, at: noon.dateComponents)
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-
-        completeReplacementWorkflow()
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        let expectedAlertIdentifier = Alert.Identifier(managerIdentifier: "CoastalPump", alertIdentifier: "infusionAssemblyReplacementReminder")
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == .delayed(interval: nextDate.timeIntervalSince(now))
-        }), "Unexpected issuedAlerts: \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-        NSTimeZone.default = tz
-    }
-    
-    func testEnablingNotificationsSettingsRestartsInfusionAssemblyReplacementReminder() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        let now = Date.distantPast
-        pumpManager = pumpManager(state: pumpManagerState.forPreviewsAndTests, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-
-        pumpManager.notificationSettingsState.infusionReplacementReminder = try NotificationSetting(isEnabled: true, repeatDays: 1, timeOfDay: noon)
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        let expectedAlertIdentifier = Alert.Identifier(managerIdentifier: "CoastalPump", alertIdentifier: "infusionAssemblyReplacementReminder")
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        let nextDate = try now.next(daysLater: 1, at: noon.dateComponents)
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == .delayed(interval: nextDate.timeIntervalSince(now))
-        }), "Unexpected issuedAlerts: \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-        NSTimeZone.default = tz
-    }
-    
-    func testChangingNotificationsSettingsToDateInPastRestartsInfusionAssemblyReplacementReminderNextAvailableDate() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        // Say a user has their replacement reminder set for "every 3 days at noon"
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        var settings = try NotificationSetting(isEnabled: true, repeatDays: 3, timeOfDay: noon)
-        // Now, say they replaced their infusion assembly "yesterday" at 11am.  Say it is 1pm today (so, 3 days have not yet passed)
-        let now = Calendar.current.date(bySettingHour: 13, minute: 0, second: 0, of: Date.distantPast)!
-        var state = pumpManagerState.forPreviewsAndTests
-        state.notificationSettingsState.infusionReplacementReminder = settings
-        setReplacementDate(of: .infusionAssembly, to: Calendar.current.date(bySettingHour: 11, minute: 0, second: 0, of: now - .days(1))!)
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        setReplacementDate(of: .infusionAssembly, to: now)
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-        
-        // Change reminder to repeat "every day", which means the "first reminder" is now in the past
-        settings.repeatDays = 1
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        let expectedAlertIdentifier = Alert.Identifier(managerIdentifier: "CoastalPump", alertIdentifier: "infusionAssemblyReplacementReminder")
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        // Should result in reminder next day at noon
-        let nextDate = try now.next(daysLater: 1, at: noon.dateComponents)
-        let expectedTrigger = Alert.Trigger.delayed(interval: nextDate.timeIntervalSince(now))
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == expectedTrigger
-        }), "Unexpected issuedAlerts: expected \(expectedAlertIdentifier) \(expectedTrigger); \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-        NSTimeZone.default = tz
-    }
-
-    func testChangingNotificationsSettingsRestartsInfusionAssemblyReplacementReminder() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        let now = Date()
-        var state = pumpManagerState.forPreviewsAndTests
-        var settings = try NotificationSetting(isEnabled: true, repeatDays: 1, timeOfDay: noon)
-        state.notificationSettingsState.infusionReplacementReminder = settings
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        setReplacementDate(of: .infusionAssembly, to: now)
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-        
-        settings.repeatDays = 2
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        let expectedAlertIdentifier = Alert.Identifier(managerIdentifier: "CoastalPump", alertIdentifier: "infusionAssemblyReplacementReminder")
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        var nextDate = try now.next(daysLater: 2, at: noon.dateComponents)
-        var expectedTrigger = Alert.Trigger.delayed(interval: nextDate.timeIntervalSince(now))
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == expectedTrigger
-        }), "Unexpected issuedAlerts: expected \(expectedAlertIdentifier) \(expectedTrigger); \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-
-        // Now change it again, this time to 3 days
-        retractedAlerts = []
-        issuedAlerts = []
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-        settings.repeatDays = 3
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        nextDate = try now.next(daysLater: 3, at: noon.dateComponents)
-        expectedTrigger = Alert.Trigger.delayed(interval: nextDate.timeIntervalSince(now))
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == expectedTrigger
-        }), "Unexpected issuedAlerts: expected \(expectedAlertIdentifier) \(expectedTrigger); \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-
-        NSTimeZone.default = tz
-    }
-
-    func testChangingNotificationsSettingsRestartsInfusionAssemblyReplacementReminderProperlyWithLastReplacementInThePast() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        // t = 0
-        let now = Date()
-        var state = pumpManagerState.forPreviewsAndTests
-        var settings = try NotificationSetting(isEnabled: true, repeatDays: 1, timeOfDay: noon)
-        state.notificationSettingsState.infusionReplacementReminder = settings
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        // Replaced 1 day ago
-        setReplacementDate(of: .infusionAssembly, to: now.addingTimeInterval(.days(-1)))
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-        
-        settings.repeatDays = 2
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        let expectedAlertIdentifier = Alert.Identifier(managerIdentifier: "CoastalPump", alertIdentifier: "infusionAssemblyReplacementReminder")
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        var nextDate = try now.next(daysLater: 1, at: noon.dateComponents)
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == .delayed(interval: nextDate.timeIntervalSince(now))
-        }), "Unexpected issuedAlerts: \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-
-        // Now change it again, this time to 3 days
-        retractedAlerts = []
-        issuedAlerts = []
-        alertExpectation = expectation(description: #function)
-        // wait for retract, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 2
-        settings.repeatDays = 3
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        XCTAssertEqual([expectedAlertIdentifier], retractedAlerts.map { $0.alertIdentifier })
-        XCTAssertEqual(issuedAlerts.count, 1)
-        nextDate = try now.next(daysLater: 2, at: noon.dateComponents)
-        XCTAssertTrue(issuedAlerts.contains(where: {
-            return $0.alert.identifier == expectedAlertIdentifier &&
-            $0.alert.trigger == .delayed(interval: nextDate.timeIntervalSince(now))
-        }), "Unexpected issuedAlerts: \(issuedAlerts.map({"\($0.alert.identifier) \($0.alert.trigger)"}))")
-
-        NSTimeZone.default = tz
-    }
-
-    func testNotChangingNotificationsSettingsDoesNotRestartInfusionAssemblyReplacementReminder() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-        let noon = NotificationSetting.TimeOfDay(hour: 12, minute: 0)
-        let now = Date.distantPast
-        var state = pumpManagerState.forPreviewsAndTests
-        let settings = try NotificationSetting(isEnabled: true, repeatDays: 1, timeOfDay: noon)
-        state.notificationSettingsState.infusionReplacementReminder = settings
-        setReplacementDate(of: .infusionAssembly, to: now)
-        pumpManager = pumpManager(state: state, pump: pump, dateGenerator: { now })
-        pumpManager.pumpManagerDelegate = self
-        pumpIsConnected = true
-        alertExpectation = expectation(description: #function)
-        // wait for 2 retracts, then the alert issue
-        alertExpectation?.expectedFulfillmentCount = 3
-        alertExpectation?.isInverted = true
-        
-        // Still enabled, but setting it to exact same values
-        pumpManager.notificationSettingsState.infusionReplacementReminder = settings
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-
-        XCTAssertEqual(retractedAlerts.count, 0)
-        XCTAssertEqual(issuedAlerts.count, 0)
-        NSTimeZone.default = tz
-    }
-    
-    func testAcknowledgingInfusionAssemblyReminderAlert() throws {
-        let tz = NSTimeZone.default
-        NSTimeZone.default = TimeZone(secondsFromGMT: 0)!
-                
-        let expectedAlertIdentifier = "infusionAssemblyReplacementReminder"
-        pumpManager.acknowledgeAlert(alertIdentifier: expectedAlertIdentifier) {
-            XCTAssertNil($0)
-        }
-        XCTAssertEqual(retractedAlerts.count, 0)
-        XCTAssertEqual(issuedAlerts.count, 0)
-
-        NSTimeZone.default = tz
-    }
     
     func testPumpExpirationReminderDaily() {
         pumpManager.expiryReminderRepeat = .daily
@@ -731,7 +434,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let now = Date()
         pump.setupDeviceInformation()
         pump.deviceInformation?.updateExpirationDate(remainingLifetime: .days(15), reportedAt: now)
-        pumpManager = pumpManager(state: pumpManagerState.forPreviewsAndTests, pump: pump, dateGenerator: { now })
+        pumpManager = InsulinDeliveryPumpManager(state: InsulinDeliveryPumpManagerState.forPreviewsAndTests, pump: pump, dateGenerator: { now })
         pumpManager.pumpManagerDelegate = self
         pumpManager.expiryReminderRepeat = .dayBefore
         let interval = pump.deviceInformation!.estimatedExpirationDate.timeIntervalSince(now) - .days(1)
@@ -790,7 +493,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         completedOnboarding()
         
         let expected = AnnunciationType.mechanicalIssue
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         setUpExpectations()
       
         pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
@@ -833,39 +536,39 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
     
     func testStatusHighlightPriorityOrder() throws {
-        var state = pumpManagerState.forPreviewsAndTests
+        var state = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let now = Date()
         state.suspendState = .resumed(now)
         var latestAnnunciationType: AnnunciationType?
         state.onboardingCompleted = true
-        state.pumpState.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "1234")
-        XCTAssertNil(pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now }))
+        state.pumpState.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "1234", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
+        XCTAssertNil(InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now }))
 
         // Test adding conditions in reverse to make sure priorities are correct
         state.suspendState = .suspended(now)
-        XCTAssertEqual("Insulin Suspended", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        XCTAssertEqual("Insulin Suspended", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
 
         state.pumpState.lastCommsDate = now - .minutes(11)
         pumpIsConnected = false
-        XCTAssertEqual("Signal Loss", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: nil, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        XCTAssertEqual("Signal Loss", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: nil, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
 
-        latestAnnunciationType = .batteryError
-        XCTAssertEqual("No Insulin", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        latestAnnunciationType = .batteryEmpty
+        XCTAssertEqual("No Insulin", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
         latestAnnunciationType = .occlusionDetected
-        XCTAssertEqual("Occlusion", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        XCTAssertEqual("Occlusion", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
 
         state.replacementWorkflowState = incompleteWorkflow
-        XCTAssertEqual("Incomplete\nReplacement", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        XCTAssertEqual("Incomplete\nReplacement", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
 
         state.onboardingCompleted = false
-        XCTAssertEqual("Complete Setup", pumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
+        XCTAssertEqual("Complete Setup", InsulinDeliveryPumpManager.determinePumpStatusHighlight(state: state, latestAnnunciationType: latestAnnunciationType, isPumpConnected: pump.isConnected, now: { now })?.localizedMessage)
     }
     
     func testW32ShowsBadge() throws {
         completedOnboarding()
         
         let expected = AnnunciationType.batteryLow
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         setUpExpectations()
         XCTAssertNil(pumpManager.insulinDeliveryPumpStatusBadge)
 
@@ -879,7 +582,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         completedOnboarding()
         
         let expected = AnnunciationType.batteryLow
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         setUpExpectations()
         XCTAssertNil(pumpManager.insulinDeliveryPumpStatusBadge)
 
@@ -890,55 +593,16 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         setUpExpectations()
         statusUpdateExpectation?.isInverted = true
-        pumpManager.issueAlert(Alert(with: GeneralAnnunciation(type: .reservoirLow, identifier: 1), managerIdentifier: pumpManager.pluginIdentifier))
+        pumpManager.issueAlert(Alert(with: GeneralAnnunciation(type: .reservoirLow, identifier: 1, status: .pending, auxiliaryData: Data()), managerIdentifier: pumpManager.pluginIdentifier))
         wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
 
         XCTAssertEqual(expected.statusBadge, pumpManager.insulinDeliveryPumpStatusBadge)
-    }
-    
-    func testW35ShowsBadge() throws {
-        completedOnboarding()
-        let expected = AnnunciationType.batteryAttention
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
-        setUpExpectations()
-        XCTAssertNil(pumpManager.insulinDeliveryPumpStatusBadge)
-
-        pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-
-        XCTAssertEqual(expected.statusBadge, pumpManager.insulinDeliveryPumpStatusBadge)
-    }
-    
-    func testReplacingPartialComponentsDoesNotRetractOutstandingAnnunciation() {
-        completedOnboarding()
-        let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
-        setUpExpectations()
-        statusUpdates = []
-        
-        pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-        XCTAssertNotNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
-        
-        setUpExpectations()
-        alertExpectation?.isInverted = true
-        statusUpdateExpectation?.isInverted = true
-        statusUpdates = []
-        pumpManager.replacementWorkflowState.selectedComponents = .reservoir
-        completeReplacementWorkflow()
-        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-
-        XCTAssertEqual(expected.statusHighlight, try XCTUnwrap(pumpManager.pumpStatusHighlight as? PumpStatusHighlight))
-        XCTAssertEqual("Occlusion", try XCTUnwrap(pumpManager.pumpStatusHighlight as? PumpStatusHighlight).localizedMessage)
-        XCTAssertEqual(0, statusUpdates.count)
-        XCTAssertEqual(0, retractedAlerts.count)
     }
     
     func testReplacingComponentRetractsOutstandingAnnunciation() {
         completedOnboarding()
         let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         setUpExpectations()
         statusUpdates = []
         
@@ -950,39 +614,13 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         // Ok, now reset and see if replacement clears the status highlight
         setUpExpectations()
         statusUpdates = []
-        alertExpectation?.expectedFulfillmentCount = 2 // this also retracts the infusionAssemblyReminder alert
-        pumpManager.replacementWorkflowState.selectedComponents = .infusionAssemblyAndReservoir
+        alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
         completeReplacementWorkflow()
         wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
 
         XCTAssertNil(pumpManager.pumpStatusHighlight)
         XCTAssertEqual(1, statusUpdates.count)
-        XCTAssertEqual(2, retractedAlerts.count) // this also retracts the infusionAssemblyReminder alert
-    }
-
-    func testReplacingExtraComponentsRetractsOutstandingAnnunciation() {
-        completedOnboarding()
-        let expected = AnnunciationType.mechanicalIssue
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
-        setUpExpectations()
-        statusUpdates = []
-        
-        pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-        XCTAssertNotNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
-        
-        // Ok, now reset and see if replacement clears the status highlight
-        setUpExpectations()
-        statusUpdates = []
-        alertExpectation?.expectedFulfillmentCount = 2 // this also retracts the infusionAssemblyReminder alert
-        pumpManager.replacementWorkflowState.selectedComponents = .reservoirAndPumpBase
-        completeReplacementWorkflow()
-        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-
-        XCTAssertNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
-        XCTAssertEqual(2, retractedAlerts.count) // this also retracts the infusionAssemblyReminder alert
+        XCTAssertEqual(2, retractedAlerts.count)
     }
     
     func testReplacingComponentRetractsOutstandingAnnunciationWithNonAnnunciationAlert() {
@@ -992,22 +630,20 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         wait(for: [alertExpectation!], timeout: expectationTimeout)
         
         let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
-        alertExpectation = expectation(description: "alert2." + #function)
-        pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-        wait(for: [alertExpectation!], timeout: expectationTimeout)
-        
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         setUpExpectations()
-        alertExpectation?.assertForOverFulfill = false
-
-        pumpManager.replacementWorkflowState.selectedComponents = .infusionAssemblyAndReservoir
+        pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
+        wait(for: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
+        
+        // Ok, now reset and see if replacement clears the status highlight
+        setUpExpectations()
+        alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
         completeReplacementWorkflow()
-        waitOnThread() // retracting an alert (part of the completion of a replacement workflow) has a nested threaded action
         wait(for: [alertExpectation!, statusUpdateExpectation!, lookupExpectation!], timeout: expectationTimeout)
 
         XCTAssertNil(pumpManager.pumpStatusHighlight)
         XCTAssertEqual(1, statusUpdates.count)
-        XCTAssertEqual(2, retractedAlerts.count) // this also retracts the infusionAssemblyReminder alert
+        XCTAssertEqual(2, retractedAlerts.count) // includes pump expiration reminder
     }
 
     func testPumpStatusHighlightInsulinSuspended() {
@@ -1065,7 +701,6 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         }
         pump.suspendInsulinDeliveryResult = .success(Status(therapyControlState: .pause, pumpOperationalState: .ready, reservoirLevel: 100))
         completedOnboarding()
-        pumpManager.replacementWorkflowState.componentsNeedingReplacement = AnnunciationType.occlusionDetected.componentsNeedingReplacementToResolve
         setUpExpectations()
         statusUpdateExpectation?.assertForOverFulfill = false
         // No alert is expected
@@ -1118,7 +753,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let testExpectation = XCTestExpectation(description: #function)
 
         pump.setupDeviceInformation()
-        pumpManager.startPrimingReservoir() { error in
+        pumpManager.startPriming() { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1144,7 +779,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func recordAnnunciation(_ annunciationType: AnnunciationType) {
         alertExpectation = expectation(description: #function)
-        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: annunciationType, identifier: 1))
+        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: annunciationType, identifier: 1, status: .pending, auxiliaryData: Data()))
         wait(for: [alertExpectation!], timeout: expectationTimeout)
     }
 
@@ -1172,31 +807,22 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         XCTAssertNotEqual(pumpManager.replacementWorkflowState, incompleteWorkflow)
         XCTAssertFalse(pumpManager.replacementWorkflowState.isWorkflowIncomplete)
-        XCTAssertEqual(pumpManager.replacementWorkflowState.lastReplacementDates, ComponentDates(infusionAssembly: .distantPast, reservoir: now, pumpBase: now))
+        XCTAssertEqual(pumpManager.replacementWorkflowState.lastPumpReplacementDate, now)
     }
-    
-    func testReplacementWorkflowCompletedClearsComponentsNeedingReplacement() {
-        recordAnnunciation(.reservoirEmpty)
-        pumpManager.replacementWorkflowState.selectedComponents = AnnunciationType.reservoirEmpty.componentsNeedingReplacementToResolve.componentSet
-        XCTAssertEqual(pumpManager.replacementWorkflowState.componentsNeedingReplacement, AnnunciationType.reservoirEmpty.componentsNeedingReplacementToResolve)
-        completeReplacementWorkflow()
-        XCTAssertEqual(pumpManager.replacementWorkflowState.componentsNeedingReplacement, .none)
-    }
-    
+        
     func testUpdateReplacementWorkflowState() {
         recordAnnunciation(.reservoirEmpty)
         let milestoneProgress = [1, 2]
         let pumpSetupState = PumpSetupState.connecting
-        let expectedReplacementWorkflowState = pumpManagerState.ReplacementWorkflowState(milestoneProgress: milestoneProgress, pumpSetupState: pumpSetupState, selectedComponents: selectedComponents, wasWorkflowCanceled: false, componentsNeedingReplacement: [.reservoir: .forced], lastReplacementDates: nil)
+        let expectedReplacementWorkflowState = InsulinDeliveryPumpManagerState.ReplacementWorkflowState(milestoneProgress: milestoneProgress, pumpSetupState: pumpSetupState, wasWorkflowCanceled: false, lastPumpReplacementDate: nil, doesPumpNeedsReplacement: true)
         
-        pumpManager.updateReplacementWorkflowState(milestoneProgress: milestoneProgress, pumpSetupState: pumpSetupState, selectedComponents: selectedComponents)
+        pumpManager.updateReplacementWorkflowState(milestoneProgress: milestoneProgress, pumpSetupState: pumpSetupState)
         XCTAssertEqual(pumpManager.replacementWorkflowState, expectedReplacementWorkflowState)
     }
 
     func testUpdateReplacementWorkflowCanceled() {
         pumpManager.replacementWorkflowState = incompleteWorkflow
         recordAnnunciation(.reservoirEmpty)
-        pumpManager.replacementWorkflowState.selectedComponents = AnnunciationType.reservoirEmpty.componentsNeedingReplacementToResolve.componentSet
         pumpManager.replacementWorkflowCanceled()
         XCTAssertTrue(pumpManager.replacementWorkflowState.wasWorkflowCanceled)
         XCTAssertEqual(pumpManager.replacementWorkflowState.milestoneProgress, [])
@@ -1208,9 +834,8 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         
         // enact bolus
         pump.setupDeviceInformation()
-        pump.setupDefaultPumpConfiguration()
         let bolusAmount: Double = 1
-        pumpManager.enactBolus(units: bolusAmount, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: bolusAmount, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1246,9 +871,8 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         
         // enact bolus
         pump.setupDeviceInformation()
-        pump.setupDefaultPumpConfiguration()
         let bolusAmount: Double = 1
-        pumpManager.enactBolus(units: bolusAmount, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: bolusAmount, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1287,14 +911,14 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         alertExpectation = expectation(description: #function)
         let rate: Double = 4
         pump.startDeliveringInsulin()
-        pumpManager.enactTempBasal(unitsPerHour: rate, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: rate, for: .minutes(30)) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
         pump.respondToTempBasalAdjustmentWithSuccess()
         wait(for: [testExpectation], timeout: expectationTimeout)
 
-        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .tempBasalCanceled, identifier: 1))
+        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .tempBasalCanceled, identifier: 1, status: .pending, auxiliaryData: Data()))
         wait(for: [alertExpectation!], timeout: expectationTimeout)
         // We do not issue an alert for W-36
         XCTAssertTrue(issuedAlerts.isEmpty)
@@ -1304,7 +928,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testPumpNotConfiguredAnnunciationWorkflowComplete() {
         alertExpectation = expectation(description: #function)
-        let annunciation = GeneralAnnunciation(type: .pumpNotConfigured, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .reservoirEmpty, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
         XCTAssertFalse(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
         wait(for: [self.alertExpectation!], timeout: expectationTimeout)
@@ -1315,45 +939,13 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testPrimingIssueAnnunciationWorkflowComplete() {
         alertExpectation = expectation(description: #function)
-        let annunciation = GeneralAnnunciation(type: .primingIssue, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .primingIssue, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
         XCTAssertFalse(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
         wait(for: [self.alertExpectation!], timeout: expectationTimeout)
         
         XCTAssertFalse(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
         XCTAssertEqual(issuedAlerts.first?.alert, Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-    }
-
-    func testPumpNotConfiguredAnnunciationWorkflowIncomplete() {
-        let expectation = expectation(description: #function)
-        class Observer: InsulinDeliveryPumpObserver {
-            var receivedPumpNotConfigured = false
-            let exp: XCTestExpectation
-            init(exp: XCTestExpectation) {
-                self.exp = exp
-            }
-            func pumpNotConfigured() {
-                receivedPumpNotConfigured = true
-                exp.fulfill()
-            }
-        }
-        let observer = Observer(exp: expectation)
-        pumpManager.addPumpObserver(observer, queue: .main)
-        pumpManager.replacementWorkflowState = incompleteWorkflow
-
-        let annunciation = GeneralAnnunciation(type: .pumpNotConfigured, identifier: 1)
-        pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
-        XCTAssertTrue(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
-        waitOnThread()
-        wait(for: [expectation], timeout: expectationTimeout)
-        
-        XCTAssertTrue(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
-        XCTAssertTrue(issuedAlerts.isEmpty)
-        XCTAssertTrue(observer.receivedPumpNotConfigured)
-        XCTAssertTrue(pump.confirmedAnnunciations.contains { $0 as? GeneralAnnunciation == annunciation })
-        XCTAssertTrue(pump.confirmedAnnunciations.contains { $0.type == .pumpNotConfigured })
-
-        pumpManager.removePumpObserver(observer)
     }
 
     func testReservoirIssueAnnunciationWorkflowIncomplete() {
@@ -1373,7 +965,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         pumpManager.addPumpObserver(observer, queue: .main)
         pumpManager.replacementWorkflowState = incompleteWorkflow
 
-        let annunciation = GeneralAnnunciation(type: .reservoirIssue, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .reservoirIssue, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
         XCTAssertTrue(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
         waitOnThread()
@@ -1391,7 +983,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     func testAcknowledgeAlertConfirmsAnnunciation() {
         pump.confirmAnnunciationResult = .success
         recordAnnunciation(.reservoirEmpty)
-        let annunciation = GeneralAnnunciation(type: AnnunciationType.reservoirEmpty, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: AnnunciationType.reservoirEmpty, identifier: 1, status: .pending, auxiliaryData: Data())
         XCTAssertTrue(pump.confirmedAnnunciations.isEmpty)
         let exp = expectation(description: #function)
         pumpManager.acknowledgeAlert(alertIdentifier: annunciation.alertIdentifier) {
@@ -1406,7 +998,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let replacementWorkflowState = incompleteWorkflow
         pumpManager.replacementWorkflowState = replacementWorkflowState
 
-        let annunciation = GeneralAnnunciation(type: .primingIssue, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .primingIssue, identifier: 1, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
         XCTAssertTrue(pumpManager.state.replacementWorkflowState.isWorkflowIncomplete)
         waitOnThread()
@@ -1418,7 +1010,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     func testEnactTempBasal() {
         let testExpectation = XCTestExpectation(description: #function)
         let rate: Double = 4
-        pumpManager.enactTempBasal(unitsPerHour: rate, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: rate, for: .minutes(30)) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1443,7 +1035,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         wait(for: [testExpectation], timeout: expectationTimeout)
 
         testExpectation = XCTestExpectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 4, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 4, for: .minutes(30)) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1472,7 +1064,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         XCTAssertEqual(newPumpEvents[0].type, .resume)
 
         testExpectation = XCTestExpectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 4, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 4, for: .minutes(30)) { error in
             XCTAssertNil(error)
             testExpectation.fulfill()
         }
@@ -1566,7 +1158,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         pumpManager.pumpDidInitiateBolus(pump, bolusID: bolus1ID, insulinProgrammed: bolus1AmountProgrammed, startTime: bolus1StartTime)
         pumpManager.pumpDidInitiateBolus(pump, bolusID: bolus2ID, insulinProgrammed: bolus2AmountProgrammed, startTime: bolus2StartTime)
         let testExpectation = expectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -1579,7 +1171,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         XCTAssertEqual(pumpManager.state.unfinalizedBoluses.count, 2)
         XCTAssertNotNil(pumpManager.state.unfinalizedTempBasal)
 
-        pumpManager.updateReplacementWorkflowState(milestoneProgress: [], pumpSetupState: nil, selectedComponents: [.pumpBase])
+        pumpManager.updateReplacementWorkflowState(milestoneProgress: [], pumpSetupState: nil)
         pumpManager.replacementWorkflowCompleted() // do not wait for threaded actions to occur here
 
         XCTAssertTrue(pumpManager.state.unfinalizedBoluses.isEmpty)
@@ -1600,7 +1192,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testEnactBolus() {
         let testExpectation = XCTestExpectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             if error != nil {
                 XCTAssert(false)
             } else {
@@ -1615,9 +1207,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     func testEnactBolusDisconnected() {
         let testExpectation = XCTestExpectation(description: #function)
         pumpIsConnected = false
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             if case .connection(let nestedError) = error,
-               let pumpError = nestedError as? pumpManagerError,
+               let pumpError = nestedError as? InsulinDeliveryPumpManagerError,
                case .commError(let commError) = pumpError
             {
                 XCTAssertEqual(commError, .disconnected)
@@ -1631,9 +1223,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testEnactBolusInvalidBolusVolume() {
         let testExpectation = XCTestExpectation(description: #function)
-        pumpManager.enactBolus(units: 0, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 0, activationType: .manualRecommendationAccepted) { error in
             if case .configuration(let nestedError) = error,
-               let pumpError = nestedError as? pumpManagerError,
+               let pumpError = nestedError as? InsulinDeliveryPumpManagerError,
                case .invalidBolusVolume = pumpError
             {
                 XCTAssert(true)
@@ -1647,10 +1239,10 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testEnactBolusAlreadyInProgress() {
         let testExpectation = XCTestExpectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { _ in }
-        pumpManager.enactBolus(units: 3, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { _ in }
+        pumpManager.enactBolus(decisionId: nil, units: 3, activationType: .manualRecommendationAccepted) { error in
             if case .deviceState(let nestedError) = error,
-               let pumpError = nestedError as? pumpManagerError,
+               let pumpError = nestedError as? InsulinDeliveryPumpManagerError,
                case .hasActiveCommand = pumpError
             {
                 XCTAssert(true)
@@ -1674,9 +1266,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         wait(for: [testExpectation], timeout: 30)
 
         testExpectation = expectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             if case .deviceState(let nestedError) = error,
-               let pumpError = nestedError as? pumpManagerError,
+               let pumpError = nestedError as? InsulinDeliveryPumpManagerError,
                case .insulinDeliverySuspended = pumpError
             {
                 XCTAssert(true)
@@ -1689,9 +1281,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
 
     func testAutoConfirmTempBasalCanceledAnnunciation() {
-        let annunciation = GeneralAnnunciation(type: .tempBasalCanceled, identifier: 123)
+        let annunciation = GeneralAnnunciation(type: .tempBasalCanceled, identifier: 123, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
-        XCTAssertTrue(pump.insulinDeliveryControlPoint.requestQueue.contains(where: { IDControlPointOpcode(rawValue: $0.request[$0.request.startIndex...].to(IDControlPointOpcode.RawValue.self)) ==  .confirmAnnunciation}))
+        XCTAssertTrue(pump.idCommand.lockedRequestQueue.value.contains(where: { IDCommandControlPointOpcode(rawValue: $0.request[$0.request.startIndex...].to(IDCommandControlPointOpcode.RawValue.self)) ==  .confirmAnnunciation}))
     }
 
     func testIssueCanceledBolusAnnunciationWithNoBolusID() {
@@ -1707,7 +1299,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testTempBasalEnded() {
         let testExpectation = expectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -1728,15 +1320,15 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
     
     func testAutoConfirmStopWarningW41Annunciation() {
-        let annunciation = GeneralAnnunciation(type: .stopWarning, identifier: 123)
+        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
-        XCTAssertTrue(pump.insulinDeliveryControlPoint.requestQueue.contains(where: { IDControlPointOpcode(rawValue: $0.request[$0.request.startIndex...].to(IDControlPointOpcode.RawValue.self)) ==  .confirmAnnunciation}))
+        XCTAssertTrue(pump.idCommand.lockedRequestQueue.value.contains(where: { IDCommandControlPointOpcode(rawValue: $0.request[$0.request.startIndex...].to(IDCommandControlPointOpcode.RawValue.self)) ==  .confirmAnnunciation}))
     }
 
     func testIssueAnnunciationAvoidDuplicate() {
         alertExpectation = expectation(description: #function)
-        let annunciation1 = GeneralAnnunciation(type: .occlusionDetected, identifier: 123)
-        let annunciation2 = GeneralAnnunciation(type: .occlusionDetected, identifier: 1234)
+        let annunciation1 = GeneralAnnunciation(type: .occlusionDetected, identifier: 123, status: .pending, auxiliaryData: Data())
+        let annunciation2 = GeneralAnnunciation(type: .occlusionDetected, identifier: 1234, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation1)
         wait(for: [self.alertExpectation!], timeout: expectationTimeout)
         XCTAssertEqual(issuedAlerts.count, 1)
@@ -1799,7 +1391,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         // reporting no status changes clears pending insulin delivery commands
         pump.state.setupCompleted = true
-        let statusChangedFlags = InsulinDeliveryStatusChangedFlag.allZeros
+        let statusChangedFlags = IDStatusChangedFlag.allZeros
         var statusChangedData = Data(statusChangedFlags.rawValue)
         statusChangedData = TestE2EProtection().appendingE2EProtection(statusChangedData)
         pump.manageInsulinDeliveryStatusChangedData(statusChangedData)
@@ -1832,7 +1424,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     func testIsInReplacementWorkflow() {
         completedOnboarding()
         XCTAssertFalse(pumpManager.isInReplacementWorkflow)
-        pumpManager.updateReplacementWorkflowState(milestoneProgress: [1], pumpSetupState: .authenticated, selectedComponents: .infusionAssembly)
+        pumpManager.updateReplacementWorkflowState(milestoneProgress: [1], pumpSetupState: .authenticated)
         XCTAssertTrue(pumpManager.isInReplacementWorkflow)
     }
 
@@ -1855,7 +1447,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let now = Date()
         let bolusDeliveryStatus = BolusDeliveryStatus(id: 1, progressState: .canceled, type: .fast, insulinProgrammed: 2, insulinDelivered: 1, startTime: now.addingTimeInterval(-5), endTime: now)
         let bolusCancelledAnnunciation = BolusCanceledAnnunciation(identifier: 123, bolusDeliveryStatus: bolusDeliveryStatus)
-        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "12345678", pumpOperationalState: .waiting)
+        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "12345678", pumpOperationalState: .waiting, reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
 
         alertExpectation = expectation(description: #function)
         alertExpectation?.expectedFulfillmentCount = 2
@@ -1863,18 +1455,18 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         wait(for: [alertExpectation!], timeout: 30)
         XCTAssertEqual(issuedAlerts.count, 0)
 
-        let endOfLifeAnnunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123)
-        let endOfLifeAnnunciationIdentifier = Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: endOfLifeAnnunciation.alertIdentifier)
+        let annunciation = GeneralAnnunciation(type: .reservoirEmpty, identifier: 123, status: .pending, auxiliaryData: Data())
+        let annunciationIdentifier = Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier)
         alertExpectation = expectation(description: #function)
         alertExpectation?.expectedFulfillmentCount = 2
-        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: endOfLifeAnnunciation, at: now)
+        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: annunciation, at: now)
         wait(for: [alertExpectation!], timeout: 30)
-        XCTAssertEqual(issuedAlerts.first?.alert.identifier, endOfLifeAnnunciationIdentifier)
+        XCTAssertTrue(issuedAlerts.contains(where: { $0.alert.identifier == annunciationIdentifier }))
     }
     
     func testPumpDidDetectHistoricalAnnunciationBatteryErrorAlwaysRetracted() {
         let now = Date()
-        let annunciation = GeneralAnnunciation(type: .batteryError, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: .batteryEmpty, identifier: 1, status: .pending, auxiliaryData: Data())
         let identifier = Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier)
 
         alertExpectation = expectation(description: #function)
@@ -1887,7 +1479,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
     func testUncertainActiveTempBasal() {
         let testExpectation = expectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 2, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -1908,7 +1500,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let exp = expectation(description: #function)
         alertExpectation = expectation(description: "alert." + #function)
         alertExpectation?.assertForOverFulfill = false
-        let expectedAlert = Alert(with: GeneralAnnunciation(type: .pumpNotConfigured, identifier: 1), managerIdentifier: pumpManager.managerIdentifier)
+        let expectedAlert = Alert(with: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 1, status: .pending, auxiliaryData: Data()), managerIdentifier: InsulinDeliveryPumpManager.managerIdentifier)
         pumpManager.issueAlert(expectedAlert)
         wait(for: [alertExpectation!], timeout: 30)
 
@@ -1916,7 +1508,6 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         XCTAssertNil(retractedAlerts.first)
         
         alertExpectation = expectation(description: "alert2." + #function)
-        alertExpectation?.expectedFulfillmentCount = 2
         alertExpectation?.assertForOverFulfill = false
         pumpManager.prepareForDeactivation { _ in
             exp.fulfill()
@@ -1933,20 +1524,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         XCTAssertTrue(retractedAlerts.contains(where: { $0.alertIdentifier.alertIdentifier == expectedAlert.identifier.alertIdentifier }))
     }
 
-    func testPumpAwaitConfigurationAlert() {
-        pump.setupDeviceInformation(pumpOperationalState: .waiting)
-        pumpManager.pumpDidSync(pump)
-        alertExpectation = expectation(description: #function)
-        wait(for: [alertExpectation!], timeout: 30)
-
-        let pumpAwaitingConfigurationAnnunciation = PumpAwaitingConfigurationAnnunciation()
-        let pumpAwaitingConfigurationAnnunciationIdentifier = Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: pumpAwaitingConfigurationAnnunciation.alertIdentifier)
-        XCTAssertEqual(issuedAlerts.first?.alert.identifier, pumpAwaitingConfigurationAnnunciationIdentifier)
-    }
-
     func testDoNotReportDosesOnPumpStateUpdate() {
         let testExpectation = expectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             if error == nil {
                 self.waitOnThread()
@@ -1967,7 +1547,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         pump.setupDeviceInformation(therapyControlState: .run, pumpOperationalState: .ready)
         let bolusID: BolusID = 123
         let testExpectation = expectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2110,7 +1690,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let testExpectation = expectation(description: #function)
         let basalDeliveredBefore = 1
         let basalDeliveredAfter = 2
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2140,7 +1720,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         var testExpectation = expectation(description: #function)
         let basalDeliveredBefore = 1
         let basalDeliveredAfter = 2
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2175,7 +1755,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         var testExpectation = expectation(description: #function)
         let basalDeliveredBefore = 1
         let basalDeliveredAfter = 2
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2210,7 +1790,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         var testExpectation = expectation(description: #function)
         let basalDeliveredBefore = 1
         let basalDeliveredAfter = 2
-        pumpManager.enactTempBasal(unitsPerHour: 1.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 1.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2226,7 +1806,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         pump.respondToGetActiveBasalRate(scheduleBasalRate: 2.4, tempBasalRate: 1.0, tempBasalDuration: .minutes(30))
         
         testExpectation = expectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 2.0, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2.0, for: .minutes(30)) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2243,12 +1823,12 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 }
 
 // MARK: pumpManagerStateObserverTests
-extension pumpManagerTests {
+extension InsulinDeliveryPumpManagerTests {
 
-    class StateObserver: pumpManagerStateObserver {
+    class StateObserver: InsulinDeliveryPumpManagerStateObserver {
         weak var exp: XCTestExpectation?
-        var state: pumpManagerState?
-        func pumpManagerDidUpdateState(_ pumpManager: pumpManager, _ state: pumpManagerState) {
+        var state: InsulinDeliveryPumpManagerState?
+        func pumpManagerDidUpdateState(_ pumpManager: InsulinDeliveryPumpManager, _ state: InsulinDeliveryPumpManagerState) {
             self.state = state
             exp?.fulfill()
         }
@@ -2294,7 +1874,7 @@ extension pumpManagerTests {
 }
 
 // MARK: pumpManagerStatusObserverTests
-extension pumpManagerTests {
+extension InsulinDeliveryPumpManagerTests {
 
     class StatusObserver: PumpManagerStatusObserver {
         weak var exp: XCTestExpectation?
@@ -2321,16 +1901,16 @@ extension pumpManagerTests {
     }
     
     func testPumpManagerStatusObserverUpdates() throws {
+        completedOnboarding()
         let exp = expectation(description: #function)
         let observer = StatusObserver(exp)
         pumpManager.addStatusObserver(observer, queue: .main)
         let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         pump.setTherapyControlStateTo(.stop)
         pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
         wait(for: [exp], timeout: expectationTimeout)
         XCTAssertNotNil(observer.status)
-        XCTAssertNil(observer.status?.basalDeliveryState)
     }
     
     func testPumpManagerStatusObserverUpdatesInsulinSuspended() throws {
@@ -2339,7 +1919,7 @@ extension pumpManagerTests {
         let observer = StatusObserver(exp)
         pumpManager.addStatusObserver(observer, queue: .main)
         let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1)
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
         let exp2 = XCTestExpectation(description: "suspend." + #function)
         pump.suspendInsulinDeliveryResult = .success(nil)
         pumpManager.suspendDelivery { _ in exp2.fulfill() }
@@ -2353,7 +1933,7 @@ extension pumpManagerTests {
 
     func testStatusUpdateForDifferentDevices() {
         statusUpdates = []
-        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "test1234")
+        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "test1234", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
@@ -2365,7 +1945,7 @@ extension pumpManagerTests {
 
     func testStatusUpdateForDifferentBasalDeliveryState() {
         statusUpdates = []
-        pumpManager.enactTempBasal(unitsPerHour: 2.0, for: .minutes(30), completion: { _ in })
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2.0, for: .minutes(30), completion: { _ in })
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
@@ -2376,7 +1956,7 @@ extension pumpManagerTests {
     }
 
     func testStatusUpdateForDifferentBolusState() {
-        pumpManager.enactBolus(units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
+        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
@@ -2387,7 +1967,7 @@ extension pumpManagerTests {
     }
 
     func testStatusUpdateForDifferentDeliveryIsUncertain() {
-        pumpManager.enactBolus(units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
+        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         pump.handleCBError(CBError(.peripheralDisconnected))
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
@@ -2406,7 +1986,7 @@ extension pumpManagerTests {
 }
 
 // MARK: Logging Tests
-extension pumpManagerTests {
+extension InsulinDeliveryPumpManagerTests {
     func testLoggingPrepareForDeactivation() {
         pumpManager.prepareForDeactivation() { _ in }
         loggingExpectation = expectation(description: #function)
@@ -2417,7 +1997,7 @@ extension pumpManagerTests {
     }
 
     func testLoggingResolvedUncertainBolus() {
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             if  let pumpManagerError = error,
                 case .uncertainDelivery = pumpManagerError
             {
@@ -2448,7 +2028,7 @@ extension pumpManagerTests {
 
     func testLoggingResolvedUncertainCancelBolus() {
         var testExpectation = expectation(description: #function)
-        pumpManager.enactBolus(units: 2, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: 2, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2485,7 +2065,7 @@ extension pumpManagerTests {
 
     func testLoggingResolvedUncertainTempBasal() {
         let testExpectation = expectation(description: #function)
-        pumpManager.enactTempBasal(unitsPerHour: 4, for: .minutes(30)) { error in
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 4, for: .minutes(30)) { error in
             if let pumpManagerError = error,
                 case .uncertainDelivery = pumpManagerError
             {
@@ -2507,7 +2087,7 @@ extension pumpManagerTests {
     }
 
     func testLoggingResolvedUncertainCancelTempBasal() {
-        pumpManager.enactTempBasal(unitsPerHour: 4, for: .minutes(30)) { _ in}
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 4, for: .minutes(30)) { _ in}
         pump.respondToTempBasalAdjustmentWithSuccess()
         pumpManager.cancelTempBasal() { error in
             if let pumpManagerError = error,
@@ -2555,7 +2135,7 @@ extension pumpManagerTests {
     }
 
     func testLoggingHistoricalAnnunciation() {
-        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123), at: Date())
+        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data()), at: Date())
         loggingExpectation = expectation(description: #function)
         loggingExpectation?.expectedFulfillmentCount = 2
         wait(for: [loggingExpectation!], timeout: 30)
@@ -2618,11 +2198,12 @@ extension pumpManagerTests {
     }
 
     func testLoggingPumpDidReceiveAnnunciation() {
-        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123))
+        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data()))
         loggingExpectation = expectation(description: #function)
+        loggingExpectation?.assertForOverFulfill = false
         wait(for: [loggingExpectation!], timeout: 30)
-        XCTAssertTrue(logEntryMessages.last?.contains("didReceiveAnnunciation") ?? false)
-        XCTAssertTrue(logEntryMessages.last?.contains("\(AnnunciationType.endOfPumpLifetime)") ?? false)
+        XCTAssertTrue(logEntryMessages.contains(where: { $0.contains("didReceiveAnnunciation") }))
+        XCTAssertTrue(logEntryMessages.contains(where: { $0.contains("\(AnnunciationType.endOfPumpLifetime)") }))
     }
 
     func testLoggingHandleBolusCancelledAnnunciation() {
@@ -2630,7 +2211,7 @@ extension pumpManagerTests {
         let programmedAmount = 2.0
         let deliveredAmount = 1.0
         var testExpectation = expectation(description: #function)
-        pumpManager.enactBolus(units: programmedAmount, activationType: .manualRecommendationAccepted) { error in
+        pumpManager.enactBolus(decisionId: nil, units: programmedAmount, activationType: .manualRecommendationAccepted) { error in
             XCTAssertNil(error)
             if error == nil {
                 testExpectation.fulfill()
@@ -2667,7 +2248,7 @@ extension pumpManagerTests {
     }
 
     func testLoggingIssueAlert() {
-        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123)
+        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
         pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
         loggingExpectation = expectation(description: #function)
         wait(for: [loggingExpectation!], timeout: 30)
@@ -2675,7 +2256,7 @@ extension pumpManagerTests {
     }
 
     func testLoggingRetractAlert() {
-        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123)
+        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
         pumpManager.retractAlert(identifier: Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier))
         loggingExpectation = expectation(description: #function)
         wait(for: [loggingExpectation!], timeout: 30)
@@ -2698,7 +2279,7 @@ extension pumpManagerTests {
     }
 }
 
-extension pumpManagerTests {
+extension InsulinDeliveryPumpManagerTests {
     func waitOnThread() {
         let exp = expectation(description: "waitOnThread")
         pumpManager.delegateQueue.async {
@@ -2719,7 +2300,9 @@ extension pumpManagerTests {
 }
 
 // MARK: PumpManagerDelegate
-extension pumpManagerTests: PumpManagerDelegate {
+extension InsulinDeliveryPumpManagerTests: PumpManagerDelegate {
+    var automatedTreatmentState: LoopKit.AutomatedTreatmentState? { nil }
+    
     var automaticDosingEnabled: Bool { true }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) { }
@@ -2826,4 +2409,10 @@ extension pumpManagerTests: PumpManagerDelegate {
         completion(.success(alerts.map { PersistedAlert(alert: $0.alert, issuedDate: $0.issuedDate, retractedDate: nil, acknowledgedDate: nil) }))
         lookupExpectation?.fulfill()
     }
+}
+
+class TestE2EProtection: E2EProtection {
+    var e2eDelegate: (any BluetoothCommonKit.E2EProtectionDelegate)?
+    
+    var e2eCounter: UInt8 = 1
 }

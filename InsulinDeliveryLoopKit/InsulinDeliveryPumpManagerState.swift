@@ -184,11 +184,10 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
         }
         
         public func updatedAfterReplacingPump(_ now: @escaping () -> Date = Date.init) -> ReplacementWorkflowState {
-            let lastPumpReplacementDate = lastPumpReplacementDateOrDefault(now)
             let pumpSetupState: PumpSetupState? = nil
             return updatedWith(milestoneProgress: [],
                                pumpSetupState: pumpSetupState,
-                               lastPumpReplacementDate: lastPumpReplacementDate,
+                               lastPumpReplacementDate: now(),
                                doesPumpNeedsReplacement: false)
         }
         

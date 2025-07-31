@@ -88,6 +88,11 @@
 		B45D2FC62DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC52DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift */; };
 		B45D2FC82DC4AF5500EFCCE4 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC72DC4AF5500EFCCE4 /* BackButton.swift */; };
 		B45DB7F82D8CA3B800347D81 /* InsulinDeliveryServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B45DB7F72D8CA3B800347D81 /* InsulinDeliveryServiceKit */; };
+		B4625D2D2E380EA60063CBCD /* MockKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */; };
+		B4625D2F2E380F470063CBCD /* SecurityManagerTestingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */; };
+		B4625D302E38E48B0063CBCD /* MockKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */; };
+		B4625D312E38E5040063CBCD /* SecurityManagerTestingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */; };
+		B4625D332E390C600063CBCD /* TestInsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C735252E322F5800DBABC5 /* TestInsulinDeliveryPump.swift */; };
 		B46322B8243E2D6F0087BC0C /* InsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46322B7243E2D6F0087BC0C /* InsulinDeliveryPump.swift */; };
 		B46322C4243F704D0087BC0C /* HorizontalSizeClassOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46322C3243F704D0087BC0C /* HorizontalSizeClassOverride.swift */; };
 		B46AD70A29C0F8DC00A04C78 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABC24375A4D009608ED /* LoopKit.framework */; };
@@ -115,7 +120,6 @@
 		B48051F524813CAB00C5EA7F /* UnfinalizedDose.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F424813CAB00C5EA7F /* UnfinalizedDose.swift */; };
 		B48051F724813CD200C5EA7F /* UnfinalizedDoseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F624813CD200C5EA7F /* UnfinalizedDoseTests.swift */; };
 		B48051F924813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */; };
-		B4954ABF272786FB00FE6B0B /* MuteWarningsSettingsEditViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4954ABE272786FB00FE6B0B /* MuteWarningsSettingsEditViewModelTests.swift */; };
 		B49723D02704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */; };
 		B499737B26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B499737A26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift */; };
 		B499737D26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B499737C26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift */; };
@@ -291,6 +295,8 @@
 		B45D2FC52DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdditionalDescriptionView.swift; sourceTree = "<group>"; };
 		B45D2FC72DC4AF5500EFCCE4 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		B45D2FC92DC4B2D900EFCCE4 /* InsulinDeliveryLoopKitPlugin-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "InsulinDeliveryLoopKitPlugin-Bridging-Header.h"; sourceTree = "<group>"; };
+		B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockKeychainManager.swift; sourceTree = "<group>"; };
+		B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityManagerTestingDelegate.swift; sourceTree = "<group>"; };
 		B46322B7243E2D6F0087BC0C /* InsulinDeliveryPump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPump.swift; sourceTree = "<group>"; };
 		B46322C3243F704D0087BC0C /* HorizontalSizeClassOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalSizeClassOverride.swift; sourceTree = "<group>"; };
 		B4733F5824586588001D691A /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
@@ -302,7 +308,6 @@
 		B48051F424813CAB00C5EA7F /* UnfinalizedDose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfinalizedDose.swift; sourceTree = "<group>"; };
 		B48051F624813CD200C5EA7F /* UnfinalizedDoseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfinalizedDoseTests.swift; sourceTree = "<group>"; };
 		B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerStateTests.swift; sourceTree = "<group>"; };
-		B4954ABE272786FB00FE6B0B /* MuteWarningsSettingsEditViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteWarningsSettingsEditViewModelTests.swift; sourceTree = "<group>"; };
 		B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpSettingsViewModelTests.swift; sourceTree = "<group>"; };
 		B499737A26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpCommError.swift; sourceTree = "<group>"; };
 		B499737C26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpStatus.swift; sourceTree = "<group>"; };
@@ -413,7 +418,6 @@
 				1DAE26D9280F44D600E260B1 /* InsulinStatusViewModelTests.swift */,
 				1DAE26DB280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift */,
 				B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */,
-				B4954ABE272786FB00FE6B0B /* MuteWarningsSettingsEditViewModelTests.swift */,
 				B4D85585241BC25000ED61FF /* WorkflowViewModelTests.swift */,
 				1DB0D90327EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift */,
 				B43C47F4246C2E4C00E36AB5 /* SettingsViewModelTests.swift */,
@@ -533,6 +537,15 @@
 				B45D2FC12DC4AD4600EFCCE4 /* UIImage.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		B4625D2B2E380EA10063CBCD /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */,
+				B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */,
+			);
+			path = Mocks;
 			sourceTree = "<group>";
 		};
 		B46322BF243E3CEE0087BC0C /* Model */ = {
@@ -701,6 +714,7 @@
 		B4D85543241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				B4625D2B2E380EA10063CBCD /* Mocks */,
 				B4D85546241BBAFA00ED61FF /* Info.plist */,
 				B43C47F2246C2B4500E36AB5 /* InsulinDeliveryPumpManagerTests.swift */,
 				B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */,
@@ -1110,6 +1124,8 @@
 			files = (
 				B48051F924813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift in Sources */,
 				B48051F724813CD200C5EA7F /* UnfinalizedDoseTests.swift in Sources */,
+				B4625D2D2E380EA60063CBCD /* MockKeychainManager.swift in Sources */,
+				B4625D2F2E380F470063CBCD /* SecurityManagerTestingDelegate.swift in Sources */,
 				B4C735262E322F5800DBABC5 /* TestInsulinDeliveryPump.swift in Sources */,
 				B43C47F3246C2B4600E36AB5 /* InsulinDeliveryPumpManagerTests.swift in Sources */,
 			);
@@ -1177,14 +1193,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4625D332E390C600063CBCD /* TestInsulinDeliveryPump.swift in Sources */,
 				1DCEDA3528066D4600ADEE1E /* ExpirationProgressViewModelTests.swift in Sources */,
 				1DAE26DC280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift in Sources */,
 				1DAE26DA280F44D600E260B1 /* InsulinStatusViewModelTests.swift in Sources */,
 				B4D85586241BC25000ED61FF /* WorkflowViewModelTests.swift in Sources */,
 				B49723D02704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift in Sources */,
-				B4954ABF272786FB00FE6B0B /* MuteWarningsSettingsEditViewModelTests.swift in Sources */,
 				1DB0D90427EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift in Sources */,
+				B4625D302E38E48B0063CBCD /* MockKeychainManager.swift in Sources */,
 				B43C47F5246C2E4C00E36AB5 /* SettingsViewModelTests.swift in Sources */,
+				B4625D312E38E5040063CBCD /* SecurityManagerTestingDelegate.swift in Sources */,
 				B4733F87245B3EFD001D691A /* IDSViewCoordinatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

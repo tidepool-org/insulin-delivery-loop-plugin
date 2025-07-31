@@ -12,7 +12,7 @@ import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
 fileprivate func noExpiredComponentsState( _ now: @escaping () -> Date) -> InsulinDeliveryPumpManagerState {
-    return makeExpiredPumpState(nil, now)
+    return makeExpiredPumpState(timeLeft: nil, now)
 }
 
 fileprivate func makeExpiredPumpState(timeLeft: TimeInterval?, _ now: @escaping () -> Date) -> InsulinDeliveryPumpManagerState {

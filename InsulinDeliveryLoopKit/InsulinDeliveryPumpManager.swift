@@ -707,7 +707,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         return nil
     }
 
-    public func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
+    public func enactBolus(decisionId: UUID?, units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
         let preflightResult = setStateWithResult({ state -> PreflightResult in
             if !pump.isConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
@@ -747,7 +747,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
                         fatalError("all boluses must have a bolus id")
                     }
                     self?.mutateState { state in
-                        state.unfinalizedBoluses[bolusID] = UnfinalizedDose(bolusAmount: bolusDeliveryStatus.insulinProgrammed, startTime: startDate, scheduledCertainty: .certain, automatic: activationType.isAutomatic)
+                        state.unfinalizedBoluses[bolusID] = UnfinalizedDose(decisionId: decisionId, bolusAmount: bolusDeliveryStatus.insulinProgrammed, startTime: startDate, scheduledCertainty: .certain, automatic: activationType.isAutomatic)
                         state.activeTransition = nil
                     }
                     self?.reportCachedDoses()
@@ -847,7 +847,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         }
     }
 
-    public func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
+    public func enactTempBasal(decisionId: UUID?, unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
         // Cancel the current temp basal when duration is 0
         guard duration != 0 else {
             cancelTempBasal(completion: completion)
@@ -899,7 +899,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
                             canceledTempBasal.cancel(at: now, insulinDelivered: self?.pump.state.activeTempBasalDeliveryStatus.insulinDelivered)
                             state.finalizedDoses.append(canceledTempBasal)
                         }
-                        state.unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: enactRate, startTime: startDate, duration: duration, scheduledCertainty: .certain)
+                        state.unfinalizedTempBasal = UnfinalizedDose(decisionId: decisionId, tempBasalRate: enactRate, startTime: startDate, duration: duration, scheduledCertainty: .certain)
                         state.activeTransition = nil
                     }
                     self?.reportCachedDoses()
@@ -1509,7 +1509,7 @@ extension InsulinDeliveryPumpManager {
     // Allowed reservoir fill amounts
     public static let supportedReservoirFillVolumes: [Int] = Array(stride(from: 80, through: 100, by: 10))
 
-    // Volume of insulin in one motor pulse (estimated)
+    // Volume of insulin in one motor pulse
     public static let pulseSize: Double = 0.08
 
     // Number of pulses required to delivery one unit of insulin
@@ -1587,7 +1587,13 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
             logDelegateEvent("Resolved pending enact bolus command. bolus ID: \(bolusID), insulin programmed: \(insulinProgrammed), startTime: \(startTime)")
             mutateState { state in
                 state.pendingInsulinDeliveryCommand = nil
-                state.unfinalizedBoluses[bolusID] = UnfinalizedDose(bolusAmount: insulinProgrammed, startTime: startTime, scheduledCertainty: .certain)
+                state.unfinalizedBoluses[bolusID] = UnfinalizedDose(decisionId: nil, bolusAmount: insulinProgrammed, startTime: startTime, scheduledCertainty: .certain)
+            }
+        } else {
+            // boluses was initiated on pump and needs to be reported
+            logDelegateEvent("Detected historical bolus initiated. bolus ID: \(bolusID), insulin programmed: \(insulinProgrammed), startTime: \(startTime)")
+            mutateState { state in
+                state.unfinalizedBoluses[bolusID] = UnfinalizedDose(decisionId: nil, bolusAmount: insulinProgrammed, startTime: startTime, scheduledCertainty: .certain)
             }
         }
 
@@ -1631,7 +1637,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
             logDelegateEvent("Resolved pending enact temp basal command. rate: \(programmedRate), startTime: \(startTime), duration: \(programmedDuration)")
             mutateState { state in
                 state.pendingInsulinDeliveryCommand = nil
-                state.unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: programmedRate, startTime: startTime, duration: programmedDuration, scheduledCertainty: .certain)
+                state.unfinalizedTempBasal = UnfinalizedDose(decisionId: nil, tempBasalRate: programmedRate, startTime: startTime, duration: programmedDuration, scheduledCertainty: .certain)
             }
             reportCachedDoses()
         }

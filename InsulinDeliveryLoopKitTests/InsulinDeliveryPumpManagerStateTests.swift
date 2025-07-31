@@ -8,6 +8,7 @@
 
 import XCTest
 import LoopKit
+import InsulinDeliveryServiceKit
 @testable import InsulinDeliveryLoopKit
 
 class InsulinDeliveryPumpManagerStateTests: XCTestCase {
@@ -18,8 +19,8 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
     private var pumpState: IDPumpState!
 
     override func setUp() {
-        deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "12345678")
-        pumpState = pumpState(deviceInformation: deviceInformation)
+        deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "12345678", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
+        pumpState = IDPumpState(deviceInformation: deviceInformation)
     }
 
     private func dateGenerator() -> Date {
@@ -28,10 +29,9 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
     
     func testInitialization() {
         let state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
-                                         maxBolusUnits: 10.0,
-                                         pumpState: pumpState,
-                                         dateGenerator: dateGenerator)
-        pumpState.configuration.bolusMaximum = 10.0
+                                                    maxBolusUnits: 10.0,
+                                                    pumpState: pumpState,
+                                                    dateGenerator: dateGenerator)
         
         XCTAssertEqual(state.basalRateSchedule, basalRateSchedule)
         XCTAssertNil(state.lastStatusDate)
@@ -48,9 +48,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         XCTAssertFalse(state.onboardingCompleted)
         XCTAssertEqual(state.replacementWorkflowState.milestoneProgress, [])
         XCTAssertNil(state.replacementWorkflowState.pumpSetupState)
-        XCTAssertNil(state.replacementWorkflowState.selectedComponents)
         XCTAssertEqual(InsulinDeliveryPumpManagerState.NotificationSettingsState(), state.notificationSettingsState)
-        XCTAssertNil(state.replacementWorkflowState.lastReplacementDates)
         XCTAssertEqual([], state.onboardingVideosWatched)
     }
 
@@ -91,29 +89,27 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         let expectedPumpActivatedAt = Date()
         let expectedTotalInsulinDelivery  = 10.5
         let bolusID: BolusID = 1
-        let bolus = UnfinalizedDose(bolusAmount: 5.5,
+        let bolus = UnfinalizedDose(decisionId: nil,
+                                    bolusAmount: 5.5,
                                     startTime: Date(),
                                     scheduledCertainty: .certain)
         let expectedUnfinalizedBoluses = [bolusID: bolus]
-        let expectedUnfinalizedTempBasal = UnfinalizedDose(tempBasalRate: 1.5,
-                                                     startTime: Date(),
-                                                     duration: TimeInterval.minutes(15),
-                                                     scheduledCertainty: .certain)
+        let expectedUnfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                           tempBasalRate: 1.5,
+                                                           startTime: Date(),
+                                                           duration: TimeInterval.minutes(15),
+                                                           scheduledCertainty: .certain)
         let expectedFinalizedDoses = [bolus, expectedUnfinalizedTempBasal]
-        let expectedlastReplacementDates = ComponentDates(infusionAssembly: Date.distantPast, reservoir: Date.distantFuture, pumpBase: Date.distantPast)
         let expectedReplacementWorkflowState = InsulinDeliveryPumpManagerState.ReplacementWorkflowState(milestoneProgress: [1, 2, 3],
-                                                                                             pumpSetupState: .primingReservoir,
-                                                                                             selectedComponents: .reservoir,
-                                                                                             wasWorkflowCanceled: false,
-                                                                                             componentsNeedingReplacement: [.reservoir: .forced],
-                                                                                             lastReplacementDates: expectedlastReplacementDates)
+                                                                                                        pumpSetupState: .primingPump,
+                                                                                                        wasWorkflowCanceled: false,
+                                                                                                        lastPumpReplacementDate: .distantPast)
 
         let expectedNotificationsSettingsState = InsulinDeliveryPumpManagerState.NotificationSettingsState()
         var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                          maxBolusUnits: 10.0,
                                          pumpState: pumpState,
                                          dateGenerator: dateGenerator)
-        pumpState.configuration.bolusMaximum = 10.0
 
         let expectedPendingInsulinDeliveryCommand = PendingInsulinDeliveryCommand(type: .bolus(2.0), date: Date())
 
@@ -127,7 +123,6 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         state.unfinalizedTempBasal = expectedUnfinalizedTempBasal
         state.replacementWorkflowState = expectedReplacementWorkflowState
         state.notificationSettingsState = expectedNotificationsSettingsState
-        state.replacementWorkflowState.lastReplacementDates = expectedlastReplacementDates
         state.unfinalizedSuspendDetected = true
         state.pendingInsulinDeliveryCommand = expectedPendingInsulinDeliveryCommand
         state.onboardingVideosWatched = ["foo"]
@@ -139,7 +134,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
 
         let rawValue = state.rawValue
         XCTAssertEqual(BasalRateSchedule(rawValue: try XCTUnwrap(rawValue["basalRateSchedule"] as? BasalRateSchedule.RawValue)), basalRateSchedule)
-        XCTAssertEqual(pumpState(rawValue: try XCTUnwrap(rawValue["pumpState"] as? pumpState.RawValue)), pumpState)
+        XCTAssertEqual(IDPumpState(rawValue: try XCTUnwrap(rawValue["pumpState"] as? IDPumpState.RawValue)), pumpState)
         XCTAssertEqual(try XCTUnwrap(rawValue["lastStatusDate"] as? Date), expectedLastStatusDate)
         XCTAssertEqual(try XCTUnwrap(rawValue["pumpActivatedAt"] as? Date), expectedPumpActivatedAt)
         XCTAssertNil(rawValue["suspendState"] as? SuspendState.RawValue)
@@ -192,29 +187,28 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
     func testRestoreFromRawValueValid() {
         let expectedLastStatusDate = Date()
         let expectedPumpActivatedAt = Date()
-        let expectedlastReplacementDates = ComponentDates(infusionAssembly: .distantPast, reservoir: .distantPast, pumpBase: .distantPast)
         let expectedTotalInsulinDelivery  = 10.5
         let bolusID: BolusID = 3
-        let bolus = UnfinalizedDose(bolusAmount: 5.5,
+        let bolus = UnfinalizedDose(decisionId: nil,
+                                    bolusAmount: 5.5,
                                     startTime: Date(),
                                     scheduledCertainty: .certain)
         let expectedUnfinalizedBoluses = [bolusID: bolus]
-        let expectedUnfinalizedTempBasal = UnfinalizedDose(tempBasalRate: 1.5,
-                                                     startTime: Date(),
-                                                     duration: TimeInterval.minutes(15),
-                                                     scheduledCertainty: .certain)
+        let expectedUnfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                           tempBasalRate: 1.5,
+                                                           startTime: Date(),
+                                                           duration: TimeInterval.minutes(15),
+                                                           scheduledCertainty: .certain)
         let expectedFinalizedDoses = [bolus, expectedUnfinalizedTempBasal]
         var expectedState = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
-                                                 maxBolusUnits: 10.0,
-                                                 pumpState: pumpState,
-                                                 dateGenerator: dateGenerator)
+                                                            maxBolusUnits: 10.0,
+                                                            pumpState: pumpState,
+                                                            dateGenerator: dateGenerator)
 
         let expectedReplacementWorkflowState = InsulinDeliveryPumpManagerState.ReplacementWorkflowState(milestoneProgress: [1, 2, 3],
-                                                                                             pumpSetupState: .primingReservoir,
-                                                                                             selectedComponents: .reservoir,
-                                                                                             wasWorkflowCanceled: false,
-                                                                                             componentsNeedingReplacement: [.reservoir: .forced],
-                                                                                             lastReplacementDates: expectedlastReplacementDates)
+                                                                                                        pumpSetupState: .primingPump,
+                                                                                                        wasWorkflowCanceled: false,
+                                                                                                        lastPumpReplacementDate: .distantPast)
         let expectedNotificationsSettingsState = InsulinDeliveryPumpManagerState.NotificationSettingsState()
 
         let expectedPendingInsulinDeliveryCommand = PendingInsulinDeliveryCommand(type: .bolus(2.0), date: Date())
@@ -228,7 +222,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         expectedState.onboardingCompleted = true
         expectedState.replacementWorkflowState = expectedReplacementWorkflowState
         expectedState.notificationSettingsState = expectedNotificationsSettingsState
-        expectedState.replacementWorkflowState.lastReplacementDates = expectedlastReplacementDates
+        expectedState.replacementWorkflowState.lastPumpReplacementDate = .distantPast
         expectedState.unfinalizedSuspendDetected = false
         expectedState.pendingInsulinDeliveryCommand = expectedPendingInsulinDeliveryCommand
         expectedState.onboardingVideosWatched = ["foo"]
@@ -246,7 +240,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         XCTAssertTrue(state.onboardingCompleted)
         XCTAssertEqual(state.replacementWorkflowState, expectedState.replacementWorkflowState)
         XCTAssertEqual(state.notificationSettingsState, expectedState.notificationSettingsState)
-        XCTAssertEqual(state.replacementWorkflowState.lastReplacementDates, expectedlastReplacementDates)
+        XCTAssertEqual(state.replacementWorkflowState.lastPumpReplacementDate, .distantPast)
         XCTAssertEqual(state.unfinalizedSuspendDetected, false)
         XCTAssertEqual(state.pendingInsulinDeliveryCommand, expectedState.pendingInsulinDeliveryCommand)
         XCTAssertEqual(state.lastPumpTime, expectedState.lastPumpTime)
@@ -296,156 +290,91 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
 class PumpManagerNotificationSettingsStateTests: XCTestCase {
     typealias NotificationSettingsState = InsulinDeliveryPumpManagerState.NotificationSettingsState
     var notificationSettingsState: NotificationSettingsState!
-    var expectedInfusionReplacementReminderSettings: NotificationSetting!
     let expectedIsEnabled = true
     let expectedRepeatDays = 2
     let expectedTimeOfDay = NotificationSetting.TimeOfDay(hour: 14, minute: 0)
 
     override func setUpWithError() throws {
-        expectedInfusionReplacementReminderSettings = try NotificationSetting(isEnabled: expectedIsEnabled, repeatDays: expectedRepeatDays, timeOfDay: expectedTimeOfDay)
         notificationSettingsState = NotificationSettingsState()
-        notificationSettingsState.infusionReplacementReminder = expectedInfusionReplacementReminderSettings
         notificationSettingsState.expiryReminderRepeat = .dayBefore
     }
     
     func testInitDefault() throws {
-        XCTAssertEqual(NotificationSetting(), NotificationSettingsState().infusionReplacementReminder)
         XCTAssertEqual(.never, NotificationSettingsState().expiryReminderRepeat)
         XCTAssertEqual(.never, NotificationSettingsState.ExpiryReminderRepeat.default)
     }
 
     func testInit() throws {
-        XCTAssertEqual(expectedInfusionReplacementReminderSettings, notificationSettingsState.infusionReplacementReminder)
         XCTAssertEqual(.dayBefore, notificationSettingsState.expiryReminderRepeat)
-    }
-
-    func testNotificationSettingRawValue() throws {
-        let rawValue = notificationSettingsState.rawValue
-        XCTAssertEqual(expectedInfusionReplacementReminderSettings, NotificationSetting(rawValue: try XCTUnwrap(rawValue["infusionReplacement"] as? NotificationSetting.RawValue)))
     }
     
     func testRestoreFromRawValueValid() throws {
         let rawValue = notificationSettingsState.rawValue
         let state = try XCTUnwrap(NotificationSettingsState(rawValue: rawValue))
-        XCTAssertEqual(expectedInfusionReplacementReminderSettings, state.infusionReplacementReminder)
         XCTAssertEqual(.dayBefore, state.expiryReminderRepeat)
     }
     
     func testRestoreFromRawValueMissing() throws {
         var rawValue = notificationSettingsState.rawValue
         rawValue.removeValue(forKey: "expiryReminderRepeat")
-        rawValue.removeValue(forKey: "infusionReplacement")
+        rawValue.removeValue(forKey: "pumpReplacement")
 
         let state = NotificationSettingsState(rawValue: rawValue)
-        XCTAssertEqual(NotificationSetting(), state?.infusionReplacementReminder)
         XCTAssertEqual(.never, state?.expiryReminderRepeat)
     }
 }
 
 class PumpManagerWorkflowSettingsStateTests: XCTestCase {
-    typealias ComponentDates = InsulinDeliveryPumpManagerState.ReplacementWorkflowState.ComponentDates
-    
     var workflowState: InsulinDeliveryPumpManagerState.ReplacementWorkflowState!
     
     override func setUpWithError() throws {
         workflowState = InsulinDeliveryPumpManagerState.ReplacementWorkflowState(milestoneProgress: [1, 2, 3],
-                                                                      pumpSetupState: .primingReservoir,
-                                                                      selectedComponents: .reservoir,
-                                                                      wasWorkflowCanceled: false,
-                                                                      componentsNeedingReplacement: .none,
-                                                                      lastReplacementDates: nil)
+                                                                                 pumpSetupState: .primingPump,
+                                                                                 wasWorkflowCanceled: false,
+                                                                                 lastPumpReplacementDate: nil)
     }
     
     func testInit() throws {
         XCTAssertEqual([], InsulinDeliveryPumpManagerState.ReplacementWorkflowState().milestoneProgress)
         XCTAssertEqual(nil, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().pumpSetupState)
-        XCTAssertEqual(nil, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().selectedComponents)
         XCTAssertEqual(false, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().wasWorkflowCanceled)
-        XCTAssertEqual(.none, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().componentsNeedingReplacement)
-        XCTAssertEqual(nil, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().lastReplacementDates)
+        XCTAssertEqual(nil, InsulinDeliveryPumpManagerState.ReplacementWorkflowState().lastPumpReplacementDate)
     }
     
     func testUpdating() throws {
         workflowState = workflowState.updatedWith(milestoneProgress: [1])
         XCTAssertEqual([1], workflowState.milestoneProgress)
-        XCTAssertEqual(.primingReservoir, workflowState.pumpSetupState)
-        XCTAssertEqual(.reservoir, workflowState.selectedComponents)
+        XCTAssertEqual(.primingPump, workflowState.pumpSetupState)
         XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(nil, workflowState.lastReplacementDates)
+        XCTAssertEqual(nil, workflowState.lastPumpReplacementDate)
 
         workflowState = workflowState.updatedWith(milestoneProgress: [1, 2], pumpSetupState: .configured)
         XCTAssertEqual([1, 2], workflowState.milestoneProgress)
         XCTAssertEqual(.configured, workflowState.pumpSetupState)
-        XCTAssertEqual(.reservoir, workflowState.selectedComponents)
         XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(nil, workflowState.lastReplacementDates)
+        XCTAssertEqual(nil, workflowState.lastPumpReplacementDate)
 
         workflowState = workflowState.updatedWith(milestoneProgress: [1, 2], pumpSetupState: nil)
         XCTAssertEqual([1, 2], workflowState.milestoneProgress)
         XCTAssertEqual(.configured, workflowState.pumpSetupState)
-        XCTAssertEqual(.reservoir, workflowState.selectedComponents)
         XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(nil, workflowState.lastReplacementDates)
+        XCTAssertEqual(nil, workflowState.lastPumpReplacementDate)
 
         workflowState = workflowState.updatedWith(milestoneProgress: [1, 2], pumpSetupState: Optional<PumpSetupState>(nil))
         XCTAssertEqual([1, 2], workflowState.milestoneProgress)
         XCTAssertEqual(nil, workflowState.pumpSetupState)
-        XCTAssertEqual(.reservoir, workflowState.selectedComponents)
         XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(nil, workflowState.lastReplacementDates)
+        XCTAssertEqual(nil, workflowState.lastPumpReplacementDate)
     }
     
     func testReplacingComponents() throws {
         let now = Date.distantFuture
-        workflowState = workflowState.updatedWith(componentsNeedingReplacement: [.reservoir: .forced, .pumpBase: .forced, .infusionAssembly: .forced])
-        workflowState = workflowState.updatedAfterReplacing(components: .all, { now })
+        workflowState = workflowState.updatedWith(lastPumpReplacementDate: .distantPast)
+        workflowState = workflowState.updatedAfterReplacingPump({ now })
         XCTAssertEqual([], workflowState.milestoneProgress)
         XCTAssertEqual(nil, workflowState.pumpSetupState)
         XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(ComponentDates(infusionAssembly: now, reservoir: now, pumpBase: now), workflowState.lastReplacementDates)
-    }
-    
-    func testReplacingPartialComponents() throws {
-        let lastReplacement = Date()
-        let now = Date.distantFuture
-        workflowState = workflowState.updatedWith(componentsNeedingReplacement: [.reservoir: .forced, .pumpBase: .forced, .infusionAssembly: .forced], lastReplacementDates: ComponentDates(infusionAssembly: lastReplacement, reservoir: lastReplacement, pumpBase: lastReplacement))
-        workflowState = workflowState.updatedAfterReplacing(components: .infusionAssembly, { now })
-        XCTAssertEqual([], workflowState.milestoneProgress)
-        XCTAssertEqual(nil, workflowState.pumpSetupState)
-        XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual([.reservoir: .forced, .pumpBase: .forced], workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(ComponentDates(infusionAssembly: now, reservoir: lastReplacement, pumpBase: lastReplacement), workflowState.lastReplacementDates)
-    }
-    
-    func testReplacingComponentsWithNoLastReplacementDates() throws {
-        let now = Date.distantFuture
-        workflowState = workflowState.updatedWith(componentsNeedingReplacement: [.reservoir: .forced])
-        workflowState = workflowState.updatedAfterReplacing(components: .reservoir, { now })
-        XCTAssertEqual([], workflowState.milestoneProgress)
-        XCTAssertEqual(nil, workflowState.pumpSetupState)
-        XCTAssertEqual(false, workflowState.wasWorkflowCanceled)
-        XCTAssertEqual(.none, workflowState.componentsNeedingReplacement)
-        XCTAssertEqual(ComponentDates(infusionAssembly: now, reservoir: now, pumpBase: now), workflowState.lastReplacementDates)
-    }
-
-    func testAddComponentsNeedingReplacement() throws {
-        workflowState = workflowState.updatedWith(componentsNeedingReplacement: [.reservoir: .forced])
-        workflowState.addComponentsNeedingReplacement(for: nil)
-        XCTAssertEqual(workflowState.componentsNeedingReplacement, [.reservoir: .forced])
-        workflowState.addComponentsNeedingReplacement(for: .occlusionDetected)
-        XCTAssertEqual(workflowState.componentsNeedingReplacement, [.reservoir: .forced, .infusionAssembly: .forced])
-    }
-    
-    func testRemoveComponentsNeedingReplacement() throws {
-        workflowState = workflowState.updatedWith(componentsNeedingReplacement: [.infusionAssembly: .forced, .reservoir: .forced])
-        workflowState.removeComponentsNeedingReplacement(for: nil)
-        XCTAssertEqual(workflowState.componentsNeedingReplacement, [.infusionAssembly: .forced, .reservoir: .forced])
-        workflowState.removeComponentsNeedingReplacement(for: .occlusionDetected)
-        XCTAssertEqual(workflowState.componentsNeedingReplacement, .none)
+        XCTAssertEqual(false, workflowState.doesPumpNeedsReplacement)
+        XCTAssertEqual(now, workflowState.lastPumpReplacementDate)
     }
 }

@@ -17,6 +17,7 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
         case rawDoseType
         case duration
         case programmedUnits
+        case decisionId
         case programmedRate
         case rawScheduledCertainty
         case startTime
@@ -70,6 +71,8 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
     
     var programmedRate: Double?  // Tracks the original temp rate, as during finalization the units are discretized to pump pulses, changing the actual rate
     
+    var decisionId: UUID?
+    
     let startTime: Date
     
     var duration: TimeInterval?
@@ -118,7 +121,8 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
 
     var automatic: Bool?
 
-    init(bolusAmount: Double, startTime: Date, scheduledCertainty: ScheduledCertainty, automatic: Bool? = false) {
+    init(decisionId: UUID?, bolusAmount: Double, startTime: Date, scheduledCertainty: ScheduledCertainty, automatic: Bool? = false) {
+        self.decisionId = decisionId
         self.doseType = .bolus
         self.units = bolusAmount
         self.startTime = startTime
@@ -128,7 +132,8 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
         self.automatic = automatic
     }
 
-    init(tempBasalRate: Double, startTime: Date, duration: TimeInterval, scheduledCertainty: ScheduledCertainty, automatic: Bool? = true) {
+    init(decisionId: UUID?, tempBasalRate: Double, startTime: Date, duration: TimeInterval, scheduledCertainty: ScheduledCertainty, automatic: Bool? = true) {
+        self.decisionId = decisionId
         self.doseType = .tempBasal
         self.units = tempBasalRate * duration.hours
         self.startTime = startTime
@@ -139,6 +144,7 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
     }
 
     init(suspendStartTime: Date, scheduledCertainty: ScheduledCertainty, automatic: Bool? = false) {
+        self.decisionId = nil
         self.doseType = .suspend
         self.units = 0
         self.startTime = suspendStartTime
@@ -147,6 +153,7 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
     }
 
     init(resumeStartTime: Date, scheduledCertainty: ScheduledCertainty, automatic: Bool? = false) {
+        self.decisionId = nil
         self.doseType = .resume
         self.units = 0
         self.startTime = resumeStartTime
@@ -244,6 +251,10 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
         if let programmedRate = rawValue[UnfinalizedDoseKey.programmedRate.rawValue] as? Double {
             self.programmedRate = programmedRate
         }
+        
+        if let decisionId = rawValue[UnfinalizedDoseKey.decisionId.rawValue] as? UUID {
+            self.decisionId = decisionId
+        }
 
         if let duration = rawValue[UnfinalizedDoseKey.duration.rawValue] as? Double {
             self.duration = duration
@@ -266,6 +277,10 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
 
         if let programmedRate = programmedRate {
             rawValue[UnfinalizedDoseKey.programmedRate.rawValue] = programmedRate
+        }
+        
+        if let decisionId {
+            rawValue[UnfinalizedDoseKey.decisionId.rawValue] = decisionId
         }
 
         if let duration = duration {
@@ -303,9 +318,9 @@ extension DoseEntry {
     init (_ dose: UnfinalizedDose, at date: Date, isFinalized: Bool = false) {
         switch dose.doseType {
         case .bolus:
-            self = DoseEntry(type: .bolus, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedUnits ?? dose.units, unit: .units, deliveredUnits: dose.finalizedUnits(at: date), automatic: dose.automatic, isMutable: !isFinalized, wasProgrammedByPumpUI: false)
+            self = DoseEntry(type: .bolus, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedUnits ?? dose.units, unit: .units, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date), automatic: dose.automatic, isMutable: !isFinalized, wasProgrammedByPumpUI: false)
         case .tempBasal:
-            self = DoseEntry(type: .tempBasal, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedRate ?? dose.rate, unit: .unitsPerHour, deliveredUnits: dose.finalizedUnits(at: date), automatic: dose.automatic, isMutable: !isFinalized)
+            self = DoseEntry(type: .tempBasal, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedRate ?? dose.rate, unit: .unitsPerHour, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date), automatic: dose.automatic, isMutable: !isFinalized)
         case .suspend:
             self = DoseEntry(suspendDate: dose.startTime, automatic: dose.automatic)
         case .resume:

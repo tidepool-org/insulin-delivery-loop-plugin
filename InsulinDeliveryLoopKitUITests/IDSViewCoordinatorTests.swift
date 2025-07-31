@@ -10,6 +10,8 @@ import XCTest
 import SwiftUI
 import LoopKit
 import LoopKitUI
+import InsulinDeliveryServiceKit
+import BluetoothCommonKit
 @testable import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
@@ -25,18 +27,25 @@ class IDSViewCoordinatorTests: XCTestCase {
     private var viewCoordinator: IDSViewCoordinator!
     private var didCreatePumpManager = false
     private var didOnboardPumpManager = false
+    
+    private var securityManagerTestingDelegate = SecurityManagerTestingDelegate()
 
     private func setUpViewCoordinator() {
-        let pump = InsulinDeliveryPump(bluetoothManager: BluetoothManager(restoreOptions: nil),
+        securityManagerTestingDelegate.sharedKeyData = Data(hexadecimalString: "000102030405060708090a0b0c0d0e0f")!
+        let securityManager = SecurityManager()
+        securityManager.delegate = securityManagerTestingDelegate
+        let bluetoothManager = BluetoothManager(peripheralConfiguration: .insulinDeliveryServiceConfiguration, servicesToDiscover: [InsulinDeliveryCharacteristicUUID.service.cbUUID], restoreOptions: nil)
+        bluetoothManager.peripheralManager = PeripheralManager()
+
+        let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
+        let pump = InsulinDeliveryPump(bluetoothManager: bluetoothManager,
                                        bolusManager: BolusManager(),
                                        basalManager: BasalManager(),
                                        pumpHistoryEventManager: PumpHistoryEventManager(),
-                                       securityManager: SecurityManager(),
-                                       acControlPoint: ACControlPoint(securityManager: SecurityManager(), maxRequestSize: 19),
-                                       acData: ACData(securityManager: SecurityManager(), maxRequestSize: 19),
-                                       state: IDPumpState())
-
-        let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
+                                       securityManager: securityManager,
+                                       acControlPoint: ACControlPointDataHandler(securityManager: securityManager, maxRequestSize: 19),
+                                       acData: ACDataDataHandler(securityManager: securityManager, maxRequestSize: 19),
+                                       state: pumpManagerState.pumpState)
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
 
         viewCoordinator = IDSViewCoordinator(pumpManager: pumpManager, colorPalette: loopColorPalette, allowDebugFeatures: false)
@@ -49,102 +58,30 @@ class IDSViewCoordinatorTests: XCTestCase {
     }
 
     func testIDSScreenSetupNextReplacementWorkflow() throws {
-        XCTAssertEqual(IDSScreen.assemblePumpGuide.setupNext(workflowType: .replacement), .setReservoirFillValue)
         XCTAssertNil(IDSScreen.attachPump.setupNext(workflowType: .replacement))
         XCTAssertEqual(IDSScreen.connectToPump.setupNext(workflowType: .replacement), .primeReservoir)
-        XCTAssertEqual(IDSScreen.discardInfusionAssembly.setupNext(workflowType: .replacement), .prepareInsertionDevice)
-        XCTAssertEqual(IDSScreen.prepareInsertionDevice.setupNext(workflowType: .replacement), .applyInfusionAssembly)
-        XCTAssertEqual(IDSScreen.applyInfusionAssembly.setupNext(workflowType: .replacement), .checkCannula)
-        XCTAssertEqual(IDSScreen.checkCannula.setupNext(workflowType: .replacement), .attachPump)
-        XCTAssertEqual(IDSScreen.discardAllComponents.setupNext(workflowType: .replacement), .prepareInsertionDevice)
-        XCTAssertEqual(IDSScreen.discardReservoir.setupNext(workflowType: .replacement), .fillReservoir)
-        XCTAssertEqual(IDSScreen.fillReservoir.setupNext(workflowType: .replacement), .assemblePumpGuide)
         XCTAssertEqual(IDSScreen.primeReservoir.setupNext(workflowType: .replacement), .attachPump)
-        XCTAssertEqual(IDSScreen.pumpBarcodeScanner.setupNext(workflowType: .replacement), .connectToPump)
-        XCTAssertEqual(IDSScreen.pumpKeyEntryManual.setupNext(workflowType: .replacement), .connectToPump)
-        XCTAssertNil(IDSScreen.replaceParts.setupNext(workflowType: .replacement))
-        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .replacement), .pumpKeyEntryManual)
-        XCTAssertEqual(IDSScreen.setReservoirFillValue.setupNext(workflowType: .replacement), .pumpBarcodeScanner)
+        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .replacement), .connectToPump)
         XCTAssertNil(IDSScreen.settings.setupNext(workflowType: .replacement))
     }
 
     func testIDSScreenSetupNextOnboardingWorkflow() throws {
-        XCTAssertEqual(IDSScreen.setupSystemComponents1.setupNext(workflowType: .onboarding), .waterUsage)
-        XCTAssertEqual(IDSScreen.waterUsage.setupNext(workflowType: .onboarding), .setupSystemComponents2InfusionAssembly)
-        XCTAssertEqual(IDSScreen.setupSystemComponents2InfusionAssembly.setupNext(workflowType: .onboarding), .infusionAssemblySetupStart)
-        XCTAssertEqual(IDSScreen.setupSystemComponents2FillReservoir.setupNext(workflowType: .onboarding), .fillReservoirSetupStart)
-        XCTAssertEqual(IDSScreen.setupSystemComponents2FillNeedle.setupNext(workflowType: .onboarding), .fillReservoirNeedleSetupStart)
-        XCTAssertEqual(IDSScreen.infusionAssemblySetupStart.setupNext(workflowType: .onboarding), .infusionAssemblySetupVideo)
-        XCTAssertEqual(IDSScreen.infusionAssemblySetupVideo.setupNext(workflowType: .onboarding), .infusionAssemblySteps1to3)
-        XCTAssertEqual(IDSScreen.infusionAssemblySteps1to3.setupNext(workflowType: .onboarding), .infusionAssemblyStep4)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep4.setupNext(workflowType: .onboarding), .infusionAssemblyStep5)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep5.setupNext(workflowType: .onboarding), .infusionAssemblyStep6)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep6.setupNext(workflowType: .onboarding), .infusionAssemblyStep7)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep7.setupNext(workflowType: .onboarding), .infusionAssemblyStep8)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep8.setupNext(workflowType: .onboarding), .infusionAssemblyStep9)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep9.setupNext(workflowType: .onboarding), .infusionAssemblyStep10)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep10.setupNext(workflowType: .onboarding), .infusionAssemblyStep11)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep11.setupNext(workflowType: .onboarding), .infusionAssemblyStep12)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep12.setupNext(workflowType: .onboarding), .infusionAssemblyStep13)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep13.setupNext(workflowType: .onboarding), .infusionAssemblyStep14)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep14.setupNext(workflowType: .onboarding), .infusionAssemblyStep15)
-        XCTAssertEqual(IDSScreen.infusionAssemblyStep15.setupNext(workflowType: .onboarding), .setupSystemComponents2FillReservoir)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStart.setupNext(workflowType: .onboarding), .fillReservoirSetupVideo)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupVideo.setupNext(workflowType: .onboarding), .fillReservoirSetupStep1)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep1.setupNext(workflowType: .onboarding), .fillReservoirSetupStep2)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep2.setupNext(workflowType: .onboarding), .fillReservoirSetupStep3)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep3.setupNext(workflowType: .onboarding), .fillReservoirSetupStep4)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep4.setupNext(workflowType: .onboarding), .fillReservoirSetupStep5)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep5.setupNext(workflowType: .onboarding), .fillReservoirSetupStep6)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep6.setupNext(workflowType: .onboarding), .fillReservoirSetupStep7)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep7.setupNext(workflowType: .onboarding), .fillReservoirSetupStep8)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep8.setupNext(workflowType: .onboarding), .fillReservoirSetupStep9)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep9.setupNext(workflowType: .onboarding), .fillReservoirSetupStep10)
-        XCTAssertEqual(IDSScreen.fillReservoirSetupStep10.setupNext(workflowType: .onboarding), .connectToPump)
-        XCTAssertEqual(IDSScreen.pumpBarcodeScanner.setupNext(workflowType: .onboarding), .connectToPump)
-        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .onboarding), .pumpKeyEntryManual)
-        XCTAssertEqual(IDSScreen.pumpKeyEntryManual.setupNext(workflowType: .onboarding), .connectToPump)
-        XCTAssertEqual(IDSScreen.setReservoirFillValue.setupNext(workflowType: .onboarding), .connectToPump)
-        XCTAssertEqual(IDSScreen.connectToPump.setupNext(workflowType: .onboarding), .setupSystemComponents2FillNeedle)
-        XCTAssertEqual(IDSScreen.fillReservoirNeedleSetupStart.setupNext(workflowType: .onboarding), .fillReservoirNeedleSetupWarning)
-        XCTAssertEqual(IDSScreen.fillReservoirNeedleSetupWarning.setupNext(workflowType: .onboarding), .primeReservoir)
+        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .onboarding), .connectToPump)
+        XCTAssertEqual(IDSScreen.connectToPump.setupNext(workflowType: .onboarding), .primeReservoir)
         XCTAssertEqual(IDSScreen.primeReservoir.setupNext(workflowType: .onboarding), .attachPump)
-        XCTAssertEqual(IDSScreen.attachPump.setupNext(workflowType: .onboarding), .attachPump)
-        XCTAssertEqual(IDSScreen.attachPump.setupNext(workflowType: .onboarding), .expirationConfiguration)
-        XCTAssertEqual(IDSScreen.expirationConfiguration.setupNext(workflowType: .onboarding), .lowReservoirConfiguration)
-        XCTAssertEqual(IDSScreen.lowReservoirConfiguration.setupNext(workflowType: .onboarding), .setupComplete)
-        XCTAssertNil(IDSScreen.setupComplete.setupNext(workflowType: .onboarding))
+        XCTAssertNil(IDSScreen.attachPump.setupNext(workflowType: .onboarding))
     }
 
     func testIDSScreenMilestoneProgressScreen() throws {
-        XCTAssertTrue(IDSScreen.applyInfusionAssembly.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertTrue(IDSScreen.assemblePumpGuide.isMilestoneProgressScreen(workflowType: .onboarding))
         XCTAssertTrue(IDSScreen.attachPump.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertTrue(IDSScreen.checkCannula.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertFalse(IDSScreen.connectToPump.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertTrue(IDSScreen.discardAllComponents.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertTrue(IDSScreen.discardInfusionAssembly.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertTrue(IDSScreen.discardInfusionAssemblyAndReservoir.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertTrue(IDSScreen.discardReservoir.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertTrue(IDSScreen.discardReservoirAndPumpBase.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertTrue(IDSScreen.fillReservoir.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertTrue(IDSScreen.prepareInsertionDevice.isMilestoneProgressScreen(workflowType: .replacement))
+        XCTAssertFalse(IDSScreen.connectToPump.isMilestoneProgressScreen(workflowType: .onboarding))
         XCTAssertTrue(IDSScreen.primeReservoir.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertFalse(IDSScreen.pumpBarcodeScanner.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertFalse(IDSScreen.pumpKeyEntryManual.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertFalse(IDSScreen.replaceParts.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertFalse(IDSScreen.selectPump.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertFalse(IDSScreen.setReservoirFillValue.isMilestoneProgressScreen(workflowType: .replacement))
+        XCTAssertFalse(IDSScreen.selectPump.isMilestoneProgressScreen(workflowType: .onboarding))
         XCTAssertFalse(IDSScreen.settings.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertTrue(IDSScreen.setupSystemComponents1.isMilestoneProgressScreen(workflowType: .quickOnboarding))
-        XCTAssertTrue(IDSScreen.infusionAssemblySetupStart.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertTrue(IDSScreen.fillReservoirSetupStart.isMilestoneProgressScreen(workflowType: .onboarding))
-        XCTAssertTrue(IDSScreen.fillReservoirNeedleSetupStart.isMilestoneProgressScreen(workflowType: .replacement))
-        XCTAssertFalse(IDSScreen.attachPump.isMilestoneProgressScreen(workflowType: .removeAirBubbles))
     }
 
     func testStartOnboardingScreen() throws {
-        XCTAssertEqual(IDSScreen.startOnboardingScreen, IDSScreen.setupSystemComponents1)
+        XCTAssertEqual(IDSScreen.startOnboardingScreen, IDSScreen.selectPump)
     }
 
     func testSettingScreen() throws {
@@ -160,227 +97,55 @@ class IDSViewCoordinatorTests: XCTestCase {
     
     func testViewControllerForScreenSetupFlow() throws {
         setUpViewCoordinator()
-        viewCoordinator.navigateTo(.assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.currentScreen, .assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .setReservoirFillValue)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide, .setReservoirFillValue])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .pumpBarcodeScanner)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner])
+        viewCoordinator.navigateTo(.selectPump)
+        XCTAssertEqual(viewCoordinator.currentScreen, .selectPump)
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump])
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .primeReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump, .primeReservoir])
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump, .primeReservoir])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump, .primeReservoir, .attachPump])
-    }
-    
-    func testViewControllerForScreenReplacementFlowInfusionAssembly() throws {
-        setUpViewCoordinator()
-        viewCoordinator.navigateTo(.replaceParts)
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts])
-        
-        viewCoordinator.navigateTo(.discardInfusionAssembly)
-        XCTAssertEqual(viewCoordinator.currentScreen, .discardInfusionAssembly)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssembly])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .prepareInsertionDevice)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssembly, .prepareInsertionDevice])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .applyInfusionAssembly)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssembly, .prepareInsertionDevice, .applyInfusionAssembly])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .checkCannula)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssembly, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssembly, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .attachPump])
-    }
-
-    func testViewControllerForScreenReplacementFlowReservoir() throws {
-        setUpViewCoordinator()
-        viewCoordinator.navigateTo(.replaceParts)
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts])
-
-        viewCoordinator.navigateTo(.discardReservoir)
-        XCTAssertEqual(viewCoordinator.currentScreen, .discardReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .fillReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir, .assemblePumpGuide])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .setReservoirFillValue)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue])
-
-        // since there is a reservoir replacement in the workflow, the setup helper navigates to connectToPump instead of the next screen
-        viewCoordinator.navigateTo(.connectToPump)
-        XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .primeReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump, .primeReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardReservoir, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump, .primeReservoir, .attachPump])
-    }
-
-    func testViewControllerForScreenReplacementFlowInfusionAssemblyAndReservoir() throws {
-        setUpViewCoordinator()
-        viewCoordinator.navigateTo(.replaceParts)
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts])
-
-        viewCoordinator.navigateTo(.discardInfusionAssemblyAndReservoir)
-        XCTAssertEqual(viewCoordinator.currentScreen, .discardInfusionAssemblyAndReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .prepareInsertionDevice)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .applyInfusionAssembly)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .checkCannula)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula])
-
-        // since there is a reservoir replacement in the workflow, the setup helper navigates to fill reservoir instead of the next screen
-        viewCoordinator.navigateTo(.fillReservoir)
-        XCTAssertEqual(viewCoordinator.currentScreen, .fillReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .setReservoirFillValue)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue])
-
-        // since there is a reservoir replacement in the workflow, the setup helper navigates to connectToPump instead of the next screen
-        viewCoordinator.navigateTo(.connectToPump)
-        XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .primeReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump, .primeReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardInfusionAssemblyAndReservoir, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .connectToPump, .primeReservoir, .attachPump])
-    }
-
-    func testViewControllerForScreenReplacementFlowAllComponents() throws {
-        setUpViewCoordinator()
-        viewCoordinator.navigateTo(.replaceParts)
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts])
-        
-        viewCoordinator.navigateTo(.discardAllComponents)
-        XCTAssertEqual(viewCoordinator.currentScreen, .discardAllComponents)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .prepareInsertionDevice)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .applyInfusionAssembly)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .checkCannula)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula])
-
-        // since there is a reservoir replacement in the workflow, the setup helper navigates to fill reservoir instead of the next screen
-        viewCoordinator.navigateTo(.fillReservoir)
-        XCTAssertEqual(viewCoordinator.currentScreen, .fillReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .setReservoirFillValue)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .pumpBarcodeScanner)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump])
-
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .primeReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump, .primeReservoir])
-        
-        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
-        XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.replaceParts, .discardAllComponents, .prepareInsertionDevice, .applyInfusionAssembly, .checkCannula, .fillReservoir, .assemblePumpGuide, .setReservoirFillValue, .pumpBarcodeScanner, .connectToPump, .primeReservoir, .attachPump])
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump, .primeReservoir, .attachPump])        
     }
     
     func testPopToRoot() throws {
         setUpViewCoordinator()
 
-        viewCoordinator.navigateTo(.replaceParts)
-        viewCoordinator.navigateTo(.discardInfusionAssembly)
+        viewCoordinator.navigateTo(.selectPump)
+        viewCoordinator.navigateTo(.primeReservoir)
         viewCoordinator.navigateTo(.attachPump)
         
         viewCoordinator.popToRoot()
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
+        XCTAssertEqual(viewCoordinator.currentScreen, .selectPump)
     }
     
     func testNavigateToPrevious() throws {
         setUpViewCoordinator()
 
-        viewCoordinator.navigateTo(.replaceParts)
-        viewCoordinator.navigateTo(.discardInfusionAssembly)
+        viewCoordinator.navigateTo(.selectPump)
+        viewCoordinator.navigateTo(.attachPump)
         
         viewCoordinator.navigateToPrevious()
-        XCTAssertEqual(viewCoordinator.currentScreen, .replaceParts)
+        XCTAssertEqual(viewCoordinator.currentScreen, .selectPump)
     }
 
     func testReplaceCurrentScreen() throws {
         setUpViewCoordinator()
-        viewCoordinator.navigateTo(.assemblePumpGuide)
-        XCTAssertEqual(viewCoordinator.currentScreen, .assemblePumpGuide)
+        viewCoordinator.navigateTo(.selectPump)
+        XCTAssertEqual(viewCoordinator.currentScreen, .selectPump)
         viewCoordinator.replaceCurrentScreen(with: .connectToPump)
         XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
         XCTAssertEqual(viewCoordinator.screenStack, [.connectToPump])
     }
 }
 
-extension viewCoordinatorTests: PumpManagerOnboardingDelegate {
+extension IDSViewCoordinatorTests: PumpManagerOnboardingDelegate {
     func pumpManagerOnboarding(didCreatePumpManager pumpManager: PumpManagerUI) {
         didCreatePumpManager = true
     }

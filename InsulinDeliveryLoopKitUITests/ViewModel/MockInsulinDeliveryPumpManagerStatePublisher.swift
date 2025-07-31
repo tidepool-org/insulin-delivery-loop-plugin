@@ -20,7 +20,7 @@ class MockInsulinDeliveryPumpManagerStatePublisher: InsulinDeliveryPumpManagerSt
     init(state: InsulinDeliveryPumpManagerState, status: PumpManagerStatus? = nil, pumpManager: InsulinDeliveryPumpManager? = nil, now: @escaping () -> Date) {
         self.state = state
         self.now = now
-        self.pumpManager = pumpManager ?? InsulinDeliveryPumpManager(state: state, pump: MockInsulinDeliveryPump(), dateGenerator: now)
+        self.pumpManager = pumpManager ?? InsulinDeliveryPumpManager(state: state, pump: VirtualInsulinDeliveryPump(), dateGenerator: now)
         self.status = status ?? self.pumpManager.status
     }
     var state: InsulinDeliveryPumpManagerState {

@@ -14,7 +14,8 @@ extension BolusDeliveryStatus {
         guard self.progressState != .noActiveBolus else { return nil }
         
         let startTime = self.startTime ?? now.addingTimeInterval(-self.insulinDelivered / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
-        var unfinalizedBolus = UnfinalizedDose(bolusAmount: self.insulinProgrammed,
+        var unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: self.insulinProgrammed,
                                                startTime: startTime,
                                                scheduledCertainty: progressState == .estimatingProgress ? .uncertain : .certain)
         // calculate the end time

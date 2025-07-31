@@ -63,13 +63,13 @@ class ReservoirHUDViewModelTests: XCTestCase {
     }
     
     func testFullNormalAtAccuracyLimit() throws {
-        viewModel.reservoirLevel = 48 // U
+        viewModel.reservoirLevel = 50 // U
         XCTAssertEqual(.full, viewModel.imageType)
         XCTAssertEqual(.normal, viewModel.warningColor)
     }
     
     func testFullNormalAboveAccuracyLimit() throws {
-        viewModel.reservoirLevel = 48.nextUp // U
+        viewModel.reservoirLevel = 50.nextUp // U
         XCTAssertEqual(.full, viewModel.imageType)
         XCTAssertEqual(.normal, viewModel.warningColor)
     }

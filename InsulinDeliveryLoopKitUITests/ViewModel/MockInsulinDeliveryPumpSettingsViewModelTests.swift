@@ -9,15 +9,51 @@
 import XCTest
 import LoopKit
 import TidepoolSecurity
+import InsulinDeliveryServiceKit
+import BluetoothCommonKit
 @testable import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
 class VirtualInsulinDeliveryPumpSettingsViewModelTests: XCTestCase {
 
     class MockDelegate: InsulinDeliveryPumpDelegate {
-        var basalRateSchedule: BasalRateSchedule {
-            BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!
-        }
+        var supportedBasalRates: [Double] = Array((10...2000).map { Double($0) / Double(100) })
+        
+        var supportedBolusVolumes: [Double] = Array((10...350).map { Double($0) / Double(10) })
+        
+        var supportedMaximumBolusVolumes: [Double] = Array((10...350).map { Double($0) / Double(10) })
+        
+        var maximumBasalScheduleEntryCount: Int = 24
+        
+        var minimumBasalScheduleEntryDuration: TimeInterval = TimeInterval.minutes(30)
+        
+        var pumpReservoirCapacity: Double = 100
+        
+        var supportedMaximumBasalRateAmount: Double = 20.0
+        
+        var basalRateProfileTemplateNumber: UInt8 = 1
+        
+        var numberOfProfileTemplates: UInt8 = 1
+        
+        var estimatedBolusDeliveryRate: Double = 2.5 / TimeInterval.minutes(1)
+        
+        var reservoirAccuracyLimit: Double? = 50
+        
+        var supportedReservoirFillVolumes: [Int] = Array(stride(from: 80, through: 100, by: 10))
+        
+        var pulseSize: Double = 0.08
+        
+        var pulsesPerUnit: Double = 1/0.08
+        
+        var expectedLifespan: TimeInterval = TimeInterval.days(10)
+        
+        var maxAllowedPumpClockDrift: TimeInterval = .seconds(60)
+        
+        var basalProfile: [InsulinDeliveryServiceKit.BasalSegment] = [BasalSegment(index: 1, rate: 1, duration: .hours(24))]
+        
+//        var basalRateSchedule: BasalRateSchedule {
+//            BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!
+//        }
         
         var tidepoolSecurity: TidepoolSecurity?
         
@@ -64,40 +100,40 @@ class VirtualInsulinDeliveryPumpSettingsViewModelTests: XCTestCase {
         let exp = expectation(description: #function)
         exp.assertForOverFulfill = false
         delegate.lastDidReceiveAnnunciationExpectation = exp
-        let mockPump = VirtualInsulinDeliveryPump()
-        mockPump.delegate = delegate
-        let viewModel = MockPumpSettingsViewModel(mockPump: mockPump, annunciationTypeToIssueDelay: 0)
-        viewModel.mockPump.deviceInformation = MockInsulinDeliveryPumpStatus.deviceInformation
+        let virtualPump = VirtualInsulinDeliveryPump()
+        virtualPump.delegate = delegate
+        let viewModel = MockPumpSettingsViewModel(virtualPump: virtualPump, annunciationTypeToIssueDelay: 0)
+        viewModel.virtualPump.deviceInformation = MockInsulinDeliveryPumpStatus.deviceInformation
         viewModel.reservoirString = "12"
         viewModel.stoppedNotificationDelay = InsulinDeliveryLoopKitUI.TimeInterval.minutes(1)
         viewModel.annunciationTypeToIssue = .batteryLow
-        XCTAssertNotEqual(mockPump.deviceInformation?.reservoirLevel, viewModel.reservoirRemaining)
-        XCTAssertNotEqual(mockPump.status.activeBolusDeliveryStatus.insulinProgrammed, 0.0)
-        XCTAssertNotEqual(mockPump.stoppedNotificationDelay, viewModel.stoppedNotificationDelay)
+        XCTAssertNotEqual(virtualPump.deviceInformation?.reservoirLevel, viewModel.reservoirRemaining)
+        XCTAssertEqual(virtualPump.status.activeBolusDeliveryStatus.insulinProgrammed, 0.0)
+        XCTAssertNotEqual(virtualPump.stoppedNotificationDelay, viewModel.stoppedNotificationDelay)
         XCTAssertNil(delegate.lastDidReceiveAnnunciation)
         viewModel.commitUpdatedSettings()
-        XCTAssertEqual(mockPump.deviceInformation?.reservoirLevel, viewModel.reservoirRemaining)
-        XCTAssertEqual(mockPump.stoppedNotificationDelay, viewModel.stoppedNotificationDelay)
+        XCTAssertEqual(virtualPump.deviceInformation?.reservoirLevel, viewModel.reservoirRemaining)
+        XCTAssertEqual(virtualPump.stoppedNotificationDelay, viewModel.stoppedNotificationDelay)
         wait(for: [exp], timeout: 30)
         XCTAssertEqual(.batteryLow, delegate.lastDidReceiveAnnunciation?.type)
     }
 
     func testUpdateState() {
-        let mockPump = VirtualInsulinDeliveryPump(status: MockInsulinDeliveryPumpStatus.withoutBasalRateSchedule)
-        let viewModel = MockPumpSettingsViewModel(mockPump: mockPump)
+        let virtualPump = VirtualInsulinDeliveryPump(status: MockInsulinDeliveryPumpStatus.withoutBasalProfile)
+        let viewModel = MockPumpSettingsViewModel(virtualPump: virtualPump)
 
-        mockPump.deviceInformation?.updateExpirationDate(remainingLifetime: 0)
-        mockPump.deviceInformation?.reservoirLevel = 10
-        mockPump.errorOnNextComms = .procedureNotApplicable
-        mockPump.isConnected = false
+        virtualPump.deviceInformation?.updateExpirationDate(remainingLifetime: 0)
+        virtualPump.deviceInformation?.reservoirLevel = 10
+        virtualPump.errorOnNextComms = DeviceCommError.procedureNotApplicable
+        virtualPump.isConnected = false
 
-        XCTAssertNotEqual(viewModel.errorOnNextComms.commError, mockPump.errorOnNextComms)
-        XCTAssertNotEqual(viewModel.disconnectComms, !mockPump.isConnected)
-        XCTAssertNotEqual(viewModel.reservoirRemaining, mockPump.deviceInformation?.reservoirLevel)
+        XCTAssertNotEqual(viewModel.errorOnNextComms.commError, virtualPump.errorOnNextComms)
+        XCTAssertNotEqual(viewModel.disconnectComms, !virtualPump.isConnected)
+        XCTAssertNotEqual(viewModel.reservoirRemaining, virtualPump.deviceInformation?.reservoirLevel)
 
         viewModel.updateState()
-        XCTAssertEqual(viewModel.errorOnNextComms.commError, mockPump.errorOnNextComms)
-        XCTAssertEqual(viewModel.disconnectComms, !mockPump.isConnected)
-        XCTAssertEqual(viewModel.reservoirRemaining, mockPump.deviceInformation?.reservoirLevel)
+        XCTAssertEqual(viewModel.errorOnNextComms.commError, virtualPump.errorOnNextComms)
+        XCTAssertEqual(viewModel.disconnectComms, !virtualPump.isConnected)
+        XCTAssertEqual(viewModel.reservoirRemaining, virtualPump.deviceInformation?.reservoirLevel)
     }
 }

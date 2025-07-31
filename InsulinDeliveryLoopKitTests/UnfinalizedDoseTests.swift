@@ -15,8 +15,9 @@ class UnfinalizedDoseTests: XCTestCase {
     func testInitializationBolus() {
         let amount = 3.5
         let startTime = Date()
-        let duration = TimeInterval(amount / InsulinDeliveryPump.estimatedBolusDeliveryRate)
-        let unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let duration = TimeInterval(amount / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+        let unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         XCTAssertEqual(unfinalizedBolus.doseType, .bolus)
@@ -34,10 +35,11 @@ class UnfinalizedDoseTests: XCTestCase {
         let amount = 0.5
         let startTime = Date()
         let duration = TimeInterval.minutes(30)
-        let unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: amount,
-                                               startTime: startTime,
-                                               duration: duration,
-                                               scheduledCertainty: .certain)
+        let unfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                   tempBasalRate: amount,
+                                                   startTime: startTime,
+                                                   duration: duration,
+                                                   scheduledCertainty: .certain)
         XCTAssertEqual(unfinalizedTempBasal.doseType, .tempBasal)
         XCTAssertEqual(unfinalizedTempBasal.units, amount*duration.hours)
         XCTAssertNil(unfinalizedTempBasal.programmedUnits)
@@ -82,8 +84,9 @@ class UnfinalizedDoseTests: XCTestCase {
     func testProgress() {
         let amount = 3.5
         let startTime = Date()
-        let duration = TimeInterval(amount / InsulinDeliveryPump.estimatedBolusDeliveryRate)
-        let unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let duration = TimeInterval(amount / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+        let unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         XCTAssertEqual(unfinalizedBolus.progress(at: startTime + .seconds(30)), .seconds(30) / duration)
@@ -94,10 +97,11 @@ class UnfinalizedDoseTests: XCTestCase {
         let amount = 0.5
         let startTime = Date()
         let duration = TimeInterval.minutes(30)
-        let unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: amount,
-                                             startTime: startTime,
-                                             duration: duration,
-                                             scheduledCertainty: .certain)
+        let unfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                   tempBasalRate: amount,
+                                                   startTime: startTime,
+                                                   duration: duration,
+                                                   scheduledCertainty: .certain)
         XCTAssertFalse(unfinalizedTempBasal.isFinished(at: startTime + .minutes(25)))
         XCTAssertTrue(unfinalizedTempBasal.isFinished(at: startTime + .minutes(31)))
     }
@@ -105,7 +109,8 @@ class UnfinalizedDoseTests: XCTestCase {
     func testFinalizedUnits() {
         let amount = 3.5
         let startTime = Date()
-        let unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         XCTAssertNil(unfinalizedBolus.finalizedUnits(at: startTime + .seconds(30)))
@@ -114,7 +119,7 @@ class UnfinalizedDoseTests: XCTestCase {
         
     func testBolusCancelLongAfterFinishTime() {
         let start = Date()
-        var dose = UnfinalizedDose(bolusAmount: 1, startTime: start, scheduledCertainty: .certain)
+        var dose = UnfinalizedDose(decisionId: nil, bolusAmount: 1, startTime: start, scheduledCertainty: .certain)
         dose.cancel(at: start + .hours(2))
         
         XCTAssertEqual(1.0, dose.units)
@@ -123,8 +128,9 @@ class UnfinalizedDoseTests: XCTestCase {
     func testRawValue() {
         let amount = 3.5
         let startTime = Date()
-        let duration = TimeInterval(amount / InsulinDeliveryPump.estimatedBolusDeliveryRate)
-        let unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let duration = TimeInterval(amount / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+        let unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         let rawValue = unfinalizedBolus.rawValue
@@ -140,8 +146,9 @@ class UnfinalizedDoseTests: XCTestCase {
     func testRawValueBolusWithProgrammedUnits() {
         let amount = 3.5
         let startTime = Date()
-        let duration = TimeInterval(amount / InsulinDeliveryPump.estimatedBolusDeliveryRate)
-        var unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let duration = TimeInterval(amount / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+        var unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         unfinalizedBolus.programmedUnits = amount
@@ -170,10 +177,11 @@ class UnfinalizedDoseTests: XCTestCase {
         let rate = 0.5
         let startTime = Date()
         let duration = TimeInterval.minutes(30)
-        var unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: rate,
-                                             startTime: startTime,
-                                             duration: duration,
-                                             scheduledCertainty: .certain)
+        var unfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                   tempBasalRate: rate,
+                                                   startTime: startTime,
+                                                   duration: duration,
+                                                   scheduledCertainty: .certain)
         unfinalizedTempBasal.programmedRate = rate
         let rawValue = unfinalizedTempBasal.rawValue
         XCTAssertEqual(UnfinalizedDose.DoseType(rawValue: rawValue["rawDoseType"] as! UnfinalizedDose.DoseType.RawValue), .tempBasal)
@@ -200,10 +208,11 @@ class UnfinalizedDoseTests: XCTestCase {
         let rate = 0.5
         let startTime = Date()
         let duration = TimeInterval.minutes(30)
-        let expectedUnfinalizedTempBasal = UnfinalizedDose(tempBasalRate: rate,
-                                                     startTime: startTime,
-                                                     duration: duration,
-                                                     scheduledCertainty: .certain)
+        let expectedUnfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                           tempBasalRate: rate,
+                                                           startTime: startTime,
+                                                           duration: duration,
+                                                           scheduledCertainty: .certain)
         let rawValue = expectedUnfinalizedTempBasal.rawValue
         let unfinalizedTempBasal = UnfinalizedDose(rawValue: rawValue)!
         XCTAssertEqual(unfinalizedTempBasal.doseType, .tempBasal)
@@ -221,8 +230,9 @@ class UnfinalizedDoseTests: XCTestCase {
         let amount = 3.5
         let startTime = Date()
         let now = Date()
-        let duration = TimeInterval(amount / InsulinDeliveryPump.estimatedBolusDeliveryRate)
-        let unfinalizedBolus = UnfinalizedDose(bolusAmount: amount,
+        let duration = TimeInterval(amount / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+        let unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+                                               bolusAmount: amount,
                                                startTime: startTime,
                                                scheduledCertainty: .certain)
         let doseEntry = DoseEntry(unfinalizedBolus, at: now)
@@ -240,10 +250,11 @@ class UnfinalizedDoseTests: XCTestCase {
         let now = Date()
         let duration = TimeInterval.minutes(30)
         let rate = amount*duration.hours
-        let unfinalizedTempBasal = UnfinalizedDose(tempBasalRate: amount,
-                                               startTime: startTime,
-                                               duration: duration,
-                                               scheduledCertainty: .certain)
+        let unfinalizedTempBasal = UnfinalizedDose(decisionId: nil,
+                                                   tempBasalRate: amount,
+                                                   startTime: startTime,
+                                                   duration: duration,
+                                                   scheduledCertainty: .certain)
         let doseEntry = DoseEntry(unfinalizedTempBasal, at: now)
         XCTAssertEqual(doseEntry.type, .tempBasal)
         XCTAssertEqual(doseEntry.startDate, startTime)
@@ -284,7 +295,7 @@ class UnfinalizedDoseTests: XCTestCase {
     func testMultipleCancels() {
         let now = Date()
         let then = now.addingTimeInterval(.minutes(1))
-        var dose = UnfinalizedDose(bolusAmount: 1, startTime: now, scheduledCertainty: .certain)
+        var dose = UnfinalizedDose(decisionId: nil, bolusAmount: 1, startTime: now, scheduledCertainty: .certain)
         dose.cancel(at: now)
 
         XCTAssertEqual(now, dose.endTime)

@@ -11,6 +11,7 @@ import LoopKit
 import PotentASN1
 import ShieldOID
 import Shield
+import BluetoothCommonKit
 
 extension InsulinDeliveryPump {
     var pumpKeyServiceIdentifier: String { "org.tidepool.InsulinDeliveryLoopKit.Key.Shared" }
@@ -37,28 +38,28 @@ extension InsulinDeliveryPump {
     
     private(set) var wildcardKeyData: Data? {
         get {
-            return securePersistentPumpAuthentication().getAuthenticationData(for: wildcardIdentifierKey)
+            return securePersistentAuthentication().getAuthenticationData(for: wildcardIdentifierKey)
         }
         set {
-            try? securePersistentPumpAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierKey)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierKey)
         }
     }
     
     private(set) var wildcardCertificateData: Data? {
         get {
-            return securePersistentPumpAuthentication().getAuthenticationData(for: wildcardIdentifierCertificate)
+            return securePersistentAuthentication().getAuthenticationData(for: wildcardIdentifierCertificate)
         }
         set {
-            try? securePersistentPumpAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierCertificate)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierCertificate)
         }
     }
     
     private(set) var constrainedCertificateData: Data? {
         get {
-            return securePersistentPumpAuthentication().getAuthenticationData(for: constrainedIdentifierCertificate)
+            return securePersistentAuthentication().getAuthenticationData(for: constrainedIdentifierCertificate)
         }
         set {
-            try? securePersistentPumpAuthentication().setAuthenticationData(newValue, for: constrainedIdentifierCertificate)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: constrainedIdentifierCertificate)
         }
     }
     
@@ -190,12 +191,12 @@ extension InsulinDeliveryPump {
     }
 }
 
-public protocol SecurePersistentPumpAuthentication {
+public protocol SecurePersistentAuthentication {
     func setAuthenticationData(_ data: Data?, for keyService: String?) throws
     func getAuthenticationData(for keyService: String?) -> Data?
 }
 
-extension KeychainManager: SecurePersistentPumpAuthentication {
+extension KeychainManager: SecurePersistentAuthentication {
     public func setAuthenticationData(_ data: Data?, for keyService: String?) throws {
         if let keyService = keyService {
             try replaceGenericPassword(data, forService: keyService)

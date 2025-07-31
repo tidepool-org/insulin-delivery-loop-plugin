@@ -8,6 +8,7 @@
 
 import LoopKit
 import XCTest
+import InsulinDeliveryServiceKit
 @testable import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
@@ -19,14 +20,14 @@ class InsulinStatusViewModelTests: XCTestCase {
     var viewModel: InsulinStatusViewModel!
     let defaultRate = 1.234
     var unfinalizedDose: UnfinalizedDose {
-        UnfinalizedDose(tempBasalRate: 2.345, startTime: now, duration: 1, scheduledCertainty: .certain)
+        UnfinalizedDose(decisionId: nil, tempBasalRate: 2.345, startTime: now, duration: 1, scheduledCertainty: .certain)
     }
     var deviceInformation: DeviceInformation!
     
     override func setUpWithError() throws {
         let schedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: defaultRate)], timeZone: nil)!
         now = Date()
-        deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "serialNumber")
+        deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "serialNumber", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         pumpState = IDPumpState(deviceInformation: deviceInformation)
         state = InsulinDeliveryPumpManagerState(basalRateSchedule: schedule, maxBolusUnits: 0)
         state.suspendState = .resumed(now)
@@ -90,7 +91,7 @@ class InsulinStatusViewModelTests: XCTestCase {
         XCTAssertEqual("130", viewModel.reservoirLevelString)
         mockPublisher.state.pumpState.deviceInformation?.reservoirLevel = 123
         XCTAssertEqual("120", viewModel.reservoirLevelString)
-        mockPublisher.state.pumpState.deviceInformation?.reservoirLevel = 48.1
+        mockPublisher.state.pumpState.deviceInformation?.reservoirLevel = 50.1
         XCTAssertEqual("50", viewModel.reservoirLevelString)
         mockPublisher.state.pumpState.deviceInformation?.reservoirLevel = 48.nextDown
         XCTAssertEqual("48", viewModel.reservoirLevelString)
