@@ -14,11 +14,11 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
 
     private enum UnfinalizedDoseKey: String {
         case automatic
-        case rawDoseType
+        case decisionId
         case duration
         case programmedUnits
-        case decisionId
         case programmedRate
+        case rawDoseType
         case rawScheduledCertainty
         case startTime
         case units
