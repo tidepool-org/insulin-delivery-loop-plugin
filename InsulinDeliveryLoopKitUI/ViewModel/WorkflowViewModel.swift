@@ -115,12 +115,6 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
         selectedDeviceSerialNumber = nil
         pumpSetupState = .advertising
     }
-
-    // TODO remove
-    func enterPumpKeyForSelectedDevice() {
-        guard selectedDeviceSerialNumber != nil else { return }
-        workflowStepCompletionHandler()
-    }
     
     func connectToSelectedDevice() {
         guard let serialNumber = selectedDeviceSerialNumber else { return }
@@ -147,10 +141,6 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
     
     func deviceMatchingSerialNumber(_ serialNumber: String) -> Device? {
         deviceList[serialNumber]
-    }
-
-    func pumpKeyEnterManuallySelected() {
-        navigator?.replaceCurrentScreen(with: .selectPump)
     }
 
     // TODO need to connect to pump after selecting it
@@ -342,6 +332,11 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
 
     func startInsulinDeliverySelected(completion: @escaping (Error?) -> Void) {
         startInsulinDelivery(completion: completion)
+    }
+    
+    func replacePumpSelected() {
+        prepareForNewPump()
+        navigator?.navigateTo(.selectPump)
     }
 }
 

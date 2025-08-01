@@ -206,9 +206,9 @@ struct SettingsView: View {
                             .foregroundColor(.accentColor)
                             .padding(.bottom, 2)
                     }
+                    Spacer()
+                    Image.disclosureIndicator
                 }
-                Spacer()
-                Image.disclosureIndicator
             }
         }
     }

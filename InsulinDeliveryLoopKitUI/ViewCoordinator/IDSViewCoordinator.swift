@@ -25,6 +25,7 @@ enum IDSScreen: Int {
     case basalRateScheduleEditorScreen
     case connectToPump
     case primeReservoir
+    case replaceParts
     case selectPump
     case settings
     
@@ -38,6 +39,8 @@ enum IDSScreen: Int {
             return .attachPump
         case .selectPump:
             return .connectToPump
+        case .replaceParts:
+            return .selectPump
         default:
             return nil
         }
@@ -184,6 +187,10 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
             })
             let view = SettingsView(viewModel: viewModel)
             return hostingController(rootView: view)
+        case .replaceParts:
+            prepareWorkflowViewModel()
+            let view = ReplaceComponentsView(viewModel: workflowViewModel!)
+            return hostingController(rootView: view)
         default:
             return viewControllerForFirstRunOnboardingScreen(screen)
         }
@@ -250,10 +257,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
                                               workflowStepCompletionHandler: { [weak self] in self?.setupStepFinished() },
                                               workflowCanceledHandler: { [weak self] in self?.workflowCanceled() })
 
-        if !pumpManager.isOnboarded {
-            workflowType = .onboarding
-            // prepareForNewPumpIfNeeded() used to be called here, but was determined it is not needed for onboarding. If milestone loading is part of onboarding, that line might be needed again.
-        }
+        workflowType = !pumpManager.isOnboarded ? .onboarding : .replacement
     }
 
     private func prepareForNewPump() {

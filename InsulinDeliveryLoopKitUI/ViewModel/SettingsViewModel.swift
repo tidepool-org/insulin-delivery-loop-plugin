@@ -263,8 +263,7 @@ class SettingsViewModel: ObservableObject {
     }
     
     func replacePartsSelected() {
-        // TODO replace pump
-//        navigator?.navigateTo(.replaceParts)
+        navigator?.navigateTo(.replaceParts)
     }
 
     @Published var transitioningSuspendInsulinDelivery: Bool

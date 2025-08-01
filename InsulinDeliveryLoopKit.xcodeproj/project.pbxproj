@@ -142,6 +142,7 @@
 		B4D855B7241BE5BC00ED61FF /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */; };
 		B4D855B9241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855B8241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift */; };
 		B4DE114E24645B2D009F0430 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4DE114D24645B2D009F0430 /* SettingsViewModel.swift */; };
+		B4E1BFB92E3D343C00D843ED /* ReplacePumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */; };
 		B4F85C7A29B28E9400561B57 /* Shield in Frameworks */ = {isa = PBXBuildFile; productRef = B4F85C7929B28E9400561B57 /* Shield */; };
 		C12E4BB8288F21CE009C98A2 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */; };
 /* End PBXBuildFile section */
@@ -341,6 +342,7 @@
 		B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		B4D855B8241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerState.swift; sourceTree = "<group>"; };
 		B4DE114D24645B2D009F0430 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplacePumpView.swift; sourceTree = "<group>"; };
 		B4FC572D2474828D0057413E /* PumpSetupState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpSetupState.swift; sourceTree = "<group>"; };
 		B4FF9ABC24375A4D009608ED /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4FF9ABF24375A52009608ED /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -575,6 +577,7 @@
 		B46322C5243F71040087BC0C /* Setup */ = {
 			isa = PBXGroup;
 			children = (
+				B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */,
 				B45D2FA92DC4A26D00EFCCE4 /* AttachPumpView.swift */,
 				B45D2FAB2DC4A28500EFCCE4 /* ConnectToPumpView.swift */,
 				1DE5AA4D27DBD32D00199D92 /* Modifiers */,
@@ -1170,6 +1173,7 @@
 				B45D2FAC2DC4A28500EFCCE4 /* ConnectToPumpView.swift in Sources */,
 				1DE5AA4F27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift in Sources */,
 				B45D2FBE2DC4AB3200EFCCE4 /* FloatingPoint.swift in Sources */,
+				B4E1BFB92E3D343C00D843ED /* ReplacePumpView.swift in Sources */,
 				B45D2F962DC4A05F00EFCCE4 /* Color.swift in Sources */,
 				B45D2F882DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift in Sources */,
 				B45D2F8C2DC3FA0200EFCCE4 /* FixedHeightText.swift in Sources */,
