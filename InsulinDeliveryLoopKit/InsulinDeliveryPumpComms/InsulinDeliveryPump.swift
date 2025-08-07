@@ -57,7 +57,7 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
         let acControlPoint = ACControlPointDataHandler(securityManager: securityManager, maxRequestSize: InsulinDeliveryPumpManager.maxRequestSize)
         let acData = ACDataDataHandler(securityManager: securityManager, maxRequestSize: InsulinDeliveryPumpManager.maxRequestSize)
         var state = state
-        state.isAuthorizationControlRequired = false
+        state.isAuthorizationControlRequired = true
         self.init(bluetoothManager: bluetoothManager,
                   bolusManager: bolusManager,
                   basalManager: basalManager,
@@ -110,18 +110,13 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
             
             Task {
                 let certificateData = await self.getCertificateData(pumpSerialNumber: serialNumber, certificateNonceString: "\(certificateNonce)")
-                guard let constrinedCertificateData = certificateData.constrained else {
-                    guard let wildcardCertificateData = certificateData.wildcard else {
-                        self.loggingDelegate?.logErrorEvent("Error during authentication. Could not get the wildcard or constrained certificate")
-                        self.delegate?.pumpDidCompleteAuthentication(self, error: DeviceCommError.authenticationFailed)
-                        return
-                    }
-                    
-                    self.completeKeyExchange(certificateData: wildcardCertificateData)
+                guard let certificateData = certificateData else {
+                    self.loggingDelegate?.logErrorEvent("Error during authentication. Could not get the wildcard or constrained certificate")
+                    self.delegate?.pumpDidCompleteAuthentication(self, error: DeviceCommError.authenticationFailed)
                     return
                 }
                 
-                self.completeKeyExchange(certificateData: constrinedCertificateData)
+                self.completeKeyExchange(certificateData: certificateData)
             }
         }
     }

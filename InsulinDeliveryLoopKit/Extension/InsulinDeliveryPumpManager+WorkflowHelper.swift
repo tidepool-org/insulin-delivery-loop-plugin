@@ -48,6 +48,10 @@ extension InsulinDeliveryPumpManager: InsulinDeliveryPumpWorkflowHelper {
         resetPendingItems()
         pump.prepareForNewPump()
     }
+    
+    public func setOOBString(_ oobString: String) {
+        pump.setOOBString(oobString)
+    }
         
     public func connectToPump(withIdentifier identifier: UUID,
                               andSerialNumber serialNumber: String) {

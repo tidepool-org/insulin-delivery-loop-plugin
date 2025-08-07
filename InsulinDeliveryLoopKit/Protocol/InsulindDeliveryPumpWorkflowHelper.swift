@@ -28,6 +28,8 @@ public protocol InsulinDeliveryPumpWorkflowHelper: AnyObject {
     func addPumpManagerStateObserver(_ observer: InsulinDeliveryPumpManagerStateObserver, queue: DispatchQueue)
     
     func prepareForNewPump()
+    
+    func setOOBString(_ oobString: String)
 
     func connectToPump(withIdentifier identifier: UUID, andSerialNumber serialNumber: String)
     

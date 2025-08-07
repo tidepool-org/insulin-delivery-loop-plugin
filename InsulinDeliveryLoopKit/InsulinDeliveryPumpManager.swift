@@ -223,6 +223,8 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     public var pumpReservoirCapacity: Double = InsulinDeliveryPumpManager.pumpReservoirCapacity
     
+    public static let pumpKeyLengthRange: ClosedRange<Int> = 2...8
+    
     public var reservoirLevel: Double? {
         return state.pumpState.deviceInformation?.reservoirLevel
     }

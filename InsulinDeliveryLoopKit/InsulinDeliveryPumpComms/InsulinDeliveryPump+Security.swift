@@ -16,11 +16,9 @@ import BluetoothCommonKit
 extension InsulinDeliveryPump {
     var pumpKeyServiceIdentifier: String { "org.tidepool.InsulinDeliveryLoopKit.Key.Shared" }
     
-    private var wildcardIdentifierKey: String { "org.tidepool.InsulinDeliveryLoopKit.Key.Wildcard" }
+    private var identifierKey: String { "org.tidepool.InsulinDeliveryLoopKit.Key" }
     
-    private var wildcardIdentifierCertificate: String { "org.tidepool.InsulinDeliveryLoopKit.Certificate.Wildcard" }
-    
-    private var constrainedIdentifierCertificate: String { "org.tidepool.InsulinDeliveryLoopKit.Certificate.Constrained" }
+    private var identifierCertificate: String { "org.tidepool.InsulinDeliveryLoopKit.Certificate" }
     
     private var appTypeID: String { "1" }
     
@@ -29,40 +27,27 @@ extension InsulinDeliveryPump {
     private var hardwareVersion: String { UIDevice.current.model }
     
     private var softwareVersion: String { UIDevice.current.systemVersion }
+        
+    private var certificateType: String { "CERTIFICATE" }
     
-    private var phdTypeID: String { "775" }
-    
-    private var wildcardCertificateType: String { "WILDCARD" }
-    
-    private var constrainedCertificateType: String { "CONSTRAINED" }
-    
-    private(set) var wildcardKeyData: Data? {
+    private(set) var certificateKeyData: Data? {
         get {
-            return securePersistentAuthentication().getAuthenticationData(for: wildcardIdentifierKey)
+            return securePersistentAuthentication().getAuthenticationData(for: identifierKey)
         }
         set {
-            try? securePersistentAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierKey)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: identifierKey)
         }
     }
     
-    private(set) var wildcardCertificateData: Data? {
+    private(set) var certificateData: Data? {
         get {
-            return securePersistentAuthentication().getAuthenticationData(for: wildcardIdentifierCertificate)
+            return securePersistentAuthentication().getAuthenticationData(for: identifierCertificate)
         }
         set {
-            try? securePersistentAuthentication().setAuthenticationData(newValue, for: wildcardIdentifierCertificate)
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: identifierCertificate)
         }
     }
-    
-    private(set) var constrainedCertificateData: Data? {
-        get {
-            return securePersistentAuthentication().getAuthenticationData(for: constrainedIdentifierCertificate)
-        }
-        set {
-            try? securePersistentAuthentication().setAuthenticationData(newValue, for: constrainedIdentifierCertificate)
-        }
-    }
-    
+
     func getCSRBase64(pumpSerialNumber: String, certificateNonceString: String) -> String? {
         guard let csrBase64Encoded = try? createCSR(pumpSerialNumber: pumpSerialNumber, certificateNonceString: certificateNonceString)?.encoded().base64EncodedString() else { return nil }
         return csrBase64Encoded
@@ -82,7 +67,6 @@ extension InsulinDeliveryPump {
             .add("Tidepool Loop", forType: iso_itu.ds.attributeType.name.oid)
             .add(appTypeID, forType: iso_itu.ds.attributeType.commonName.oid)
             .add(appInstanceID, forType: iso_itu.ds.attributeType.serialNumber.oid)
-            .add(phdTypeID, forType: iso_itu.ds.attributeType.surname.oid)
             .add(pumpSerialNumber, forType: iso_itu.ds.attributeType.givenName.oid)
             .add(certificateNonceString, forType: iso_itu.ds.attributeType.pseudonym.oid)
             .name
@@ -93,89 +77,46 @@ extension InsulinDeliveryPump {
             .build(signingKey: appKeyPair.privateKey, digestAlgorithm: .sha256)
     }
     
-    func getCertificateData(pumpSerialNumber: String, certificateNonceString: String) async -> (constrained: Data?, wildcard: Data?) {
-        
-        // temporary: self-signed wildcard certificate 
-        var wildcardCertificateData = getWildcardCertificateData()
-        guard wildcardCertificateData == nil else {
+    func getCertificateData(pumpSerialNumber: String, certificateNonceString: String) async -> Data? {
+        // temporary: self-signed wildcard certificate
+        var certificateData = getWildcardCertificateData()
+        guard certificateData == nil else {
             loadCertificateRequestKeyPair()
-            return (nil, wildcardCertificateData)
+            return certificateData
         }
         // ---------
         
         guard let tidepoolSecurity = pumpDelegate?.tidepoolSecurity else {
             loggingDelegate?.logErrorEvent("tidepool security not available")
-            return (nil, wildcardCertificateData)
+            return nil
         }
         
         guard let csr = getCSRBase64(pumpSerialNumber: pumpSerialNumber, certificateNonceString: certificateNonceString) else {
             loggingDelegate?.logErrorEvent("Could not create CSR")
-            return (nil, wildcardCertificateData)
+            return nil
         }
         
         do {
             let partnerData = [
-                "rcTypeId": appTypeID,
-                "rcInstanceId": appInstanceID,
-                "rcHWVersion": hardwareVersion,
-                "rcSWVersion": softwareVersion,
-                "phdTypeId": phdTypeID,
-                "phdInstanceId": pumpSerialNumber,
+                "pumpSerialNumber": pumpSerialNumber,
                 "csr": csr
             ]
             
-            let responseData = try await tidepoolSecurity.sendAppAssertion(partnerIdentifier: "Coastal", partnerData: partnerData)
+            let responseData = try await tidepoolSecurity.sendAppAssertion(partnerIdentifier: "Apex", partnerData: partnerData)
             let assertionResponse = try JSONDecoder.tidepool.decode(AssertionResponse.self, from: responseData)
-            
-            if let wildcardCertificateBase64Encoded = assertionResponse.data.certificates.first(where: { $0.type == wildcardCertificateType })?.content {
-                guard let clientPrivateKey = securityManager.generatedPrivateKey else {
-                    return (nil, nil)
-                }
-                wildcardCertificateData = Data(base64Encoded: wildcardCertificateBase64Encoded)
-                
-                // save the key used to create the wildcard certificate to be used when needed
-                var error: Unmanaged<CFError>?
-                wildcardKeyData = SecKeyCopyExternalRepresentation(clientPrivateKey, &error) as Data?
+
+            guard let certificateBase64Encoded = assertionResponse.data.certificates.first(where: { $0.type == certificateType })?.content else {
+                return nil
             }
             
-            guard let constrainedCertificateBase64Encoded = assertionResponse.data.certificates.first(where: { $0.type == constrainedCertificateType })?.content else {
-                return (nil, wildcardCertificateData)
-            }
-            
-            constrainedCertificateData = Data(base64Encoded: constrainedCertificateBase64Encoded)
-            return (constrainedCertificateData, wildcardCertificateData)
+            certificateData = Data(base64Encoded: certificateBase64Encoded)
+            return certificateData
         } catch let error {
             loggingDelegate?.logErrorEvent("Error sending assertion \(error.localizedDescription.debugDescription)")
-            
-            // when failures occur, return the wildcard certificate
-            guard let wildcardKey = loadWildcardKey() else {
-                loggingDelegate?.logErrorEvent("Error loading the wildcard key")
-                return (nil, nil)
-            }
-            
-            securityManager.generatedPrivateKey = wildcardKey
-            return (nil, wildcardCertificateData)
+            return nil
         }
     }
-    
-    private func loadWildcardKey() -> SecKey? {
-        let privateAttributes = [kSecAttrKeySizeInBits: 256,
-                                       kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
-                                      kSecAttrKeyClass: kSecAttrKeyClassPrivate,
-                                   kSecPrivateKeyAttrs: [kSecAttrIsPermanent: false]] as [CFString : Any] as CFDictionary
-        
-        var error: Unmanaged<CFError>?
-        
-        guard let certificateKeyData = wildcardKeyData else { return nil }
-        
-        let certificateKey = SecKeyCreateWithData(NSData(data: certificateKeyData) as CFData, privateAttributes, &error)
-        if let error = error {
-            loggingDelegate?.logErrorEvent("wildcard certificate key creation failed \(String(describing: error))")
-        }
-        
-        return certificateKey
-    }
-    
+
     struct AssertionResponse: Codable {
         let data: AssertionData
     }

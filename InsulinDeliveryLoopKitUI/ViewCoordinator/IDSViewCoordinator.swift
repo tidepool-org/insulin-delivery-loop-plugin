@@ -24,6 +24,7 @@ enum IDSScreen: Int {
     case attachPump
     case basalRateScheduleEditorScreen
     case connectToPump
+    case pumpKeyEntryManual
     case primeReservoir
     case replaceParts
     case selectPump
@@ -35,10 +36,12 @@ enum IDSScreen: Int {
             return IDSScreen.startOnboardingScreen
         case .connectToPump:
             return .primeReservoir
+        case .pumpKeyEntryManual:
+            return . connectToPump
         case .primeReservoir:
             return .attachPump
         case .selectPump:
-            return .connectToPump
+            return .pumpKeyEntryManual
         case .replaceParts:
             return .selectPump
         default:
@@ -167,6 +170,9 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
             return hostingController(rootView: view)
         case .connectToPump:
             let view = ConnectToPumpView(viewModel: workflowViewModel!)
+            return hostingController(rootView: view)
+        case .pumpKeyEntryManual:
+            let view = PumpKeyEntryManualView(viewModel: workflowViewModel!)
             return hostingController(rootView: view)
         case .primeReservoir:
             let view = PrimePumpView(viewModel: workflowViewModel!)

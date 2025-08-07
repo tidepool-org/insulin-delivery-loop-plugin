@@ -118,7 +118,6 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
     
     func connectToSelectedDevice() {
         guard let serialNumber = selectedDeviceSerialNumber else { return }
-        connectToPump(withSerialNumber: serialNumber)
         workflowStepCompletionHandler()
     }
     
@@ -143,10 +142,10 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
         deviceList[serialNumber]
     }
 
-    // TODO need to connect to pump after selecting it
     func pumpKeyEntry(_ pumpKey: String) {
         guard let serialNumber = selectedDeviceSerialNumber else { return }
 
+        pumpWorkflowHelper.setOOBString(pumpKey)
         connectToPump(withSerialNumber: serialNumber)
         workflowStepCompletionHandler()
     }
