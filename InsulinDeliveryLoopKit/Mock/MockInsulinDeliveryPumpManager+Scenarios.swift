@@ -89,7 +89,7 @@ extension MockInsulinDeliveryPumpManager: TestingPumpManager {
         virtualPump.isConnected = true
         virtualPump.isAuthenticated = true
         
-        virtualPump.status.initialReservoirLevel = 140
+        virtualPump.status.initialReservoirLevel = 100
         virtualPump.status.basalProfile = state.basalRateSchedule.basalProfile
         virtualPump.status.pumpPrimed()
         virtualPump.status.startInsulinDelivery()
@@ -100,7 +100,7 @@ extension MockInsulinDeliveryPumpManager: TestingPumpManager {
     private func longPumpSetup(completion: @escaping () -> Void) {
         connectToPump(withIdentifier: MockInsulinDeliveryPumpStatus.identifier, andSerialNumber: MockInsulinDeliveryPumpStatus.serialNumber)
         configurePump { _ in
-            self.setReservoirLevel(reservoirLevel: 140) { _ in
+            self.setReservoirLevel(reservoirLevel: 100) { _ in
                 self.startPriming { _ in
                     self.stopPriming { _ in
                         self.startInsulinDelivery { _ in

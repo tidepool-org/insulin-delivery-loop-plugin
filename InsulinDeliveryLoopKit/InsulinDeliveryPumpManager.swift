@@ -1509,7 +1509,7 @@ extension InsulinDeliveryPumpManager {
     public static let reservoirAccuracyLimit: Double = 50
 
     // Allowed reservoir fill amounts
-    public static let supportedReservoirFillVolumes: [Int] = Array(stride(from: 80, through: 100, by: 10))
+    public static let supportedReservoirFillVolumes: [Int] = Array(stride(from: 20, through: 100, by: 10))
 
     // Volume of insulin in one motor pulse
     public static let pulseSize: Double = 0.08

@@ -126,6 +126,7 @@
 		B49B9A7F27302D910051F2C8 /* BolusDeliveryStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49B9A7E27302D910051F2C8 /* BolusDeliveryStatus.swift */; };
 		B4A2ABE42AA9EFAE007E3EC1 /* TidepoolSecurity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A2ABE32AA9EFAE007E3EC1 /* TidepoolSecurity.framework */; };
 		B4A5A2262E43E05900B9D83F /* PumpKeyEntryManualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */; };
+		B4A5A2282E461AFF00B9D83F /* SetReservoirFillValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */; };
 		B4BCD24F24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD24E24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift */; };
 		B4BCD25224EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD25124EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift */; };
 		B4BCD25724EC126100315CA6 /* GeneralAnnunication.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD25624EC126100315CA6 /* GeneralAnnunication.swift */; };
@@ -316,6 +317,7 @@
 		B49B9A7E27302D910051F2C8 /* BolusDeliveryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusDeliveryStatus.swift; sourceTree = "<group>"; };
 		B4A2ABE32AA9EFAE007E3EC1 /* TidepoolSecurity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TidepoolSecurity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpKeyEntryManualView.swift; sourceTree = "<group>"; };
+		B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetReservoirFillValueView.swift; sourceTree = "<group>"; };
 		B4B281C4269E16F7001E7B39 /* CryptoSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CryptoSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4B281C8269E16FE001E7B39 /* CryptoSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CryptoSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4BCD24E24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulindDeliveryPumpWorkflowHelper.swift; sourceTree = "<group>"; };
@@ -579,13 +581,14 @@
 		B46322C5243F71040087BC0C /* Setup */ = {
 			isa = PBXGroup;
 			children = (
-				B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */,
-				B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */,
+				1DE5AA4D27DBD32D00199D92 /* Modifiers */,
 				B45D2FA92DC4A26D00EFCCE4 /* AttachPumpView.swift */,
 				B45D2FAB2DC4A28500EFCCE4 /* ConnectToPumpView.swift */,
-				1DE5AA4D27DBD32D00199D92 /* Modifiers */,
 				B45D2FAD2DC4A29A00EFCCE4 /* PrimePumpView.swift */,
+				B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */,
+				B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */,
 				B45D2FAF2DC4A2CD00EFCCE4 /* SelectPumpView.swift */,
+				B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */,
 			);
 			name = Setup;
 			sourceTree = "<group>";
@@ -1155,6 +1158,7 @@
 				B4A5A2262E43E05900B9D83F /* PumpKeyEntryManualView.swift in Sources */,
 				B45D2F832DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift in Sources */,
 				B45D2F902DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift in Sources */,
+				B4A5A2282E461AFF00B9D83F /* SetReservoirFillValueView.swift in Sources */,
 				B40B49EB24239AFF00638D38 /* WorkflowViewModel.swift in Sources */,
 				B45D2FB42DC4A30D00EFCCE4 /* SelectableDevice.swift in Sources */,
 				B45D2F942DC4A02600EFCCE4 /* PumpExpirationProgressView.swift in Sources */,

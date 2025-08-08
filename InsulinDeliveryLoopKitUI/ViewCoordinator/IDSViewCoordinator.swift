@@ -27,6 +27,7 @@ enum IDSScreen: Int {
     case pumpKeyEntryManual
     case primeReservoir
     case replaceParts
+    case reservoirFill
     case selectPump
     case settings
     
@@ -40,10 +41,12 @@ enum IDSScreen: Int {
             return . connectToPump
         case .primeReservoir:
             return .attachPump
-        case .selectPump:
-            return .pumpKeyEntryManual
         case .replaceParts:
             return .selectPump
+        case .reservoirFill:
+            return .pumpKeyEntryManual
+        case .selectPump:
+            return .reservoirFill
         default:
             return nil
         }
@@ -177,6 +180,13 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
         case .primeReservoir:
             let view = PrimePumpView(viewModel: workflowViewModel!)
             return hostingController(rootView: view)
+        case .replaceParts:
+            prepareWorkflowViewModel()
+            let view = ReplaceComponentsView(viewModel: workflowViewModel!)
+            return hostingController(rootView: view)
+        case .reservoirFill:
+            let view = SetReservoirFillValueView(viewModel: workflowViewModel!)
+            return hostingController(rootView: view)
         case .selectPump:
             prepareForNewPump()
             
@@ -192,10 +202,6 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
                 self.completionDelegate?.completionNotifyingDidComplete(self)
             })
             let view = SettingsView(viewModel: viewModel)
-            return hostingController(rootView: view)
-        case .replaceParts:
-            prepareWorkflowViewModel()
-            let view = ReplaceComponentsView(viewModel: workflowViewModel!)
             return hostingController(rootView: view)
         default:
             return viewControllerForFirstRunOnboardingScreen(screen)
