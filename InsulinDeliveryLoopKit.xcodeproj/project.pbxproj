@@ -1,0 +1,2036 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D39A3DA27C332C00094A774 /* Date+DaysLater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D39A3D927C332C00094A774 /* Date+DaysLater.swift */; };
+		1D6511EC28242B1900B33A8E /* PumpStatusHighlights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6511EB28242B1900B33A8E /* PumpStatusHighlights.swift */; };
+		1D6E1C6128131A1C00256AA3 /* DateComponentsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6E1C6028131A1C00256AA3 /* DateComponentsFormatter.swift */; };
+		1D6E1C6228131BD200256AA3 /* DateComponentsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6E1C6028131A1C00256AA3 /* DateComponentsFormatter.swift */; };
+		1DAE26DA280F44D600E260B1 /* InsulinStatusViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAE26D9280F44D600E260B1 /* InsulinStatusViewModelTests.swift */; };
+		1DAE26DC280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAE26DB280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift */; };
+		1DB0D90227EE45BF00FD4E33 /* ReservoirHUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB0D90127EE45BF00FD4E33 /* ReservoirHUDViewModel.swift */; };
+		1DB0D90427EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB0D90327EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift */; };
+		1DC28A0827B5C5A9007E4B88 /* LowReservoirAnnunciation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28A0727B5C5A9007E4B88 /* LowReservoirAnnunciation.swift */; };
+		1DC475E727BD722D0041506D /* InsulinDeliveryPumpManagerState+ReminderSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC475E627BD722D0041506D /* InsulinDeliveryPumpManagerState+ReminderSettingsState.swift */; };
+		1DC475E927BD72830041506D /* NotificationSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC475E827BD72830041506D /* NotificationSetting.swift */; };
+		1DCEDA3528066D4600ADEE1E /* ExpirationProgressViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCEDA3428066D4600ADEE1E /* ExpirationProgressViewModelTests.swift */; };
+		1DE5AA4F27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE5AA4E27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift */; };
+		7E643F7F29CB9FCE0053AD36 /* MockInsulinDeliveryPumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41F875926DFB5F8004AB7C3 /* MockInsulinDeliveryPumpManager.swift */; };
+		7E643F8129CBA03F0053AD36 /* MockInsulinDeliveryPumpManager+Scenarios.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF0681E29A5408500AF2948 /* MockInsulinDeliveryPumpManager+Scenarios.swift */; };
+		84CCDBA12B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDB9E2B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav */; };
+		84CCDBA22B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDB9F2B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav */; };
+		84CCDBA32B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CCDBA02B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav */; };
+		B4074816278F272400F9FFEB /* PumpSetupState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FC572D2474828D0057413E /* PumpSetupState.swift */; };
+		B40B49EB24239AFF00638D38 /* WorkflowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40B49EA24239AFF00638D38 /* WorkflowViewModel.swift */; };
+		B40B49F42423B25500638D38 /* InsulinDeliveryServicesConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40B49F32423B25500638D38 /* InsulinDeliveryServicesConfiguration.swift */; };
+		B40B4A042423C97400638D38 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B40B4A032423C97400638D38 /* Assets.xcassets */; };
+		B40E3023299FEC11004EE521 /* wildcard-certificate.der in Resources */ = {isa = PBXBuildFile; fileRef = B40E3022299FEC11004EE521 /* wildcard-certificate.der */; };
+		B41F875826DFB5CC004AB7C3 /* MockInsulinDeliveryPumpPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41F875726DFB5CC004AB7C3 /* MockInsulinDeliveryPumpPlugin.swift */; };
+		B41F876626E11551004AB7C3 /* VirtualInsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41F876326E11464004AB7C3 /* VirtualInsulinDeliveryPump.swift */; };
+		B421217C24F01A6200E9D5D7 /* InsulinDeliveryHUDProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B421217B24F01A6200E9D5D7 /* InsulinDeliveryHUDProvider.swift */; };
+		B421217F24F01F5A00E9D5D7 /* ReservoirView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B421217E24F01F5A00E9D5D7 /* ReservoirView.swift */; };
+		B421218124F01FA600E9D5D7 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B421218024F01FA600E9D5D7 /* NibLoadable.swift */; };
+		B421218324F022BD00E9D5D7 /* ReservoirView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B421218224F022BC00E9D5D7 /* ReservoirView.xib */; };
+		B421218524F024A100E9D5D7 /* HUDAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B421218424F024A100E9D5D7 /* HUDAssets.xcassets */; };
+		B4340B4127F35DA7009B1149 /* PendingInsulinDeliveryCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4340B4027F35DA7009B1149 /* PendingInsulinDeliveryCommand.swift */; };
+		B43C47DA246AFE9000E36AB5 /* AlertSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43C47D9246AFE9000E36AB5 /* AlertSound.swift */; };
+		B43C47DC246AFEA100E36AB5 /* Alert+Annunciation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43C47DB246AFEA100E36AB5 /* Alert+Annunciation.swift */; };
+		B43C47F3246C2B4600E36AB5 /* InsulinDeliveryPumpManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43C47F2246C2B4500E36AB5 /* InsulinDeliveryPumpManagerTests.swift */; };
+		B43C47F5246C2E4C00E36AB5 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43C47F4246C2E4C00E36AB5 /* SettingsViewModelTests.swift */; };
+		B43E0633241C0EF6008FB913 /* InsulinDeliveryPumpManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43E0632241C0EF6008FB913 /* InsulinDeliveryPumpManagerError.swift */; };
+		B43E0635241C0FB5008FB913 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */; };
+		B440AD9F2462210C007FB71B /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABF24375A52009608ED /* LoopKitUI.framework */; };
+		B440ADA124622119007FB71B /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABC24375A4D009608ED /* LoopKit.framework */; };
+		B440ADA424622129007FB71B /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABC24375A4D009608ED /* LoopKit.framework */; };
+		B44866912D94335D003C701B /* InsulinDeliveryPump+Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44866902D943352003C701B /* InsulinDeliveryPump+Security.swift */; };
+		B45D2F7B2DC3B06700EFCCE4 /* Annunciation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F7A2DC3B05900EFCCE4 /* Annunciation.swift */; };
+		B45D2F7D2DC3BE5500EFCCE4 /* AnnunciationType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F7C2DC3BE5100EFCCE4 /* AnnunciationType.swift */; };
+		B45D2F7F2DC3DE5E00EFCCE4 /* PumpExpiresSoonAnnunciation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F7E2DC3DE5E00EFCCE4 /* PumpExpiresSoonAnnunciation.swift */; };
+		B45D2F812DC3E93E00EFCCE4 /* ExpirationProgressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F802DC3E93E00EFCCE4 /* ExpirationProgressViewModel.swift */; };
+		B45D2F832DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F822DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift */; };
+		B45D2F862DC3F68C00EFCCE4 /* EnvironmentValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F852DC3F68C00EFCCE4 /* EnvironmentValues.swift */; };
+		B45D2F882DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F872DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift */; };
+		B45D2F8A2DC3F9E800EFCCE4 /* RoundedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F892DC3F9E800EFCCE4 /* RoundedCard.swift */; };
+		B45D2F8C2DC3FA0200EFCCE4 /* FixedHeightText.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F8B2DC3FA0200EFCCE4 /* FixedHeightText.swift */; };
+		B45D2F8E2DC3FA4800EFCCE4 /* MockPumpSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F8D2DC3FA4800EFCCE4 /* MockPumpSettingsViewModel.swift */; };
+		B45D2F902DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F8F2DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift */; };
+		B45D2F922DC3FBED00EFCCE4 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F912DC3FBED00EFCCE4 /* Image.swift */; };
+		B45D2F942DC4A02600EFCCE4 /* PumpExpirationProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F932DC4A02600EFCCE4 /* PumpExpirationProgressView.swift */; };
+		B45D2F962DC4A05F00EFCCE4 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F952DC4A05F00EFCCE4 /* Color.swift */; };
+		B45D2F982DC4A14F00EFCCE4 /* CancelWorkflowWarningButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F972DC4A14F00EFCCE4 /* CancelWorkflowWarningButton.swift */; };
+		B45D2F9A2DC4A19100EFCCE4 /* ContentPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F992DC4A19100EFCCE4 /* ContentPreview.swift */; };
+		B45D2F9C2DC4A1A900EFCCE4 /* DeviceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F9B2DC4A1A900EFCCE4 /* DeviceDetailsView.swift */; };
+		B45D2F9E2DC4A1E200EFCCE4 /* InsulinStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F9D2DC4A1E200EFCCE4 /* InsulinStatusView.swift */; };
+		B45D2FA02DC4A1FB00EFCCE4 /* MockPumpSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2F9F2DC4A1FB00EFCCE4 /* MockPumpSettingsView.swift */; };
+		B45D2FA22DC4A21100EFCCE4 /* PumpExpiryWarningEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FA12DC4A21100EFCCE4 /* PumpExpiryWarningEditView.swift */; };
+		B45D2FA42DC4A22100EFCCE4 /* LowReservoirWarningEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FA32DC4A22100EFCCE4 /* LowReservoirWarningEditView.swift */; };
+		B45D2FA62DC4A23700EFCCE4 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FA52DC4A23700EFCCE4 /* NotificationSettingsView.swift */; };
+		B45D2FA82DC4A24A00EFCCE4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FA72DC4A24A00EFCCE4 /* SettingsView.swift */; };
+		B45D2FAA2DC4A26D00EFCCE4 /* AttachPumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FA92DC4A26D00EFCCE4 /* AttachPumpView.swift */; };
+		B45D2FAC2DC4A28500EFCCE4 /* ConnectToPumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FAB2DC4A28500EFCCE4 /* ConnectToPumpView.swift */; };
+		B45D2FAE2DC4A29A00EFCCE4 /* PrimePumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FAD2DC4A29A00EFCCE4 /* PrimePumpView.swift */; };
+		B45D2FB02DC4A2CD00EFCCE4 /* SelectPumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FAF2DC4A2CD00EFCCE4 /* SelectPumpView.swift */; };
+		B45D2FB22DC4A2FA00EFCCE4 /* MutuallyExclusive.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FB12DC4A2FA00EFCCE4 /* MutuallyExclusive.swift */; };
+		B45D2FB42DC4A30D00EFCCE4 /* SelectableDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FB32DC4A30D00EFCCE4 /* SelectableDevice.swift */; };
+		B45D2FB62DC4A4AD00EFCCE4 /* DateRangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FB52DC4A4AD00EFCCE4 /* DateRangeView.swift */; };
+		B45D2FB82DC4A67E00EFCCE4 /* ReservoirIssueWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FB72DC4A67E00EFCCE4 /* ReservoirIssueWarningView.swift */; };
+		B45D2FBA2DC4A6A200EFCCE4 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FB92DC4A6A200EFCCE4 /* ErrorView.swift */; };
+		B45D2FBC2DC4A6B700EFCCE4 /* PumpDisconnectedErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FBB2DC4A6B700EFCCE4 /* PumpDisconnectedErrorView.swift */; };
+		B45D2FBE2DC4AB3200EFCCE4 /* FloatingPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FBD2DC4AB3200EFCCE4 /* FloatingPoint.swift */; };
+		B45D2FC02DC4ABD400EFCCE4 /* ImageAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FBF2DC4ABD400EFCCE4 /* ImageAlert.swift */; };
+		B45D2FC22DC4AD4600EFCCE4 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC12DC4AD4600EFCCE4 /* UIImage.swift */; };
+		B45D2FC42DC4ADE300EFCCE4 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC32DC4ADE300EFCCE4 /* TimeView.swift */; };
+		B45D2FC62DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC52DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift */; };
+		B45D2FC82DC4AF5500EFCCE4 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2FC72DC4AF5500EFCCE4 /* BackButton.swift */; };
+		B45DB7F82D8CA3B800347D81 /* InsulinDeliveryServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B45DB7F72D8CA3B800347D81 /* InsulinDeliveryServiceKit */; };
+		B4625D2D2E380EA60063CBCD /* MockKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */; };
+		B4625D2F2E380F470063CBCD /* SecurityManagerTestingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */; };
+		B4625D302E38E48B0063CBCD /* MockKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */; };
+		B4625D312E38E5040063CBCD /* SecurityManagerTestingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */; };
+		B4625D332E390C600063CBCD /* TestInsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C735252E322F5800DBABC5 /* TestInsulinDeliveryPump.swift */; };
+		B46322B8243E2D6F0087BC0C /* InsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46322B7243E2D6F0087BC0C /* InsulinDeliveryPump.swift */; };
+		B46322C4243F704D0087BC0C /* HorizontalSizeClassOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46322C3243F704D0087BC0C /* HorizontalSizeClassOverride.swift */; };
+		B46AD70A29C0F8DC00A04C78 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABC24375A4D009608ED /* LoopKit.framework */; };
+		B46AD70B29C0F8DC00A04C78 /* LoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABC24375A4D009608ED /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD70C29C0F8DD00A04C78 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABF24375A52009608ED /* LoopKitUI.framework */; };
+		B46AD70D29C0F8DD00A04C78 /* LoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4FF9ABF24375A52009608ED /* LoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD70E29C0F8E000A04C78 /* InsulinDeliveryLoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; };
+		B46AD70F29C0F8E000A04C78 /* InsulinDeliveryLoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD71029C0F8E200A04C78 /* InsulinDeliveryLoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */; };
+		B46AD71129C0F8E200A04C78 /* InsulinDeliveryLoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD71229C0F8E600A04C78 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41F874826DFB4A1004AB7C3 /* LoopKit.framework */; };
+		B46AD71329C0F8E600A04C78 /* LoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B41F874826DFB4A1004AB7C3 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD71529C0F8E900A04C78 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41F874926DFB4A1004AB7C3 /* LoopKitUI.framework */; };
+		B46AD71629C0F8E900A04C78 /* LoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B41F874926DFB4A1004AB7C3 /* LoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD71729C0F8EA00A04C78 /* InsulinDeliveryLoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; };
+		B46AD71829C0F8EA00A04C78 /* InsulinDeliveryLoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B46AD71929C0F8EB00A04C78 /* InsulinDeliveryLoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */; };
+		B46AD71A29C0F8EB00A04C78 /* InsulinDeliveryLoopKitUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B4733F5924586588001D691A /* SettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4733F5824586588001D691A /* SettingsProvider.swift */; };
+		B4733F5D24586E2D001D691A /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4733F5C24586E2D001D691A /* IdentifiableClass.swift */; };
+		B4733F6224587FFE001D691A /* IDSViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4733F6024587FFE001D691A /* IDSViewCoordinator.swift */; };
+		B4733F772459D39D001D691A /* MockNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4733F762459D39D001D691A /* MockNavigator.swift */; };
+		B4733F87245B3EFD001D691A /* IDSViewCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4733F86245B3EFD001D691A /* IDSViewCoordinatorTests.swift */; };
+		B48051F324803E2C00C5EA7F /* InsulinDeliveryDoseProgressTimerEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F224803E2C00C5EA7F /* InsulinDeliveryDoseProgressTimerEstimator.swift */; };
+		B48051F524813CAB00C5EA7F /* UnfinalizedDose.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F424813CAB00C5EA7F /* UnfinalizedDose.swift */; };
+		B48051F724813CD200C5EA7F /* UnfinalizedDoseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F624813CD200C5EA7F /* UnfinalizedDoseTests.swift */; };
+		B48051F924813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */; };
+		B49723D02704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */; };
+		B499737B26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B499737A26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift */; };
+		B499737D26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B499737C26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift */; };
+		B49B9A7F27302D910051F2C8 /* BolusDeliveryStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49B9A7E27302D910051F2C8 /* BolusDeliveryStatus.swift */; };
+		B4A2ABE42AA9EFAE007E3EC1 /* TidepoolSecurity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A2ABE32AA9EFAE007E3EC1 /* TidepoolSecurity.framework */; };
+		B4A5A2262E43E05900B9D83F /* PumpKeyEntryManualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */; };
+		B4A5A2282E461AFF00B9D83F /* SetReservoirFillValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */; };
+		B4BCD24F24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD24E24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift */; };
+		B4BCD25224EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD25124EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift */; };
+		B4BCD25724EC126100315CA6 /* GeneralAnnunication.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BCD25624EC126100315CA6 /* GeneralAnnunication.swift */; };
+		B4C735262E322F5800DBABC5 /* TestInsulinDeliveryPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C735252E322F5800DBABC5 /* TestInsulinDeliveryPump.swift */; };
+		B4CCC21D26FCA3B800380435 /* PumpConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CCC21C26FCA3B800380435 /* PumpConfiguration.swift */; };
+		B4D85540241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; };
+		B4D85547241BBAFA00ED61FF /* InsulinDeliveryLoopKit.h in Headers */ = {isa = PBXBuildFile; fileRef = B4D85539241BBAFA00ED61FF /* InsulinDeliveryLoopKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B4D85551241BBB9400ED61FF /* InsulinDeliveryPumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D85550241BBB9400ED61FF /* InsulinDeliveryPumpManager.swift */; };
+		B4D85581241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */; };
+		B4D85586241BC25000ED61FF /* WorkflowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D85585241BC25000ED61FF /* WorkflowViewModelTests.swift */; };
+		B4D85588241BC25000ED61FF /* InsulinDeliveryLoopKitUI.h in Headers */ = {isa = PBXBuildFile; fileRef = B4D8557A241BC25000ED61FF /* InsulinDeliveryLoopKitUI.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B4D8558F241BC26A00ED61FF /* InsulinDeliveryLoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */; };
+		B4D8559A241BC31800ED61FF /* InsulinDeliveryPumpManager+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D85599241BC31800ED61FF /* InsulinDeliveryPumpManager+UI.swift */; };
+		B4D855AB241BC72400ED61FF /* InsulinDeliveryLoopKitPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855AA241BC72400ED61FF /* InsulinDeliveryLoopKitPlugin.swift */; };
+		B4D855B7241BE5BC00ED61FF /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */; };
+		B4D855B9241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D855B8241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift */; };
+		B4DE114E24645B2D009F0430 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4DE114D24645B2D009F0430 /* SettingsViewModel.swift */; };
+		B4E1BFB92E3D343C00D843ED /* ReplacePumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */; };
+		B4F85C7A29B28E9400561B57 /* Shield in Frameworks */ = {isa = PBXBuildFile; productRef = B4F85C7929B28E9400561B57 /* Shield */; };
+		C12E4BB8288F21CE009C98A2 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B41F875526DFB4BC004AB7C3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4D8552D241BBAFA00ED61FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4D85577241BC25000ED61FF;
+			remoteInfo = RocheSoloKitUI;
+		};
+		B4D85541241BBAFA00ED61FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4D8552D241BBAFA00ED61FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4D85535241BBAFA00ED61FF;
+			remoteInfo = RocheSoloKit;
+		};
+		B4D85582241BC25000ED61FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4D8552D241BBAFA00ED61FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4D85577241BC25000ED61FF;
+			remoteInfo = RocheSoloKitUI;
+		};
+		B4D85591241BC26A00ED61FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4D8552D241BBAFA00ED61FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4D85535241BBAFA00ED61FF;
+			remoteInfo = RocheSoloKit;
+		};
+		B4D855A7241BC6D900ED61FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4D8552D241BBAFA00ED61FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4D85577241BC25000ED61FF;
+			remoteInfo = RocheSoloKitUI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B46AD71429C0F8E700A04C78 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B46AD71A29C0F8EB00A04C78 /* InsulinDeliveryLoopKitUI.framework in Embed Frameworks */,
+				B46AD71829C0F8EA00A04C78 /* InsulinDeliveryLoopKit.framework in Embed Frameworks */,
+				B46AD71329C0F8E600A04C78 /* LoopKit.framework in Embed Frameworks */,
+				B46AD71629C0F8E900A04C78 /* LoopKitUI.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4FAD21826D92749007608FA /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B46AD70F29C0F8E000A04C78 /* InsulinDeliveryLoopKit.framework in Embed Frameworks */,
+				B46AD71129C0F8E200A04C78 /* InsulinDeliveryLoopKitUI.framework in Embed Frameworks */,
+				B46AD70B29C0F8DC00A04C78 /* LoopKit.framework in Embed Frameworks */,
+				B46AD70D29C0F8DD00A04C78 /* LoopKitUI.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1D39A3D927C332C00094A774 /* Date+DaysLater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+DaysLater.swift"; sourceTree = "<group>"; };
+		1D6511EB28242B1900B33A8E /* PumpStatusHighlights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHighlights.swift; sourceTree = "<group>"; };
+		1D6E1C6028131A1C00256AA3 /* DateComponentsFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateComponentsFormatter.swift; sourceTree = "<group>"; };
+		1DAE26D9280F44D600E260B1 /* InsulinStatusViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinStatusViewModelTests.swift; sourceTree = "<group>"; };
+		1DAE26DB280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpManagerStatePublisher.swift; sourceTree = "<group>"; };
+		1DB0D90127EE45BF00FD4E33 /* ReservoirHUDViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirHUDViewModel.swift; sourceTree = "<group>"; };
+		1DB0D90327EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirHUDViewModelTests.swift; sourceTree = "<group>"; };
+		1DC28A0727B5C5A9007E4B88 /* LowReservoirAnnunciation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowReservoirAnnunciation.swift; sourceTree = "<group>"; };
+		1DC475E627BD722D0041506D /* InsulinDeliveryPumpManagerState+ReminderSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinDeliveryPumpManagerState+ReminderSettingsState.swift"; sourceTree = "<group>"; };
+		1DC475E827BD72830041506D /* NotificationSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSetting.swift; sourceTree = "<group>"; };
+		1DCEDA3428066D4600ADEE1E /* ExpirationProgressViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationProgressViewModelTests.swift; sourceTree = "<group>"; };
+		1DE5AA4E27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenVirtualPumpSettingsOnLongPressGesture.swift; sourceTree = "<group>"; };
+		7EF0681E29A5408500AF2948 /* MockInsulinDeliveryPumpManager+Scenarios.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MockInsulinDeliveryPumpManager+Scenarios.swift"; sourceTree = "<group>"; };
+		84CCDB9E2B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "01_Tidepool_Warning_Mn_+6dB.wav"; sourceTree = "<group>"; };
+		84CCDB9F2B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "02_Tidepool_Maintenance_Mn_+3dB.wav"; sourceTree = "<group>"; };
+		84CCDBA02B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "03_Tidepool_Error_Mn_+3dB.wav"; sourceTree = "<group>"; };
+		B40B49EA24239AFF00638D38 /* WorkflowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowViewModel.swift; sourceTree = "<group>"; };
+		B40B49F32423B25500638D38 /* InsulinDeliveryServicesConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryServicesConfiguration.swift; sourceTree = "<group>"; };
+		B40B4A032423C97400638D38 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B40E3022299FEC11004EE521 /* wildcard-certificate.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = "wildcard-certificate.der"; sourceTree = "<group>"; };
+		B41F872D26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin.loopplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MockInsulinDeliveryPumpPlugin.loopplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		B41F873026DFB430004AB7C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B41F874826DFB4A1004AB7C3 /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B41F874926DFB4A1004AB7C3 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B41F875726DFB5CC004AB7C3 /* MockInsulinDeliveryPumpPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpPlugin.swift; sourceTree = "<group>"; };
+		B41F875926DFB5F8004AB7C3 /* MockInsulinDeliveryPumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpManager.swift; sourceTree = "<group>"; };
+		B41F876326E11464004AB7C3 /* VirtualInsulinDeliveryPump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualInsulinDeliveryPump.swift; sourceTree = "<group>"; };
+		B421217B24F01A6200E9D5D7 /* InsulinDeliveryHUDProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHUDProvider.swift; sourceTree = "<group>"; };
+		B421217E24F01F5A00E9D5D7 /* ReservoirView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirView.swift; sourceTree = "<group>"; };
+		B421218024F01FA600E9D5D7 /* NibLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
+		B421218224F022BC00E9D5D7 /* ReservoirView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ReservoirView.xib; sourceTree = "<group>"; };
+		B421218424F024A100E9D5D7 /* HUDAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = HUDAssets.xcassets; sourceTree = "<group>"; };
+		B4340B4027F35DA7009B1149 /* PendingInsulinDeliveryCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingInsulinDeliveryCommand.swift; sourceTree = "<group>"; };
+		B43C47D9246AFE9000E36AB5 /* AlertSound.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertSound.swift; sourceTree = "<group>"; };
+		B43C47DB246AFEA100E36AB5 /* Alert+Annunciation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alert+Annunciation.swift"; sourceTree = "<group>"; };
+		B43C47F2246C2B4500E36AB5 /* InsulinDeliveryPumpManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerTests.swift; sourceTree = "<group>"; };
+		B43C47F4246C2E4C00E36AB5 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
+		B43E0632241C0EF6008FB913 /* InsulinDeliveryPumpManagerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerError.swift; sourceTree = "<group>"; };
+		B44866902D943352003C701B /* InsulinDeliveryPump+Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinDeliveryPump+Security.swift"; sourceTree = "<group>"; };
+		B45D2F7A2DC3B05900EFCCE4 /* Annunciation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Annunciation.swift; sourceTree = "<group>"; };
+		B45D2F7C2DC3BE5100EFCCE4 /* AnnunciationType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnunciationType.swift; sourceTree = "<group>"; };
+		B45D2F7E2DC3DE5E00EFCCE4 /* PumpExpiresSoonAnnunciation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpExpiresSoonAnnunciation.swift; sourceTree = "<group>"; };
+		B45D2F802DC3E93E00EFCCE4 /* ExpirationProgressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationProgressViewModel.swift; sourceTree = "<group>"; };
+		B45D2F822DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinStatusViewModel.swift; sourceTree = "<group>"; };
+		B45D2F852DC3F68C00EFCCE4 /* EnvironmentValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentValues.swift; sourceTree = "<group>"; };
+		B45D2F872DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkLocalizedText.swift; sourceTree = "<group>"; };
+		B45D2F892DC3F9E800EFCCE4 /* RoundedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedCard.swift; sourceTree = "<group>"; };
+		B45D2F8B2DC3FA0200EFCCE4 /* FixedHeightText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixedHeightText.swift; sourceTree = "<group>"; };
+		B45D2F8D2DC3FA4800EFCCE4 /* MockPumpSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPumpSettingsViewModel.swift; sourceTree = "<group>"; };
+		B45D2F8F2DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleSelectionCheckListView.swift; sourceTree = "<group>"; };
+		B45D2F912DC3FBED00EFCCE4 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
+		B45D2F932DC4A02600EFCCE4 /* PumpExpirationProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpExpirationProgressView.swift; sourceTree = "<group>"; };
+		B45D2F952DC4A05F00EFCCE4 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		B45D2F972DC4A14F00EFCCE4 /* CancelWorkflowWarningButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancelWorkflowWarningButton.swift; sourceTree = "<group>"; };
+		B45D2F992DC4A19100EFCCE4 /* ContentPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentPreview.swift; sourceTree = "<group>"; };
+		B45D2F9B2DC4A1A900EFCCE4 /* DeviceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailsView.swift; sourceTree = "<group>"; };
+		B45D2F9D2DC4A1E200EFCCE4 /* InsulinStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinStatusView.swift; sourceTree = "<group>"; };
+		B45D2F9F2DC4A1FB00EFCCE4 /* MockPumpSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPumpSettingsView.swift; sourceTree = "<group>"; };
+		B45D2FA12DC4A21100EFCCE4 /* PumpExpiryWarningEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpExpiryWarningEditView.swift; sourceTree = "<group>"; };
+		B45D2FA32DC4A22100EFCCE4 /* LowReservoirWarningEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowReservoirWarningEditView.swift; sourceTree = "<group>"; };
+		B45D2FA52DC4A23700EFCCE4 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		B45D2FA72DC4A24A00EFCCE4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B45D2FA92DC4A26D00EFCCE4 /* AttachPumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachPumpView.swift; sourceTree = "<group>"; };
+		B45D2FAB2DC4A28500EFCCE4 /* ConnectToPumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectToPumpView.swift; sourceTree = "<group>"; };
+		B45D2FAD2DC4A29A00EFCCE4 /* PrimePumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimePumpView.swift; sourceTree = "<group>"; };
+		B45D2FAF2DC4A2CD00EFCCE4 /* SelectPumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectPumpView.swift; sourceTree = "<group>"; };
+		B45D2FB12DC4A2FA00EFCCE4 /* MutuallyExclusive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutuallyExclusive.swift; sourceTree = "<group>"; };
+		B45D2FB32DC4A30D00EFCCE4 /* SelectableDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableDevice.swift; sourceTree = "<group>"; };
+		B45D2FB52DC4A4AD00EFCCE4 /* DateRangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeView.swift; sourceTree = "<group>"; };
+		B45D2FB72DC4A67E00EFCCE4 /* ReservoirIssueWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirIssueWarningView.swift; sourceTree = "<group>"; };
+		B45D2FB92DC4A6A200EFCCE4 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		B45D2FBB2DC4A6B700EFCCE4 /* PumpDisconnectedErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpDisconnectedErrorView.swift; sourceTree = "<group>"; };
+		B45D2FBD2DC4AB3200EFCCE4 /* FloatingPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPoint.swift; sourceTree = "<group>"; };
+		B45D2FBF2DC4ABD400EFCCE4 /* ImageAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageAlert.swift; sourceTree = "<group>"; };
+		B45D2FC12DC4AD4600EFCCE4 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		B45D2FC32DC4ADE300EFCCE4 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		B45D2FC52DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdditionalDescriptionView.swift; sourceTree = "<group>"; };
+		B45D2FC72DC4AF5500EFCCE4 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
+		B45D2FC92DC4B2D900EFCCE4 /* InsulinDeliveryLoopKitPlugin-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "InsulinDeliveryLoopKitPlugin-Bridging-Header.h"; sourceTree = "<group>"; };
+		B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockKeychainManager.swift; sourceTree = "<group>"; };
+		B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityManagerTestingDelegate.swift; sourceTree = "<group>"; };
+		B46322B7243E2D6F0087BC0C /* InsulinDeliveryPump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPump.swift; sourceTree = "<group>"; };
+		B46322C3243F704D0087BC0C /* HorizontalSizeClassOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalSizeClassOverride.swift; sourceTree = "<group>"; };
+		B4733F5824586588001D691A /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
+		B4733F5C24586E2D001D691A /* IdentifiableClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
+		B4733F6024587FFE001D691A /* IDSViewCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IDSViewCoordinator.swift; sourceTree = "<group>"; };
+		B4733F762459D39D001D691A /* MockNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNavigator.swift; sourceTree = "<group>"; };
+		B4733F86245B3EFD001D691A /* IDSViewCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSViewCoordinatorTests.swift; sourceTree = "<group>"; };
+		B48051F224803E2C00C5EA7F /* InsulinDeliveryDoseProgressTimerEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryDoseProgressTimerEstimator.swift; sourceTree = "<group>"; };
+		B48051F424813CAB00C5EA7F /* UnfinalizedDose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfinalizedDose.swift; sourceTree = "<group>"; };
+		B48051F624813CD200C5EA7F /* UnfinalizedDoseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfinalizedDoseTests.swift; sourceTree = "<group>"; };
+		B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerStateTests.swift; sourceTree = "<group>"; };
+		B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpSettingsViewModelTests.swift; sourceTree = "<group>"; };
+		B499737A26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpCommError.swift; sourceTree = "<group>"; };
+		B499737C26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInsulinDeliveryPumpStatus.swift; sourceTree = "<group>"; };
+		B49B9A7E27302D910051F2C8 /* BolusDeliveryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusDeliveryStatus.swift; sourceTree = "<group>"; };
+		B4A2ABE32AA9EFAE007E3EC1 /* TidepoolSecurity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TidepoolSecurity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpKeyEntryManualView.swift; sourceTree = "<group>"; };
+		B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetReservoirFillValueView.swift; sourceTree = "<group>"; };
+		B4B281C4269E16F7001E7B39 /* CryptoSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CryptoSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4B281C8269E16FE001E7B39 /* CryptoSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CryptoSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4BCD24E24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulindDeliveryPumpWorkflowHelper.swift; sourceTree = "<group>"; };
+		B4BCD25124EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinDeliveryPumpManager+WorkflowHelper.swift"; sourceTree = "<group>"; };
+		B4BCD25624EC126100315CA6 /* GeneralAnnunication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralAnnunication.swift; sourceTree = "<group>"; };
+		B4C735252E322F5800DBABC5 /* TestInsulinDeliveryPump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestInsulinDeliveryPump.swift; sourceTree = "<group>"; };
+		B4C8F65B27C7D09F005AB2B1 /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4C8F65F27C7D0AA005AB2B1 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4CCC21C26FCA3B800380435 /* PumpConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpConfiguration.swift; sourceTree = "<group>"; };
+		B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = InsulinDeliveryLoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D85539241BBAFA00ED61FF /* InsulinDeliveryLoopKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InsulinDeliveryLoopKit.h; sourceTree = "<group>"; };
+		B4D8553A241BBAFA00ED61FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D8553F241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinDeliveryLoopKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D85546241BBAFA00ED61FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D85550241BBB9400ED61FF /* InsulinDeliveryPumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManager.swift; sourceTree = "<group>"; };
+		B4D8555F241BC20900ED61FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = InsulinDeliveryLoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D8557A241BC25000ED61FF /* InsulinDeliveryLoopKitUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InsulinDeliveryLoopKitUI.h; sourceTree = "<group>"; };
+		B4D8557B241BC25000ED61FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D85580241BC25000ED61FF /* InsulinDeliveryLoopKitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinDeliveryLoopKitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D85585241BC25000ED61FF /* WorkflowViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowViewModelTests.swift; sourceTree = "<group>"; };
+		B4D85587241BC25000ED61FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D85599241BC31800ED61FF /* InsulinDeliveryPumpManager+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinDeliveryPumpManager+UI.swift"; sourceTree = "<group>"; };
+		B4D8559F241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin.loopplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinDeliveryLoopKitPlugin.loopplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D855AA241BC72400ED61FF /* InsulinDeliveryLoopKitPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryLoopKitPlugin.swift; sourceTree = "<group>"; };
+		B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
+		B4D855B8241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryPumpManagerState.swift; sourceTree = "<group>"; };
+		B4DE114D24645B2D009F0430 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplacePumpView.swift; sourceTree = "<group>"; };
+		B4FC572D2474828D0057413E /* PumpSetupState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpSetupState.swift; sourceTree = "<group>"; };
+		B4FF9ABC24375A4D009608ED /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4FF9ABF24375A52009608ED /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B41F872A26DFB430004AB7C3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B46AD71929C0F8EB00A04C78 /* InsulinDeliveryLoopKitUI.framework in Frameworks */,
+				B46AD71729C0F8EA00A04C78 /* InsulinDeliveryLoopKit.framework in Frameworks */,
+				B46AD71229C0F8E600A04C78 /* LoopKit.framework in Frameworks */,
+				B46AD71529C0F8E900A04C78 /* LoopKitUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85533241BBAFA00ED61FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B440ADA424622129007FB71B /* LoopKit.framework in Frameworks */,
+				C12E4BB8288F21CE009C98A2 /* LoopKitUI.framework in Frameworks */,
+				B4F85C7A29B28E9400561B57 /* Shield in Frameworks */,
+				B45DB7F82D8CA3B800347D81 /* InsulinDeliveryServiceKit in Frameworks */,
+				B4A2ABE42AA9EFAE007E3EC1 /* TidepoolSecurity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8553C241BBAFA00ED61FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D85540241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85575241BC25000ED61FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D8558F241BC26A00ED61FF /* InsulinDeliveryLoopKit.framework in Frameworks */,
+				B440ADA124622119007FB71B /* LoopKit.framework in Frameworks */,
+				B440AD9F2462210C007FB71B /* LoopKitUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8557D241BC25000ED61FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D85581241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8559C241BC53400ED61FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B46AD70C29C0F8DD00A04C78 /* LoopKitUI.framework in Frameworks */,
+				B46AD70A29C0F8DC00A04C78 /* LoopKit.framework in Frameworks */,
+				B46AD71029C0F8E200A04C78 /* InsulinDeliveryLoopKitUI.framework in Frameworks */,
+				B46AD70E29C0F8E000A04C78 /* InsulinDeliveryLoopKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1DAE26D8280F446A00E260B1 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				1DCEDA3428066D4600ADEE1E /* ExpirationProgressViewModelTests.swift */,
+				1DAE26D9280F44D600E260B1 /* InsulinStatusViewModelTests.swift */,
+				1DAE26DB280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift */,
+				B49723CF2704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift */,
+				B4D85585241BC25000ED61FF /* WorkflowViewModelTests.swift */,
+				1DB0D90327EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift */,
+				B43C47F4246C2E4C00E36AB5 /* SettingsViewModelTests.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		1DCEDA2228060FB900ADEE1E /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				84CCDB9E2B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav */,
+				84CCDB9F2B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav */,
+				84CCDBA02B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
+		1DE5AA4D27DBD32D00199D92 /* Modifiers */ = {
+			isa = PBXGroup;
+			children = (
+				1DE5AA4E27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift */,
+			);
+			name = Modifiers;
+			path = View/Modifiers;
+			sourceTree = "<group>";
+		};
+		7E643F7E29CB9FAA0053AD36 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				7EF0681E29A5408500AF2948 /* MockInsulinDeliveryPumpManager+Scenarios.swift */,
+				B41F875926DFB5F8004AB7C3 /* MockInsulinDeliveryPumpManager.swift */,
+			);
+			path = Mock;
+			sourceTree = "<group>";
+		};
+		B40B498F241C211800638D38 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				B49723C627048581009F659C /* DesignElement */,
+				B49723CC2704987B009F659C /* Preview */,
+				B4E318B9270B5350003B0EEB /* Settings */,
+				B45D2FA72DC4A24A00EFCCE4 /* SettingsView.swift */,
+				B46322C5243F71040087BC0C /* Setup */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		B40B49C52422D85C00638D38 /* InsulinDeliveryPumpComms */ = {
+			isa = PBXGroup;
+			children = (
+				B40E3021299FEBED004EE521 /* certificate */,
+				B41F876526E1146A004AB7C3 /* MockPump */,
+				B40B49F32423B25500638D38 /* InsulinDeliveryServicesConfiguration.swift */,
+				B46322B7243E2D6F0087BC0C /* InsulinDeliveryPump.swift */,
+				B44866902D943352003C701B /* InsulinDeliveryPump+Security.swift */,
+				B499737A26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift */,
+			);
+			path = InsulinDeliveryPumpComms;
+			sourceTree = "<group>";
+		};
+		B40B49EC24239BBC00638D38 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2F802DC3E93E00EFCCE4 /* ExpirationProgressViewModel.swift */,
+				B45D2F822DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift */,
+				B45D2F8D2DC3FA4800EFCCE4 /* MockPumpSettingsViewModel.swift */,
+				1DB0D90127EE45BF00FD4E33 /* ReservoirHUDViewModel.swift */,
+				B4DE114D24645B2D009F0430 /* SettingsViewModel.swift */,
+				B40B49EA24239AFF00638D38 /* WorkflowViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B40E3021299FEBED004EE521 /* certificate */ = {
+			isa = PBXGroup;
+			children = (
+				B40E3022299FEC11004EE521 /* wildcard-certificate.der */,
+			);
+			path = certificate;
+			sourceTree = "<group>";
+		};
+		B41F872E26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				B41F873026DFB430004AB7C3 /* Info.plist */,
+				B41F875726DFB5CC004AB7C3 /* MockInsulinDeliveryPumpPlugin.swift */,
+			);
+			path = MockInsulinDeliveryPumpPlugin;
+			sourceTree = "<group>";
+		};
+		B41F876526E1146A004AB7C3 /* MockPump */ = {
+			isa = PBXGroup;
+			children = (
+				B41F876326E11464004AB7C3 /* VirtualInsulinDeliveryPump.swift */,
+				B499737C26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift */,
+			);
+			path = MockPump;
+			sourceTree = "<group>";
+		};
+		B421217D24F01F2F00E9D5D7 /* UIViews */ = {
+			isa = PBXGroup;
+			children = (
+				B421217E24F01F5A00E9D5D7 /* ReservoirView.swift */,
+				B421218224F022BC00E9D5D7 /* ReservoirView.xib */,
+				B421218424F024A100E9D5D7 /* HUDAssets.xcassets */,
+			);
+			path = UIViews;
+			sourceTree = "<group>";
+		};
+		B45D2F842DC3F67A00EFCCE4 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2F952DC4A05F00EFCCE4 /* Color.swift */,
+				B45D2F852DC3F68C00EFCCE4 /* EnvironmentValues.swift */,
+				B45D2FBD2DC4AB3200EFCCE4 /* FloatingPoint.swift */,
+				B45D2F912DC3FBED00EFCCE4 /* Image.swift */,
+				B45D2FC12DC4AD4600EFCCE4 /* UIImage.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		B4625D2B2E380EA10063CBCD /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				B4625D2C2E380EA60063CBCD /* MockKeychainManager.swift */,
+				B4625D2E2E380F470063CBCD /* SecurityManagerTestingDelegate.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		B46322BF243E3CEE0087BC0C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				B49B9A7E27302D910051F2C8 /* BolusDeliveryStatus.swift */,
+				B4BCD25624EC126100315CA6 /* GeneralAnnunication.swift */,
+				1DC28A0727B5C5A9007E4B88 /* LowReservoirAnnunciation.swift */,
+				B4340B4027F35DA7009B1149 /* PendingInsulinDeliveryCommand.swift */,
+				B45D2F7E2DC3DE5E00EFCCE4 /* PumpExpiresSoonAnnunciation.swift */,
+				B4FC572D2474828D0057413E /* PumpSetupState.swift */,
+				1D6511EB28242B1900B33A8E /* PumpStatusHighlights.swift */,
+				B4CCC21C26FCA3B800380435 /* PumpConfiguration.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		B46322C2243F70340087BC0C /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				B46322C3243F704D0087BC0C /* HorizontalSizeClassOverride.swift */,
+				B4733F5824586588001D691A /* SettingsProvider.swift */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
+		B46322C5243F71040087BC0C /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				1DE5AA4D27DBD32D00199D92 /* Modifiers */,
+				B45D2FA92DC4A26D00EFCCE4 /* AttachPumpView.swift */,
+				B45D2FAB2DC4A28500EFCCE4 /* ConnectToPumpView.swift */,
+				B45D2FAD2DC4A29A00EFCCE4 /* PrimePumpView.swift */,
+				B4A5A2252E43E05900B9D83F /* PumpKeyEntryManualView.swift */,
+				B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */,
+				B45D2FAF2DC4A2CD00EFCCE4 /* SelectPumpView.swift */,
+				B4A5A2272E461AFF00B9D83F /* SetReservoirFillValueView.swift */,
+			);
+			name = Setup;
+			sourceTree = "<group>";
+		};
+		B4733F5E24587FFE001D691A /* ViewCoordinator */ = {
+			isa = PBXGroup;
+			children = (
+				B4733F6024587FFE001D691A /* IDSViewCoordinator.swift */,
+			);
+			path = ViewCoordinator;
+			sourceTree = "<group>";
+		};
+		B4733F752459D38B001D691A /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				B4733F762459D39D001D691A /* MockNavigator.swift */,
+			);
+			path = Mock;
+			sourceTree = "<group>";
+		};
+		B49723C127038F07009F659C /* NotificationSettings */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2FA12DC4A21100EFCCE4 /* PumpExpiryWarningEditView.swift */,
+				B45D2FA32DC4A22100EFCCE4 /* LowReservoirWarningEditView.swift */,
+				B45D2FA52DC4A23700EFCCE4 /* NotificationSettingsView.swift */,
+			);
+			name = NotificationSettings;
+			sourceTree = "<group>";
+		};
+		B49723C627048581009F659C /* DesignElement */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2FC52DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift */,
+				B45D2FC72DC4AF5500EFCCE4 /* BackButton.swift */,
+				B45D2F972DC4A14F00EFCCE4 /* CancelWorkflowWarningButton.swift */,
+				B45D2FB52DC4A4AD00EFCCE4 /* DateRangeView.swift */,
+				B45D2FB92DC4A6A200EFCCE4 /* ErrorView.swift */,
+				B45D2F8B2DC3FA0200EFCCE4 /* FixedHeightText.swift */,
+				B45D2F872DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift */,
+				B45D2FBF2DC4ABD400EFCCE4 /* ImageAlert.swift */,
+				B45D2FB12DC4A2FA00EFCCE4 /* MutuallyExclusive.swift */,
+				B45D2FB72DC4A67E00EFCCE4 /* ReservoirIssueWarningView.swift */,
+				B45D2F892DC3F9E800EFCCE4 /* RoundedCard.swift */,
+				B45D2FBB2DC4A6B700EFCCE4 /* PumpDisconnectedErrorView.swift */,
+				B45D2FB32DC4A30D00EFCCE4 /* SelectableDevice.swift */,
+				B45D2F8F2DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift */,
+				B45D2FC32DC4ADE300EFCCE4 /* TimeView.swift */,
+			);
+			name = DesignElement;
+			sourceTree = "<group>";
+		};
+		B49723CC2704987B009F659C /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2F992DC4A19100EFCCE4 /* ContentPreview.swift */,
+			);
+			name = Preview;
+			sourceTree = "<group>";
+		};
+		B4BCD24D24EAADB800315CA6 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				B4BCD24E24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
+		B4BCD25024EC08BB00315CA6 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2F7A2DC3B05900EFCCE4 /* Annunciation.swift */,
+				B45D2F7C2DC3BE5100EFCCE4 /* AnnunciationType.swift */,
+				B43C47DB246AFEA100E36AB5 /* Alert+Annunciation.swift */,
+				1D39A3D927C332C00094A774 /* Date+DaysLater.swift */,
+				1D6E1C6028131A1C00256AA3 /* DateComponentsFormatter.swift */,
+				B4BCD25124EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift */,
+				1DC475E627BD722D0041506D /* InsulinDeliveryPumpManagerState+ReminderSettingsState.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		B4D8552C241BBAFA00ED61FF = {
+			isa = PBXGroup;
+			children = (
+				B4D85538241BBAFA00ED61FF /* InsulinDeliveryLoopKit */,
+				B4D85543241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests */,
+				B4D85579241BC25000ED61FF /* InsulinDeliveryLoopKitUI */,
+				B4D85584241BC25000ED61FF /* InsulinDeliveryLoopKitUITests */,
+				B4D8555D241BC20900ED61FF /* InsulinDeliveryLoopKitPlugin */,
+				B41F872E26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */,
+				B4D85537241BBAFA00ED61FF /* Products */,
+				B4D85552241BBDC400ED61FF /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		B4D85537241BBAFA00ED61FF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */,
+				B4D8553F241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests.xctest */,
+				B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */,
+				B4D85580241BC25000ED61FF /* InsulinDeliveryLoopKitUITests.xctest */,
+				B4D8559F241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin.loopplugin */,
+				B41F872D26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin.loopplugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B4D85538241BBAFA00ED61FF /* InsulinDeliveryLoopKit */ = {
+			isa = PBXGroup;
+			children = (
+				B4D855B1241BE18C00ED61FF /* Common */,
+				B4BCD25024EC08BB00315CA6 /* Extension */,
+				7E643F7E29CB9FAA0053AD36 /* Mock */,
+				B46322BF243E3CEE0087BC0C /* Model */,
+				B4BCD24D24EAADB800315CA6 /* Protocol */,
+				B40B49C52422D85C00638D38 /* InsulinDeliveryPumpComms */,
+				1DCEDA2228060FB900ADEE1E /* Sounds */,
+				B4D85539241BBAFA00ED61FF /* InsulinDeliveryLoopKit.h */,
+				B4D8553A241BBAFA00ED61FF /* Info.plist */,
+				1DC475E827BD72830041506D /* NotificationSetting.swift */,
+				B4D85550241BBB9400ED61FF /* InsulinDeliveryPumpManager.swift */,
+				B4D855B8241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift */,
+				B43E0632241C0EF6008FB913 /* InsulinDeliveryPumpManagerError.swift */,
+				B48051F224803E2C00C5EA7F /* InsulinDeliveryDoseProgressTimerEstimator.swift */,
+				B48051F424813CAB00C5EA7F /* UnfinalizedDose.swift */,
+			);
+			path = InsulinDeliveryLoopKit;
+			sourceTree = "<group>";
+		};
+		B4D85543241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				B4625D2B2E380EA10063CBCD /* Mocks */,
+				B4D85546241BBAFA00ED61FF /* Info.plist */,
+				B43C47F2246C2B4500E36AB5 /* InsulinDeliveryPumpManagerTests.swift */,
+				B48051F824813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift */,
+				B4C735252E322F5800DBABC5 /* TestInsulinDeliveryPump.swift */,
+				B48051F624813CD200C5EA7F /* UnfinalizedDoseTests.swift */,
+			);
+			path = InsulinDeliveryLoopKitTests;
+			sourceTree = "<group>";
+		};
+		B4D85552241BBDC400ED61FF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B4A2ABE32AA9EFAE007E3EC1 /* TidepoolSecurity.framework */,
+				C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */,
+				B4C8F65F27C7D0AA005AB2B1 /* LoopKitUI.framework */,
+				B4C8F65B27C7D09F005AB2B1 /* LoopKit.framework */,
+				B41F874826DFB4A1004AB7C3 /* LoopKit.framework */,
+				B41F874926DFB4A1004AB7C3 /* LoopKitUI.framework */,
+				B4B281C8269E16FE001E7B39 /* CryptoSwift.framework */,
+				B4B281C4269E16F7001E7B39 /* CryptoSwift.framework */,
+				B4FF9ABF24375A52009608ED /* LoopKitUI.framework */,
+				B4FF9ABC24375A4D009608ED /* LoopKit.framework */,
+			);
+			path = Frameworks;
+			sourceTree = "<group>";
+		};
+		B4D8555D241BC20900ED61FF /* InsulinDeliveryLoopKitPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				B4D8555F241BC20900ED61FF /* Info.plist */,
+				B4D855AA241BC72400ED61FF /* InsulinDeliveryLoopKitPlugin.swift */,
+				B45D2FC92DC4B2D900EFCCE4 /* InsulinDeliveryLoopKitPlugin-Bridging-Header.h */,
+			);
+			path = InsulinDeliveryLoopKitPlugin;
+			sourceTree = "<group>";
+		};
+		B4D85579241BC25000ED61FF /* InsulinDeliveryLoopKitUI */ = {
+			isa = PBXGroup;
+			children = (
+				B40B4A032423C97400638D38 /* Assets.xcassets */,
+				B45D2F842DC3F67A00EFCCE4 /* Extension */,
+				B4733F752459D38B001D691A /* Mock */,
+				B46322C2243F70340087BC0C /* Protocol */,
+				B4733F5E24587FFE001D691A /* ViewCoordinator */,
+				B40B49EC24239BBC00638D38 /* ViewModel */,
+				B40B498F241C211800638D38 /* View */,
+				B421217D24F01F2F00E9D5D7 /* UIViews */,
+				B4D85598241BC2EB00ED61FF /* PumpManager */,
+				B4D8557A241BC25000ED61FF /* InsulinDeliveryLoopKitUI.h */,
+				B4D8557B241BC25000ED61FF /* Info.plist */,
+			);
+			path = InsulinDeliveryLoopKitUI;
+			sourceTree = "<group>";
+		};
+		B4D85584241BC25000ED61FF /* InsulinDeliveryLoopKitUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B4D85587241BC25000ED61FF /* Info.plist */,
+				B4733F86245B3EFD001D691A /* IDSViewCoordinatorTests.swift */,
+				1DAE26D8280F446A00E260B1 /* ViewModel */,
+			);
+			path = InsulinDeliveryLoopKitUITests;
+			sourceTree = "<group>";
+		};
+		B4D85598241BC2EB00ED61FF /* PumpManager */ = {
+			isa = PBXGroup;
+			children = (
+				B4D85599241BC31800ED61FF /* InsulinDeliveryPumpManager+UI.swift */,
+				B421217B24F01A6200E9D5D7 /* InsulinDeliveryHUDProvider.swift */,
+			);
+			path = PumpManager;
+			sourceTree = "<group>";
+		};
+		B4D855B1241BE18C00ED61FF /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				B43C47D9246AFE9000E36AB5 /* AlertSound.swift */,
+				B4733F5C24586E2D001D691A /* IdentifiableClass.swift */,
+				B4D855B6241BE5BC00ED61FF /* LocalizedString.swift */,
+				B421218024F01FA600E9D5D7 /* NibLoadable.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		B4E318B9270B5350003B0EEB /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				B45D2F932DC4A02600EFCCE4 /* PumpExpirationProgressView.swift */,
+				B45D2F9B2DC4A1A900EFCCE4 /* DeviceDetailsView.swift */,
+				B45D2F9D2DC4A1E200EFCCE4 /* InsulinStatusView.swift */,
+				B45D2F9F2DC4A1FB00EFCCE4 /* MockPumpSettingsView.swift */,
+				B49723C127038F07009F659C /* NotificationSettings */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		B41F872826DFB430004AB7C3 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85531241BBAFA00ED61FF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D85547241BBAFA00ED61FF /* InsulinDeliveryLoopKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85573241BC25000ED61FF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D85588241BC25000ED61FF /* InsulinDeliveryLoopKitUI.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		B41F872C26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B41F874226DFB430004AB7C3 /* Build configuration list for PBXNativeTarget "MockInsulinDeliveryPumpPlugin" */;
+			buildPhases = (
+				B41F872826DFB430004AB7C3 /* Headers */,
+				B41F872926DFB430004AB7C3 /* Sources */,
+				B41F872A26DFB430004AB7C3 /* Frameworks */,
+				B41F872B26DFB430004AB7C3 /* Resources */,
+				B46AD71429C0F8E700A04C78 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B41F875626DFB4BC004AB7C3 /* PBXTargetDependency */,
+			);
+			name = MockInsulinDeliveryPumpPlugin;
+			productName = MockSoloPlugin;
+			productReference = B41F872D26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin.loopplugin */;
+			productType = "com.apple.product-type.framework";
+		};
+		B4D85535241BBAFA00ED61FF /* InsulinDeliveryLoopKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4D8554A241BBAFA00ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKit" */;
+			buildPhases = (
+				B4D85531241BBAFA00ED61FF /* Headers */,
+				B4D85532241BBAFA00ED61FF /* Sources */,
+				B4D85533241BBAFA00ED61FF /* Frameworks */,
+				B4D85534241BBAFA00ED61FF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InsulinDeliveryLoopKit;
+			packageProductDependencies = (
+				B4F85C7929B28E9400561B57 /* Shield */,
+				B45DB7F72D8CA3B800347D81 /* InsulinDeliveryServiceKit */,
+			);
+			productName = RocheSoloKit;
+			productReference = B4D85536241BBAFA00ED61FF /* InsulinDeliveryLoopKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		B4D8553E241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4D8554D241BBAFA00ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitTests" */;
+			buildPhases = (
+				B4D8553B241BBAFA00ED61FF /* Sources */,
+				B4D8553C241BBAFA00ED61FF /* Frameworks */,
+				B4D8553D241BBAFA00ED61FF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4D85542241BBAFA00ED61FF /* PBXTargetDependency */,
+			);
+			name = InsulinDeliveryLoopKitTests;
+			productName = RocheSoloKitTests;
+			productReference = B4D8553F241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B4D85577241BC25000ED61FF /* InsulinDeliveryLoopKitUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4D85589241BC25000ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitUI" */;
+			buildPhases = (
+				B4D85573241BC25000ED61FF /* Headers */,
+				B4D85574241BC25000ED61FF /* Sources */,
+				B4D85575241BC25000ED61FF /* Frameworks */,
+				B4D85576241BC25000ED61FF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4D85592241BC26A00ED61FF /* PBXTargetDependency */,
+			);
+			name = InsulinDeliveryLoopKitUI;
+			productName = RocheSoloKitUI;
+			productReference = B4D85578241BC25000ED61FF /* InsulinDeliveryLoopKitUI.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		B4D8557F241BC25000ED61FF /* InsulinDeliveryLoopKitUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4D8558C241BC25000ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitUITests" */;
+			buildPhases = (
+				B4D8557C241BC25000ED61FF /* Sources */,
+				B4D8557D241BC25000ED61FF /* Frameworks */,
+				B4D8557E241BC25000ED61FF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4D85583241BC25000ED61FF /* PBXTargetDependency */,
+			);
+			name = InsulinDeliveryLoopKitUITests;
+			productName = RocheSoloKitUITests;
+			productReference = B4D85580241BC25000ED61FF /* InsulinDeliveryLoopKitUITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B4D8559E241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4D855A2241BC53400ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitPlugin" */;
+			buildPhases = (
+				B4D8559B241BC53400ED61FF /* Sources */,
+				B4D8559C241BC53400ED61FF /* Frameworks */,
+				B4D8559D241BC53400ED61FF /* Resources */,
+				B4FAD21826D92749007608FA /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4D855A8241BC6D900ED61FF /* PBXTargetDependency */,
+			);
+			name = InsulinDeliveryLoopKitPlugin;
+			productName = RocheSoloKitPlugin;
+			productReference = B4D8559F241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin.loopplugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B4D8552D241BBAFA00ED61FF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1130;
+				ORGANIZATIONNAME = "Tidepool Project";
+				TargetAttributes = {
+					B41F872C26DFB430004AB7C3 = {
+						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
+					};
+					B4D85535241BBAFA00ED61FF = {
+						CreatedOnToolsVersion = 11.3.1;
+						LastSwiftMigration = 1130;
+					};
+					B4D8553E241BBAFA00ED61FF = {
+						CreatedOnToolsVersion = 11.3.1;
+					};
+					B4D85577241BC25000ED61FF = {
+						CreatedOnToolsVersion = 11.3.1;
+						LastSwiftMigration = 1130;
+					};
+					B4D8557F241BC25000ED61FF = {
+						CreatedOnToolsVersion = 11.3.1;
+					};
+					B4D8559E241BC53400ED61FF = {
+						CreatedOnToolsVersion = 11.3.1;
+						LastSwiftMigration = 1130;
+					};
+				};
+			};
+			buildConfigurationList = B4D85530241BBAFA00ED61FF /* Build configuration list for PBXProject "InsulinDeliveryLoopKit" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B4D8552C241BBAFA00ED61FF;
+			packageReferences = (
+				B4F85C7829B28E9400561B57 /* XCRemoteSwiftPackageReference "shield" */,
+				845C74382B7D687700F71F90 /* XCRemoteSwiftPackageReference "LoopUITestingKit" */,
+				B45DB7F62D8CA3B800347D81 /* XCRemoteSwiftPackageReference "InsulinDeliveryServiceKit" */,
+			);
+			productRefGroup = B4D85537241BBAFA00ED61FF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B4D85535241BBAFA00ED61FF /* InsulinDeliveryLoopKit */,
+				B4D8553E241BBAFA00ED61FF /* InsulinDeliveryLoopKitTests */,
+				B4D85577241BC25000ED61FF /* InsulinDeliveryLoopKitUI */,
+				B4D8557F241BC25000ED61FF /* InsulinDeliveryLoopKitUITests */,
+				B4D8559E241BC53400ED61FF /* InsulinDeliveryLoopKitPlugin */,
+				B41F872C26DFB430004AB7C3 /* MockInsulinDeliveryPumpPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B41F872B26DFB430004AB7C3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85534241BBAFA00ED61FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B40E3023299FEC11004EE521 /* wildcard-certificate.der in Resources */,
+				84CCDBA32B0D48A600C120C3 /* 03_Tidepool_Error_Mn_+3dB.wav in Resources */,
+				84CCDBA22B0D48A600C120C3 /* 02_Tidepool_Maintenance_Mn_+3dB.wav in Resources */,
+				84CCDBA12B0D48A600C120C3 /* 01_Tidepool_Warning_Mn_+6dB.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8553D241BBAFA00ED61FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85576241BC25000ED61FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B421218324F022BD00E9D5D7 /* ReservoirView.xib in Resources */,
+				B40B4A042423C97400638D38 /* Assets.xcassets in Resources */,
+				B421218524F024A100E9D5D7 /* HUDAssets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8557E241BC25000ED61FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8559D241BC53400ED61FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B41F872926DFB430004AB7C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B41F875826DFB5CC004AB7C3 /* MockInsulinDeliveryPumpPlugin.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85532241BBAFA00ED61FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B46322B8243E2D6F0087BC0C /* InsulinDeliveryPump.swift in Sources */,
+				7E643F7F29CB9FCE0053AD36 /* MockInsulinDeliveryPumpManager.swift in Sources */,
+				B499737D26EFA2E300D1FBF8 /* MockInsulinDeliveryPumpStatus.swift in Sources */,
+				B4BCD24F24EAADE800315CA6 /* InsulindDeliveryPumpWorkflowHelper.swift in Sources */,
+				7E643F8129CBA03F0053AD36 /* MockInsulinDeliveryPumpManager+Scenarios.swift in Sources */,
+				1D6511EC28242B1900B33A8E /* PumpStatusHighlights.swift in Sources */,
+				1D39A3DA27C332C00094A774 /* Date+DaysLater.swift in Sources */,
+				B499737B26EF938100D1FBF8 /* InsulinDeliveryPumpCommError.swift in Sources */,
+				1DC28A0827B5C5A9007E4B88 /* LowReservoirAnnunciation.swift in Sources */,
+				B40B49F42423B25500638D38 /* InsulinDeliveryServicesConfiguration.swift in Sources */,
+				B43E0633241C0EF6008FB913 /* InsulinDeliveryPumpManagerError.swift in Sources */,
+				B4340B4127F35DA7009B1149 /* PendingInsulinDeliveryCommand.swift in Sources */,
+				B45D2F7F2DC3DE5E00EFCCE4 /* PumpExpiresSoonAnnunciation.swift in Sources */,
+				B45D2F7B2DC3B06700EFCCE4 /* Annunciation.swift in Sources */,
+				B4074816278F272400F9FFEB /* PumpSetupState.swift in Sources */,
+				B44866912D94335D003C701B /* InsulinDeliveryPump+Security.swift in Sources */,
+				B4BCD25224EC091600315CA6 /* InsulinDeliveryPumpManager+WorkflowHelper.swift in Sources */,
+				1D6E1C6228131BD200256AA3 /* DateComponentsFormatter.swift in Sources */,
+				1DC475E927BD72830041506D /* NotificationSetting.swift in Sources */,
+				B4D855B9241BE63900ED61FF /* InsulinDeliveryPumpManagerState.swift in Sources */,
+				B4BCD25724EC126100315CA6 /* GeneralAnnunication.swift in Sources */,
+				B4CCC21D26FCA3B800380435 /* PumpConfiguration.swift in Sources */,
+				B45D2F7D2DC3BE5500EFCCE4 /* AnnunciationType.swift in Sources */,
+				B43C47DA246AFE9000E36AB5 /* AlertSound.swift in Sources */,
+				B48051F524813CAB00C5EA7F /* UnfinalizedDose.swift in Sources */,
+				1DC475E727BD722D0041506D /* InsulinDeliveryPumpManagerState+ReminderSettingsState.swift in Sources */,
+				B48051F324803E2C00C5EA7F /* InsulinDeliveryDoseProgressTimerEstimator.swift in Sources */,
+				B49B9A7F27302D910051F2C8 /* BolusDeliveryStatus.swift in Sources */,
+				B41F876626E11551004AB7C3 /* VirtualInsulinDeliveryPump.swift in Sources */,
+				B4D85551241BBB9400ED61FF /* InsulinDeliveryPumpManager.swift in Sources */,
+				B43C47DC246AFEA100E36AB5 /* Alert+Annunciation.swift in Sources */,
+				B4D855B7241BE5BC00ED61FF /* LocalizedString.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8553B241BBAFA00ED61FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B48051F924813D2F00C5EA7F /* InsulinDeliveryPumpManagerStateTests.swift in Sources */,
+				B48051F724813CD200C5EA7F /* UnfinalizedDoseTests.swift in Sources */,
+				B4625D2D2E380EA60063CBCD /* MockKeychainManager.swift in Sources */,
+				B4625D2F2E380F470063CBCD /* SecurityManagerTestingDelegate.swift in Sources */,
+				B4C735262E322F5800DBABC5 /* TestInsulinDeliveryPump.swift in Sources */,
+				B43C47F3246C2B4600E36AB5 /* InsulinDeliveryPumpManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D85574241BC25000ED61FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4733F6224587FFE001D691A /* IDSViewCoordinator.swift in Sources */,
+				B45D2F812DC3E93E00EFCCE4 /* ExpirationProgressViewModel.swift in Sources */,
+				B4733F5924586588001D691A /* SettingsProvider.swift in Sources */,
+				B45D2FA82DC4A24A00EFCCE4 /* SettingsView.swift in Sources */,
+				B45D2FB62DC4A4AD00EFCCE4 /* DateRangeView.swift in Sources */,
+				B45D2F9E2DC4A1E200EFCCE4 /* InsulinStatusView.swift in Sources */,
+				B45D2FB02DC4A2CD00EFCCE4 /* SelectPumpView.swift in Sources */,
+				B421217C24F01A6200E9D5D7 /* InsulinDeliveryHUDProvider.swift in Sources */,
+				B45D2FC42DC4ADE300EFCCE4 /* TimeView.swift in Sources */,
+				B45D2FC22DC4AD4600EFCCE4 /* UIImage.swift in Sources */,
+				B421217F24F01F5A00E9D5D7 /* ReservoirView.swift in Sources */,
+				B4A5A2262E43E05900B9D83F /* PumpKeyEntryManualView.swift in Sources */,
+				B45D2F832DC3ED7A00EFCCE4 /* InsulinStatusViewModel.swift in Sources */,
+				B45D2F902DC3FAE800EFCCE4 /* SingleSelectionCheckListView.swift in Sources */,
+				B4A5A2282E461AFF00B9D83F /* SetReservoirFillValueView.swift in Sources */,
+				B40B49EB24239AFF00638D38 /* WorkflowViewModel.swift in Sources */,
+				B45D2FB42DC4A30D00EFCCE4 /* SelectableDevice.swift in Sources */,
+				B45D2F942DC4A02600EFCCE4 /* PumpExpirationProgressView.swift in Sources */,
+				B4D8559A241BC31800ED61FF /* InsulinDeliveryPumpManager+UI.swift in Sources */,
+				B45D2FA42DC4A22100EFCCE4 /* LowReservoirWarningEditView.swift in Sources */,
+				1DB0D90227EE45BF00FD4E33 /* ReservoirHUDViewModel.swift in Sources */,
+				B45D2FAA2DC4A26D00EFCCE4 /* AttachPumpView.swift in Sources */,
+				B45D2F9C2DC4A1A900EFCCE4 /* DeviceDetailsView.swift in Sources */,
+				B43E0635241C0FB5008FB913 /* LocalizedString.swift in Sources */,
+				1D6E1C6128131A1C00256AA3 /* DateComponentsFormatter.swift in Sources */,
+				B45D2FC82DC4AF5500EFCCE4 /* BackButton.swift in Sources */,
+				B45D2F9A2DC4A19100EFCCE4 /* ContentPreview.swift in Sources */,
+				B45D2F922DC3FBED00EFCCE4 /* Image.swift in Sources */,
+				B45D2FB82DC4A67E00EFCCE4 /* ReservoirIssueWarningView.swift in Sources */,
+				B45D2F8E2DC3FA4800EFCCE4 /* MockPumpSettingsViewModel.swift in Sources */,
+				B45D2FA22DC4A21100EFCCE4 /* PumpExpiryWarningEditView.swift in Sources */,
+				B45D2F982DC4A14F00EFCCE4 /* CancelWorkflowWarningButton.swift in Sources */,
+				B45D2FC02DC4ABD400EFCCE4 /* ImageAlert.swift in Sources */,
+				B45D2FC62DC4AE1A00EFCCE4 /* AdditionalDescriptionView.swift in Sources */,
+				B45D2FAC2DC4A28500EFCCE4 /* ConnectToPumpView.swift in Sources */,
+				1DE5AA4F27DBD35500199D92 /* OpenVirtualPumpSettingsOnLongPressGesture.swift in Sources */,
+				B45D2FBE2DC4AB3200EFCCE4 /* FloatingPoint.swift in Sources */,
+				B4E1BFB92E3D343C00D843ED /* ReplacePumpView.swift in Sources */,
+				B45D2F962DC4A05F00EFCCE4 /* Color.swift in Sources */,
+				B45D2F882DC3F9B900EFCCE4 /* FrameworkLocalizedText.swift in Sources */,
+				B45D2F8C2DC3FA0200EFCCE4 /* FixedHeightText.swift in Sources */,
+				B45D2FAE2DC4A29A00EFCCE4 /* PrimePumpView.swift in Sources */,
+				B45D2FA62DC4A23700EFCCE4 /* NotificationSettingsView.swift in Sources */,
+				B4DE114E24645B2D009F0430 /* SettingsViewModel.swift in Sources */,
+				B4733F5D24586E2D001D691A /* IdentifiableClass.swift in Sources */,
+				B421218124F01FA600E9D5D7 /* NibLoadable.swift in Sources */,
+				B46322C4243F704D0087BC0C /* HorizontalSizeClassOverride.swift in Sources */,
+				B45D2F8A2DC3F9E800EFCCE4 /* RoundedCard.swift in Sources */,
+				B45D2FB22DC4A2FA00EFCCE4 /* MutuallyExclusive.swift in Sources */,
+				B45D2FBC2DC4A6B700EFCCE4 /* PumpDisconnectedErrorView.swift in Sources */,
+				B45D2F862DC3F68C00EFCCE4 /* EnvironmentValues.swift in Sources */,
+				B4733F772459D39D001D691A /* MockNavigator.swift in Sources */,
+				B45D2FA02DC4A1FB00EFCCE4 /* MockPumpSettingsView.swift in Sources */,
+				B45D2FBA2DC4A6A200EFCCE4 /* ErrorView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8557C241BC25000ED61FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4625D332E390C600063CBCD /* TestInsulinDeliveryPump.swift in Sources */,
+				1DCEDA3528066D4600ADEE1E /* ExpirationProgressViewModelTests.swift in Sources */,
+				1DAE26DC280F46DE00E260B1 /* MockInsulinDeliveryPumpManagerStatePublisher.swift in Sources */,
+				1DAE26DA280F44D600E260B1 /* InsulinStatusViewModelTests.swift in Sources */,
+				B4D85586241BC25000ED61FF /* WorkflowViewModelTests.swift in Sources */,
+				B49723D02704D2FA009F659C /* MockInsulinDeliveryPumpSettingsViewModelTests.swift in Sources */,
+				1DB0D90427EE465D00FD4E33 /* ReservoirHUDViewModelTests.swift in Sources */,
+				B4625D302E38E48B0063CBCD /* MockKeychainManager.swift in Sources */,
+				B43C47F5246C2E4C00E36AB5 /* SettingsViewModelTests.swift in Sources */,
+				B4625D312E38E5040063CBCD /* SecurityManagerTestingDelegate.swift in Sources */,
+				B4733F87245B3EFD001D691A /* IDSViewCoordinatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4D8559B241BC53400ED61FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4D855AB241BC72400ED61FF /* InsulinDeliveryLoopKitPlugin.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B41F875626DFB4BC004AB7C3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4D85577241BC25000ED61FF /* InsulinDeliveryLoopKitUI */;
+			targetProxy = B41F875526DFB4BC004AB7C3 /* PBXContainerItemProxy */;
+		};
+		B4D85542241BBAFA00ED61FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4D85535241BBAFA00ED61FF /* InsulinDeliveryLoopKit */;
+			targetProxy = B4D85541241BBAFA00ED61FF /* PBXContainerItemProxy */;
+		};
+		B4D85583241BC25000ED61FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4D85577241BC25000ED61FF /* InsulinDeliveryLoopKitUI */;
+			targetProxy = B4D85582241BC25000ED61FF /* PBXContainerItemProxy */;
+		};
+		B4D85592241BC26A00ED61FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4D85535241BBAFA00ED61FF /* InsulinDeliveryLoopKit */;
+			targetProxy = B4D85591241BC26A00ED61FF /* PBXContainerItemProxy */;
+		};
+		B4D855A8241BC6D900ED61FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4D85577241BC25000ED61FF /* InsulinDeliveryLoopKitUI */;
+			targetProxy = B4D855A7241BC6D900ED61FF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B41F873E26DFB430004AB7C3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = MockInsulinDeliveryPumpPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_DYLIB_INSTALL_NAME = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.coastal.MockInsulinDeliveryPumpPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Debug;
+		};
+		B41F873F26DFB430004AB7C3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = MockInsulinDeliveryPumpPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_DYLIB_INSTALL_NAME = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.coastal.MockInsulinDeliveryPumpPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Release;
+		};
+		B4D85548241BBAFA00ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LOCALIZED_STRING_MACRO_NAMES = (
+					NSLocalizedString,
+					CFCopyLocalizedString,
+					LocalizedString,
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		B4D85549241BBAFA00ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LOCALIZED_STRING_MACRO_NAMES = (
+					NSLocalizedString,
+					CFCopyLocalizedString,
+					LocalizedString,
+				);
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		B4D8554B241BBAFA00ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B4D8554C241BBAFA00ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B4D8554E241BBAFA00ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B4D8554F241BBAFA00ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B4D8558A241BC25000ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUI/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B4D8558B241BC25000ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUI/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B4D8558D241BC25000ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B4D8558E241BC25000ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B4D855A3241BC53400ED61FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 75U4X84TEG;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "InsulinDeliveryLoopKitPlugin/InsulinDeliveryLoopKitPlugin-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Debug;
+		};
+		B4D855A4241BC53400ED61FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 75U4X84TEG;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "InsulinDeliveryLoopKitPlugin/InsulinDeliveryLoopKitPlugin-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Release;
+		};
+		B4E7CFAE2AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LOCALIZED_STRING_MACRO_NAMES = (
+					NSLocalizedString,
+					CFCopyLocalizedString,
+					LocalizedString,
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Testflight;
+		};
+		B4E7CFAF2AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Testflight;
+		};
+		B4E7CFB02AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Testflight;
+		};
+		B4E7CFB12AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUI/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Testflight;
+		};
+		B4E7CFB22AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Testflight;
+		};
+		B4E7CFB32AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 75U4X84TEG;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = InsulinDeliveryLoopKitPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.InsulinDeliveryLoopKitPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "InsulinDeliveryLoopKitPlugin/InsulinDeliveryLoopKitPlugin-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Testflight;
+		};
+		B4E7CFB42AD032A7009B4DF2 /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = MockInsulinDeliveryPumpPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_DYLIB_INSTALL_NAME = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tidepool.coastal.MockInsulinDeliveryPumpPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				WRAPPER_EXTENSION = loopplugin;
+			};
+			name = Testflight;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B41F874226DFB430004AB7C3 /* Build configuration list for PBXNativeTarget "MockInsulinDeliveryPumpPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B41F873E26DFB430004AB7C3 /* Debug */,
+				B4E7CFB42AD032A7009B4DF2 /* Testflight */,
+				B41F873F26DFB430004AB7C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D85530241BBAFA00ED61FF /* Build configuration list for PBXProject "InsulinDeliveryLoopKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D85548241BBAFA00ED61FF /* Debug */,
+				B4E7CFAE2AD032A7009B4DF2 /* Testflight */,
+				B4D85549241BBAFA00ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D8554A241BBAFA00ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D8554B241BBAFA00ED61FF /* Debug */,
+				B4E7CFAF2AD032A7009B4DF2 /* Testflight */,
+				B4D8554C241BBAFA00ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D8554D241BBAFA00ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D8554E241BBAFA00ED61FF /* Debug */,
+				B4E7CFB02AD032A7009B4DF2 /* Testflight */,
+				B4D8554F241BBAFA00ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D85589241BC25000ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D8558A241BC25000ED61FF /* Debug */,
+				B4E7CFB12AD032A7009B4DF2 /* Testflight */,
+				B4D8558B241BC25000ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D8558C241BC25000ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D8558D241BC25000ED61FF /* Debug */,
+				B4E7CFB22AD032A7009B4DF2 /* Testflight */,
+				B4D8558E241BC25000ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4D855A2241BC53400ED61FF /* Build configuration list for PBXNativeTarget "InsulinDeliveryLoopKitPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4D855A3241BC53400ED61FF /* Debug */,
+				B4E7CFB32AD032A7009B4DF2 /* Testflight */,
+				B4D855A4241BC53400ED61FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		845C74382B7D687700F71F90 /* XCRemoteSwiftPackageReference "LoopUITestingKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tidepool-org/LoopUITestingKit.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		B45DB7F62D8CA3B800347D81 /* XCRemoteSwiftPackageReference "InsulinDeliveryServiceKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:tidepool-org/InsulinDeliveryServiceKit.git";
+			requirement = {
+				branch = dev;
+				kind = branch;
+			};
+		};
+		B4F85C7829B28E9400561B57 /* XCRemoteSwiftPackageReference "shield" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/outfoxx/shield";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B45DB7F72D8CA3B800347D81 /* InsulinDeliveryServiceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B45DB7F62D8CA3B800347D81 /* XCRemoteSwiftPackageReference "InsulinDeliveryServiceKit" */;
+			productName = InsulinDeliveryServiceKit;
+		};
+		B4F85C7929B28E9400561B57 /* Shield */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B4F85C7829B28E9400561B57 /* XCRemoteSwiftPackageReference "shield" */;
+			productName = Shield;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B4D8552D241BBAFA00ED61FF /* Project object */;
+}

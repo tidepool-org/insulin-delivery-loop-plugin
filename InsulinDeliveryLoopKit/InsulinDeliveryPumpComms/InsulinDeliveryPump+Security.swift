@@ -1,0 +1,190 @@
+//
+//  InsulinDeliveryPump+Security.swift
+//  InsulinDeliveryLoopKit
+//
+//  Created by Nathaniel Hamming on 2025-03-26.
+//  Copyright © 2025 Tidepool Project. All rights reserved.
+//
+
+import UIKit
+import LoopKit
+import PotentASN1
+import ShieldOID
+import Shield
+import BluetoothCommonKit
+
+extension InsulinDeliveryPump {
+    var pumpKeyServiceIdentifier: String { "org.tidepool.InsulinDeliveryLoopKit.Key.Shared" }
+    
+    private var identifierKey: String { "org.tidepool.InsulinDeliveryLoopKit.Key" }
+    
+    private var identifierCertificate: String { "org.tidepool.InsulinDeliveryLoopKit.Certificate" }
+    
+    private var appTypeID: String { "1" }
+    
+    private var appInstanceID: String { UIDevice.current.identifierForVendor?.uuidString ?? "209648d4-4948-4aa2-9786-2fcadc0b2bad" }
+    
+    private var hardwareVersion: String { UIDevice.current.model }
+    
+    private var softwareVersion: String { UIDevice.current.systemVersion }
+        
+    private var certificateType: String { "CERTIFICATE" }
+    
+    private(set) var certificateKeyData: Data? {
+        get {
+            return securePersistentAuthentication().getAuthenticationData(for: identifierKey)
+        }
+        set {
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: identifierKey)
+        }
+    }
+    
+    private(set) var certificateData: Data? {
+        get {
+            return securePersistentAuthentication().getAuthenticationData(for: identifierCertificate)
+        }
+        set {
+            try? securePersistentAuthentication().setAuthenticationData(newValue, for: identifierCertificate)
+        }
+    }
+
+    func getCSRBase64(pumpSerialNumber: String, certificateNonceString: String) -> String? {
+        guard let csrBase64Encoded = try? createCSR(pumpSerialNumber: pumpSerialNumber, certificateNonceString: certificateNonceString)?.encoded().base64EncodedString() else { return nil }
+        return csrBase64Encoded
+    }
+    
+    func createCSR(pumpSerialNumber: String, certificateNonceString: String) -> CertificationRequest? {
+        securityManager.generateKeyPair()
+
+        guard let clientPrivateKey = securityManager.generatedPrivateKey,
+              let clientPublicKey = SecKeyCopyPublicKey(clientPrivateKey)
+        else { return nil }
+
+        let appKeyPair = SecKeyPair(privateKey: clientPrivateKey, publicKey: clientPublicKey)
+
+        let appCSRSubject = NameBuilder()
+            .add("Tidepool Project", forType: iso_itu.ds.attributeType.organizationName.oid)
+            .add("Tidepool Loop", forType: iso_itu.ds.attributeType.name.oid)
+            .add(appTypeID, forType: iso_itu.ds.attributeType.commonName.oid)
+            .add(appInstanceID, forType: iso_itu.ds.attributeType.serialNumber.oid)
+            .add(pumpSerialNumber, forType: iso_itu.ds.attributeType.givenName.oid)
+            .add(certificateNonceString, forType: iso_itu.ds.attributeType.pseudonym.oid)
+            .name
+
+        return try? CertificationRequest.Builder()
+            .subject(name: appCSRSubject)
+            .publicKey(keyPair: appKeyPair, usage: [.nonRepudiation, .digitalSignature, .keyAgreement])
+            .build(signingKey: appKeyPair.privateKey, digestAlgorithm: .sha256)
+    }
+    
+    func getCertificateData(pumpSerialNumber: String, certificateNonceString: String) async -> Data? {
+        // temporary: self-signed wildcard certificate
+        var certificateData = getWildcardCertificateData()
+        guard certificateData == nil else {
+            loadCertificateRequestKeyPair()
+            return certificateData
+        }
+        // ---------
+        
+        guard let tidepoolSecurity = pumpDelegate?.tidepoolSecurity else {
+            loggingDelegate?.logErrorEvent("tidepool security not available")
+            return nil
+        }
+        
+        guard let csr = getCSRBase64(pumpSerialNumber: pumpSerialNumber, certificateNonceString: certificateNonceString) else {
+            loggingDelegate?.logErrorEvent("Could not create CSR")
+            return nil
+        }
+        
+        do {
+            let partnerData = [
+                "pumpSerialNumber": pumpSerialNumber,
+                "csr": csr
+            ]
+            
+            let responseData = try await tidepoolSecurity.sendAppAssertion(partnerIdentifier: "Apex", partnerData: partnerData)
+            let assertionResponse = try JSONDecoder.tidepool.decode(AssertionResponse.self, from: responseData)
+
+            guard let certificateBase64Encoded = assertionResponse.data.certificates.first(where: { $0.type == certificateType })?.content else {
+                return nil
+            }
+            
+            certificateData = Data(base64Encoded: certificateBase64Encoded)
+            return certificateData
+        } catch let error {
+            loggingDelegate?.logErrorEvent("Error sending assertion \(error.localizedDescription.debugDescription)")
+            return nil
+        }
+    }
+
+    struct AssertionResponse: Codable {
+        let data: AssertionData
+    }
+    
+    struct AssertionData: Codable {
+        let certificates: [CertificateResponse]
+    }
+    
+    struct CertificateResponse: Codable {
+        let content: String
+        let ttlInDays: Int
+        let type: String
+    }
+}
+
+public protocol SecurePersistentAuthentication {
+    func setAuthenticationData(_ data: Data?, for keyService: String?) throws
+    func getAuthenticationData(for keyService: String?) -> Data?
+}
+
+extension KeychainManager: SecurePersistentAuthentication {
+    public func setAuthenticationData(_ data: Data?, for keyService: String?) throws {
+        if let keyService = keyService {
+            try replaceGenericPassword(data, forService: keyService)
+        }
+    }
+
+    public func getAuthenticationData(for keyService: String?) -> Data? {
+        guard let keyService = keyService else {
+            return nil
+        }
+        return try? getGenericPasswordForServiceAsData(keyService)
+    }
+}
+
+// MARK: - Self-signing Authentication [Temporary]
+
+extension InsulinDeliveryPump {
+    private func loadCertificateRequestKeyPair() {
+        let privateAttributes = [kSecAttrKeySizeInBits: 256,
+                                       kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
+                                      kSecAttrKeyClass: kSecAttrKeyClassPrivate,
+                                   kSecPrivateKeyAttrs: [kSecAttrIsPermanent: false]] as CFDictionary
+        
+        var error: Unmanaged<CFError>?
+        let certificatePublicKeyDataX = Data(hexadecimalString: "6f96c120fe5ae346ce6f95bca957949bcb1841c042f2979f48dd941ec84b9389")!
+        let certificatePublicKeyDataY = Data(hexadecimalString: "d28fd37d90797712477f9a015e5e8755a7ffac05140411101d019f9c21552138")!
+        let certificatePrivateKeyData = Data(hexadecimalString: "0920b8cb993a8ceda043afeb8a9f5f03981e6e02b7f9fd7fb43e2f3f88ae96f0")!
+        var certificateKeyData = certificatePublicKeyDataX
+        certificateKeyData.append(certificatePublicKeyDataY)
+        certificateKeyData.append(certificatePrivateKeyData)
+        certificateKeyData.insert(0x04, at: 0)
+        
+        let certificateKey = SecKeyCreateWithData(NSData(data: certificateKeyData) as CFData, privateAttributes, &error)
+        guard error == nil,
+              let certificateKey = certificateKey else
+        {
+            print("certificate key creation failed \(String(describing: error))")
+            return
+        }
+        securityManager.generatedPrivateKey = certificateKey
+    }
+    
+    private func getWildcardCertificateData() -> Data? {
+        guard let certificateURL = Bundle(for: InsulinDeliveryPump.self).url(forResource: "wildcard-certificate", withExtension: "der"),
+              let certificateData = try? Data(contentsOf: certificateURL)
+        else { return nil }
+        
+        return certificateData
+    }
+}
