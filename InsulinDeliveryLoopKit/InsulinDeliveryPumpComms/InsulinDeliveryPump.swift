@@ -14,12 +14,10 @@ import TidepoolSecurity
 import InsulinDeliveryServiceKit
 import BluetoothCommonKit
 
-// TODO remove
 public protocol InsulinDeliveryPumpDelegate: AnyObject, IDPumpDelegate {
     var tidepoolSecurity: TidepoolSecurity? { get }
 }
 
-// TODO remove
 public protocol InsulinDeliveryPumpComms: IDPumpComms {
     var pumpDelegate: InsulinDeliveryPumpDelegate? { get set }
     func configurePump(pumpConfiguration: PumpConfiguration,
@@ -139,9 +137,7 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
     }
 
     public func prepareForAuthentication() {
-        //TODO need to take steps to prepare for authentication (delete secrets)
         deleteStoredKey()
-//        deleteConstrainedCertificate()
     }
 
     public func unpairPump(completion: @escaping ProcedureResultCompletion) {
@@ -256,7 +252,6 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
                     self.getInsulinDeliveryFeatures { [weak self] result in
                         guard let self = self else { return }
                         self.state.features.update(with: [.supportedE2EProtection])
-                        print("!!! features = \(self.state.features)")
                         switch result {
                         case .success():
                             self.getInsulinDeliveryStatus() { [weak self] result in
@@ -266,10 +261,7 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
                                     if self.bolusManager.isBolusActive {
                                         self.getActiveBolusDeliveredDetails() { _ in }
                                     }
-                                    
-                                    // REMOVE: reconnected. make the pump beep as a sanity check
-                                    self.sendBeepRequest()
-                                    
+
                                     if self.state.setupCompleted {
                                         self.loggingDelegate?.logSendEvent("Setup is completed. Checking for status changes to sync.")
                                         // check remaining lifetime of the pump
@@ -307,7 +299,6 @@ public class InsulinDeliveryPump: InsulinDeliveryService, InsulinDeliveryPumpCom
         }
     }
 
-    //TODO duplicate from InsulinDeliveryServiceKit
     private func startAuthentication(with peripheralManager: PeripheralManager) {
         loggingDelegate?.logSendEvent("Preparing for pump authentication.")
         delegate?.pumpConnectionStatusChanged(self)

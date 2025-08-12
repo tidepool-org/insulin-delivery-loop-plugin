@@ -26,7 +26,7 @@ struct BackButton: View {
         }
     }
 
-    private var backTitle: String { LocalizedString("Back", comment: "Back navigation for dexcom plugin") }
+    private var backTitle: String { LocalizedString("Back", comment: "Back navigation for plugin") }
 }
 
 struct BackButton_Previews: PreviewProvider {

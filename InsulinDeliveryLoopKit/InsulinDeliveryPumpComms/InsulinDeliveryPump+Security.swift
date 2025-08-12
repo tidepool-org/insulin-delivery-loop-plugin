@@ -155,25 +155,6 @@ extension KeychainManager: SecurePersistentAuthentication {
 // MARK: - Self-signing Authentication [Temporary]
 
 extension InsulinDeliveryPump {
-    //    private func getCertificateAuthorityKeyPair() -> SecKey? {
-    //        let privateAttributes = [kSecAttrKeySizeInBits: 256,
-    //                                       kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
-    //                                      kSecAttrKeyClass: kSecAttrKeyClassPrivate,
-    //                                   kSecPrivateKeyAttrs: [kSecAttrIsPermanent: false]] as CFDictionary
-    //        
-    //        var error: Unmanaged<CFError>?
-    //        
-    //        let caPublicKeyDataX = Data(hexadecimalString: "3e4363f594e75b6595db283214abbe161d0b6a4cfe13d3ad8759ddd88239a834")!
-    //        let caPublicKeyDataY = Data(hexadecimalString: "9777c909d73e36c3dbd73204f22fcecd4585012b58d59aeb1ac1ab3a02e62103")!
-    //        let caPrivateKeyData = Data(hexadecimalString: "530681d1200a235d377f01d18777e20706fff42e8f08fd014a98f783357fa9b8")!
-    //        var caKeyData = caPublicKeyDataX
-    //        caKeyData.append(caPublicKeyDataY)
-    //        caKeyData.append(caPrivateKeyData)
-    //        caKeyData.insert(0x04, at: 0)
-    //        
-    //        return SecKeyCreateWithData(NSData(data: caKeyData) as CFData, privateAttributes, &error)
-    //    }
-    
     private func loadCertificateRequestKeyPair() {
         let privateAttributes = [kSecAttrKeySizeInBits: 256,
                                        kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,

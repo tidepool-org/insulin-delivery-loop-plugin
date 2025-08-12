@@ -55,9 +55,9 @@ struct AdditionalDescriptionView: View, HorizontalSizeClassOverride {
 
 struct AdditionalDescriptionView_Previews: PreviewProvider {
     static var previews: some View {
-        let title = "Delete/Swap/Replace CGM"
-        let boldedMessage = "This will disconnect from your existing CGM and delete all the CGM settings (for example, the alert configurations). In order to use a CGM, you will need to complete the setup process again."
-        let additionalDescription = "Only use this to switching between CGMs from different manufacturers. Do not use this to replace a CGM of the same manufacturer/model (replace a Dexcom G6 with another Dexcom G6). If you are looking to replace a CGM of the same manufacturer/model, go back to settings and tap on the Transmitter ID"
+        let title = "Delete/Swap/Replace Device"
+        let boldedMessage = "This will disconnect from your existing device and delete all the device settings (for example, the alert configurations). In order to use a device, you will need to complete the setup process again."
+        let additionalDescription = "Only use this to switching between devices from different manufacturers. Do not use this to replace a device of the same manufacturer/model. If you are looking to replace a device of the same manufacturer/model, go back to settings and tap on replace device"
         return NavigationView {
                 AdditionalDescriptionView(title: title,
                                           boldedMessage: boldedMessage,

@@ -122,6 +122,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
     }
 
     private func storeMilestoneProgress() {
+        // used this approach to store milestones to be restored.
         //pumpManager.updateReplacementWorkflowState(milestoneProgress: screenStack.map { $0.rawValue }, pumpSetupState: workflowViewModel?.pumpSetupState, selectedComponents: nil)
     }
 
