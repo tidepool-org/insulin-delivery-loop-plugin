@@ -61,12 +61,16 @@ class IDSViewCoordinatorTests: XCTestCase {
         XCTAssertNil(IDSScreen.attachPump.setupNext(workflowType: .replacement))
         XCTAssertEqual(IDSScreen.connectToPump.setupNext(workflowType: .replacement), .primeReservoir)
         XCTAssertEqual(IDSScreen.primeReservoir.setupNext(workflowType: .replacement), .attachPump)
-        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .replacement), .connectToPump)
+        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .replacement), .reservoirFill)
+        XCTAssertEqual(IDSScreen.reservoirFill.setupNext(workflowType: .replacement), .pumpKeyEntryManual)
+        XCTAssertEqual(IDSScreen.pumpKeyEntryManual.setupNext(workflowType: .replacement), .connectToPump)
         XCTAssertNil(IDSScreen.settings.setupNext(workflowType: .replacement))
     }
 
     func testIDSScreenSetupNextOnboardingWorkflow() throws {
-        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .onboarding), .connectToPump)
+        XCTAssertEqual(IDSScreen.selectPump.setupNext(workflowType: .onboarding), .reservoirFill)
+        XCTAssertEqual(IDSScreen.reservoirFill.setupNext(workflowType: .onboarding), .pumpKeyEntryManual)
+        XCTAssertEqual(IDSScreen.pumpKeyEntryManual.setupNext(workflowType: .onboarding), .connectToPump)
         XCTAssertEqual(IDSScreen.connectToPump.setupNext(workflowType: .onboarding), .primeReservoir)
         XCTAssertEqual(IDSScreen.primeReservoir.setupNext(workflowType: .onboarding), .attachPump)
         XCTAssertNil(IDSScreen.attachPump.setupNext(workflowType: .onboarding))
@@ -102,16 +106,24 @@ class IDSViewCoordinatorTests: XCTestCase {
         XCTAssertEqual(viewCoordinator.screenStack, [.selectPump])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
+        XCTAssertEqual(viewCoordinator.currentScreen, .reservoirFill)
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .reservoirFill])
+        
+        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
+        XCTAssertEqual(viewCoordinator.currentScreen, .pumpKeyEntryManual)
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .reservoirFill, .pumpKeyEntryManual])
+        
+        viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .connectToPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump])
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .reservoirFill, .pumpKeyEntryManual, .connectToPump])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .primeReservoir)
-        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump, .primeReservoir])
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .reservoirFill, .pumpKeyEntryManual, .connectToPump, .primeReservoir])
         
         viewCoordinator.navigateTo(try XCTUnwrap(viewCoordinator.currentScreen.setupNext(workflowType: .replacement)))
         XCTAssertEqual(viewCoordinator.currentScreen, .attachPump)
-        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .connectToPump, .primeReservoir, .attachPump])        
+        XCTAssertEqual(viewCoordinator.screenStack, [.selectPump, .reservoirFill, .pumpKeyEntryManual, .connectToPump, .primeReservoir, .attachPump])
     }
     
     func testPopToRoot() throws {

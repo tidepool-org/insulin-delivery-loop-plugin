@@ -157,11 +157,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         retractPumpExpirationReminderAlert()
         
         pumpDelegate.notify { delegate in
-            delegate?.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier) { [weak self] result in
-                switch result {
-                case .failure(let error):
-                    self?.log.error("Failed to retract outstanding alerts: %{public}@", error.localizedDescription)
-                case .success(let alerts):
+            guard let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier)
                     let alertsToRetract = alerts
                         .filter {
                             (try? $0.alert.annunciationType().isResolvedByPumpReplacement) ?? false
@@ -169,11 +168,12 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
                         .map {
                             $0.alert.identifier
                         }
-                    self?.log.debug("Retracting alerts: %{public}@", alertsToRetract.debugDescription)
-                    alertsToRetract
-                        .forEach {
-                            self?.retractAlert(identifier: $0)
-                        }
+                    self.log.debug("Retracting alerts: %{public}@", alertsToRetract.debugDescription)
+                    for alert in alertsToRetract {
+                        await self.retractAlert(identifier: alert)
+                    }
+                } catch {
+                    self.log.error("Failed to retract outstanding alerts: %{public}@", error.localizedDescription)
                 }
             }
         }
@@ -316,11 +316,15 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         let alert = Alert(with: annunciation, managerIdentifier: self.pluginIdentifier)
 
         if newValue <= threshold && oldValue > threshold {
-            issueAlert(alert)
+            Task {
+                await issueAlert(alert)
+            }
         }
 
         if newValue > oldValue + 1 {
-            retractAlert(identifier: alert.identifier)
+            Task {
+                await retractAlert(identifier: alert.identifier)
+            }
         }
 
     }
@@ -356,11 +360,15 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         let alert = Alert(with: annunciation, managerIdentifier: self.pluginIdentifier)
 
         if !wasAlerting && isAlerting {
-            issueAlert(alert)
+            Task {
+                await issueAlert(alert)
+            }
         }
 
         if wasAlerting && !isAlerting {
-            retractAlert(identifier: alert.identifier)
+            Task {
+                await retractAlert(identifier: alert.identifier)
+            }
         }
     }
 
@@ -473,15 +481,16 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     public func lookupLatestAnnunciation(_ completion: @escaping (AnnunciationType?) -> Void) {
         pumpDelegate.notify { delegate in
-            delegate?.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier) { [weak self] result in
-                switch result {
-                case .success(var alerts):
-                    self?.log.debug("Highest priority annunciation type: %{public}@, Latest unretracted alerts: %{public}@",
-                                   alerts.highestPriorityAnnunciationType().debugDescription,
-                                   alerts.map { ($0.alert.identifier.alertIdentifier, $0.issuedDate) }.debugDescription)
+            guard let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier)
+                    self.log.debug("Highest priority annunciation type: %{public}@, Latest unretracted alerts: %{public}@",
+                                    alerts.highestPriorityAnnunciationType().debugDescription,
+                                    alerts.map { ($0.alert.identifier.alertIdentifier, $0.issuedDate) }.debugDescription)
                     completion(alerts.highestPriorityAnnunciationType())
-                case .failure(let error):
-                    self?.log.error("Failed to build pump status highlight: %{public}@", error.localizedDescription)
+                } catch {
+                    self.log.error("Failed to build pump status highlight: %{public}@", error.localizedDescription)
                     completion(nil)
                 }
             }
@@ -1480,16 +1489,17 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     private func retractUnretractedAlerts(_ completion: @escaping () -> Void) {
         pumpDelegate.notify { delegate in
-            delegate?.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier) { [weak self] result in
-                switch result {
-                case .success(let alerts):
-                    self?.log.debug("Retracting alerts: %{public}@", alerts.map { ($0.alert.identifier.alertIdentifier, $0.issuedDate) }.debugDescription)
-                    alerts.forEach {
+            guard let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier)
+                    self.log.debug("Retracting alerts: %{public}@", alerts.map { ($0.alert.identifier.alertIdentifier, $0.issuedDate) }.debugDescription)
+                    for alert in alerts {
                         // Call delegate directly, because no need to update state
-                        delegate?.retractAlert(identifier: $0.alert.identifier)
+                        await delegate.retractAlert(identifier: alert.alert.identifier)
                     }
-                case .failure(let error):
-                    self?.log.error("Failed to retract unretracted alerts: %{public}@", error.localizedDescription)
+                } catch {
+                    self.log.error("Failed to retract unretracted alerts: %{public}@", error.localizedDescription)
                 }
                 completion()
             }
@@ -1963,21 +1973,23 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
                   !wasIssued
             else { return }
 
-            self.issueAlert(Alert(with: annunciation, managerIdentifier: self.pluginIdentifier))
+            Task {
+                await self.issueAlert(Alert(with: annunciation, managerIdentifier: self.pluginIdentifier))
+            }
             self.replacementWorkflowState.doesPumpNeedsReplacement = annunciation.type.doesPumpNeedsReplacement
         }
     }
 
     private func wasAnnunciationIssued(_ annunciation: Annunciation, completion: @escaping (Bool) -> Void) {
         pumpDelegate.notify { [weak self] delegate in
-            guard let self = self else { return }
-            delegate?.lookupAllUnacknowledgedUnretracted(managerIdentifier: self.pluginIdentifier) { [weak self] result in
-                switch result {
-                case .failure(let error):
-                    self?.log.error("Failed to determine if annunciation was already issued: %{public}@", error.localizedDescription)
-                    completion(false)
-                case .success(let alerts):
+            guard let self = self, let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnacknowledgedUnretracted(managerIdentifier: self.pluginIdentifier)
                     completion(alerts.contains(where: { $0.alert.identifier.alertIdentifier == annunciation.alertIdentifier }))
+                } catch {
+                    self.log.error("Failed to determine if annunciation was already issued: %{public}@", error.localizedDescription)
+                    completion(false)
                 }
             }
         }
@@ -1985,14 +1997,14 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
 
     private func wasAnnunciationReported(_ annunciation: Annunciation, completion: @escaping (Bool) -> Void) {
         pumpDelegate.notify() { [weak self] delegate in
-            guard let self = self else { return }
-            let identifier = Alert.Identifier(managerIdentifier: self.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier)
-            delegate?.doesIssuedAlertExist(identifier: identifier) { [weak self] result in
-                switch result {
-                case .success(let wasAnnunciationReported):
+            guard let self = self, let delegate else { return }
+            Task {
+                do {
+                    let identifier = Alert.Identifier(managerIdentifier: self.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier)
+                    let wasAnnunciationReported = try await delegate.doesIssuedAlertExist(identifier: identifier)
                     completion(wasAnnunciationReported)
-                case .failure(let error):
-                    self?.logDelegateEvent("Cannot determine if annunciation \(annunciation) already exists. Error: \(error)")
+                } catch {
+                    self.logDelegateEvent("Cannot determine if annunciation \(annunciation) already exists. Error: \(error)")
                     completion(false)
                 }
             }
@@ -2001,9 +2013,10 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
 
     private func getLatestActiveAlertForAnnunciationType(_ annunciationType: AnnunciationType, completion: @escaping (PersistedAlert?) -> Void) {
         pumpDelegate.notify() { delegate in
-            delegate?.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier) { [weak self] result in
-                switch result {
-                case .success(let alerts):
+            guard let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier)
                     completion(alerts
                         .sorted(by: { $0.issuedDate > $1.issuedDate } )
                         .filter {
@@ -2011,8 +2024,8 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
                             return activeAnnunciationType == annunciationType
                         }
                         .first)
-                case .failure(let error):
-                    self?.log.error("Failed to determine if an alert with matching annunciation type is still active: %{public}@", error.localizedDescription)
+                } catch {
+                    self.log.error("Failed to determine if an alert with matching annunciation type is still active: %{public}@", error.localizedDescription)
                     completion(nil)
                 }
             }
@@ -2021,12 +2034,13 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
 
     private func isAlertActive(_ alert: Alert, completion: @escaping (Bool) -> Void) {
         pumpDelegate.notify() { delegate in
-            delegate?.lookupAllUnretracted(managerIdentifier: alert.identifier.managerIdentifier) { [weak self] result in
-                switch result {
-                case .success(let alerts):
+            guard let delegate else { return }
+            Task {
+                do {
+                    let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: alert.identifier.managerIdentifier)
                     completion(alerts.contains(where: { $0.alert.identifier == alert.identifier }))
-                case .failure(let error):
-                    self?.log.error("Failed to determine if the alert is still active: %{public}@", error.localizedDescription)
+                } catch {
+                    self.log.error("Failed to determine if the alert is still active: %{public}@", error.localizedDescription)
                     completion(false)
                 }
             }
@@ -2036,9 +2050,11 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
     private func reportRetractedAnnunciation(_ annunciation: Annunciation, at date: Date = Date()) {
         logDelegateEvent("Reporting retracted annunciation \(annunciation)")
         pumpDelegate.notify() { [weak self] delegate in
-            guard let self = self else { return }
+            guard let self = self, let delegate else { return }
             let alert = Alert(with: annunciation, managerIdentifier: self.pluginIdentifier)
-            delegate?.recordRetractedAlert(alert, at: date)
+            Task { @MainActor in
+                try await delegate.recordRetractedAlert(alert, at: date)
+            }
         }
     }
 
@@ -2066,20 +2082,26 @@ extension InsulinDeliveryPumpManager: AlertIssuer {
     public func issueAlert(_ alert: Alert) {
         logDelegateEvent("issuing \(alert.identifier) \(alert.backgroundContent.title) with trigger \(alert.trigger)")
         pumpDelegate.notify { [weak self] delegate in
-            delegate?.issueAlert(alert)
-            self?.maybeUpdateStatusHighlight()
+            guard let self, let delegate else { return }
+            Task {
+                await delegate.issueAlert(alert)
+                self.maybeUpdateStatusHighlight()
+            }
         }
     }
     
     public func retractAlert(identifier: Alert.Identifier) {
         logDelegateEvent("retracting \(identifier)")
         pumpDelegate.notify { [weak self] delegate in
-            delegate?.retractAlert(identifier: identifier)
-            self?.maybeUpdateStatusHighlight()
+            guard let self, let delegate else { return }
+            Task {
+                await delegate.retractAlert(identifier: identifier)
+                self.maybeUpdateStatusHighlight()
+            }
         }
     }
 
-    public func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier, completion: @escaping (Error?) -> Void) {
+    public func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier) async throws {
         logDelegateResponseEvent("acknowledging \(alertIdentifier)")
 
         if alertIdentifier == insulinSuspensionReminderAlertIdentifier.alertIdentifier {
@@ -2087,45 +2109,48 @@ extension InsulinDeliveryPumpManager: AlertIssuer {
                 // subsequent reminder are delayed 15 mins
                 issueInsulinSuspensionReminderAlert(reminderDelay: .minutes(15))
             }
-            completion(nil)
             return
         }
 
         if PumpExpiresSoonAnnunciation.alertIdentifierComponents(alertIdentifier)?.type == PumpExpiresSoonAnnunciation.type {
             // Schedule any repeating expiration reminder alerts
             scheduleRepeatedPumpExpirationReminderAlert()
-            completion(nil)
             return
         }
 
         guard let annunciation = GeneralAnnunciation(alertIdentifier) else {
             logDelegateResponseEvent("Failed to acknowledge \(alertIdentifier)")
-            completion(InsulinDeliveryPumpManagerError.invalidAlert)
-            return
+            throw InsulinDeliveryPumpManagerError.invalidAlert
         }
 
-        pump.confirmAnnunciation(annunciation) { [weak self] result in
-            switch result {
-            case .success:
-                self?.logDelegateResponseEvent("Annunciation \(annunciation) was acknowledge")
-                completion(nil)
-            case .failure(let error):
-                self?.logDelegateResponseEvent("Acknowledging \(annunciation) failed: \(error)")
-                self?.mutateState { state in
-                    state.annunciationsPendingConfirmation.insert(annunciation)
+        try await withCheckedThrowingContinuation { continuation in
+            pump.confirmAnnunciation(annunciation) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.logDelegateResponseEvent("Annunciation \(annunciation) was acknowledge")
+                    continuation.resume()
+                case .failure(let error):
+                    self?.logDelegateResponseEvent("Acknowledging \(annunciation) failed: \(error)")
+                    self?.mutateState { state in
+                        state.annunciationsPendingConfirmation.insert(annunciation)
+                    }
+                    continuation.resume(throwing: InsulinDeliveryPumpCommError.acknowledgingAnnunciationFailed)
                 }
-                completion(InsulinDeliveryPumpCommError.acknowledgingAnnunciationFailed)
             }
         }
     }
 
     func issueInsulinSuspensionReminderAlert(reminderDelay: TimeInterval?) {
         guard let reminderDelay = reminderDelay else { return }
-        issueAlert(insulinSuspensionReminderAlert(reminderDelay: reminderDelay))
+        Task {
+            await issueAlert(insulinSuspensionReminderAlert(reminderDelay: reminderDelay))
+        }
     }
 
     private func retractInsulinSuspensionReminderAlert() {
-        retractAlert(identifier: insulinSuspensionReminderAlertIdentifier)
+        Task {
+            await retractAlert(identifier: insulinSuspensionReminderAlertIdentifier)
+        }
     }
 
     var insulinSuspensionReminderAlertIdentifier: Alert.Identifier {
@@ -2167,11 +2192,15 @@ extension InsulinDeliveryPumpManager: AlertIssuer {
         case .never:
             return
         }
-        issueAlert(pumpExpirationReminderAlert(trigger: trigger))
+        Task {
+            await issueAlert(pumpExpirationReminderAlert(trigger: trigger))
+        }
     }
 
     private func retractPumpExpirationReminderAlert() {
-        retractAlert(identifier: pumpExpirationReminderAlertIdentifier)
+        Task {
+            await retractAlert(identifier: pumpExpirationReminderAlertIdentifier)
+        }
     }
 
     var pumpExpirationReminderAlertIdentifier: Alert.Identifier {
@@ -2191,11 +2220,15 @@ extension InsulinDeliveryPumpManager: AlertIssuer {
     }
 
     func issueTimeZoneChangedAlert() {
-        issueAlert(timeZoneChangedAlert)
+        Task {
+            await   issueAlert(timeZoneChangedAlert)
+        }
     }
 
     private func retractTimeZoneChangedAlert() {
-        retractAlert(identifier: timeZoneChangedAlertIdentifier)
+        Task {
+            await retractAlert(identifier: timeZoneChangedAlertIdentifier)
+        }
     }
 
     var timeZoneChangedAlertIdentifier: Alert.Identifier {

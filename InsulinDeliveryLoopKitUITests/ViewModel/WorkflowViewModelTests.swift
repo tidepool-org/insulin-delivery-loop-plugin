@@ -107,28 +107,6 @@ class WorkflowViewModelTests: XCTestCase {
         }
     }
     
-    func testConnectToSelectedDevice() {
-        let device = Device(id: UUID(),
-                            name: "Pump XYZ",
-                            serialNumber: "12345678",
-                            imageName: "pump-simulator",
-                            remainingLifetime: .days(100))
-        pump.delegate?.pump(pump,
-                            didDiscoverPumpWithName: device.name,
-                            identifier: device.id,
-                            serialNumber: device.serialNumber)
-        waitOnMain()
-
-        mockNavigator.screenStack = [.primeReservoir]
-        viewModel.pumpKeyEnterManuallySelected()
-        XCTAssertEqual(mockNavigator.currentScreen, .selectPump)
-        viewModel.selectedDeviceSerialNumber = device.serialNumber
-        XCTAssertTrue(viewModel.deviceSelected)
-        viewModel.enterPumpKeyForSelectedDevice()
-        viewModel.pumpKeyEntry("1234")
-        XCTAssertEqual(viewModel.pumpSetupState, PumpSetupState.connecting)
-    }
-    
     func testConnectToPumpWithSerialNumber() {
         let device = Device(id: UUID(),
                             name: "Pump XYZ",
