@@ -14,6 +14,7 @@ import InsulinDeliveryServiceKit
 
 typealias SaveNotificationSettingCompletion = (_ selectedSettings: NotificationSetting, _ completion: @escaping (_ error: Error?) -> Void) -> Void
 
+@MainActor
 class SettingsViewModel: ObservableObject {
     let pumpManager: InsulinDeliveryPumpManager
 
@@ -220,8 +221,8 @@ class SettingsViewModel: ObservableObject {
         self.transitioningSuspendInsulinDelivery = false
         self.detectedSystemTimeOffset = pumpManager.detectedSystemTimeOffset
         self.canSynchronizePumpTime = pumpManager.canSynchronizePumpTime
-        self.automaticDosingEnabled = pumpManager.automaticDosingEnabled
         self.doesPumpNeedsReplacement = pumpManager.state.replacementWorkflowState.doesPumpNeedsReplacement
+        self.automaticDosingEnabled = pumpManager.automaticDosingEnabled
 
         deletePumpManagerHandler = { [weak self] completion in
             self?.pumpManager.prepareForDeactivation { error in
@@ -245,8 +246,15 @@ class SettingsViewModel: ObservableObject {
 
         updateDescriptiveText()
 
-        NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification,
-                                               object: nil, queue: nil) { [weak self] _ in self?.updateDisplayOfPumpTime() }
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.significantTimeChangeNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.updateDisplayOfPumpTime()
+            }
+        }
     }
     
     func dismissSettings() {
@@ -334,28 +342,30 @@ class SettingsViewModel: ObservableObject {
 
 extension SettingsViewModel: InsulinDeliveryPumpObserver {
     
-    func pumpDidUpdateState() {
-        // only publish when values actually change
-        if pumpManager.expirationReminderTimeBeforeExpiration != expiryWarningDuration {
-            expiryWarningDuration = pumpManager.expirationReminderTimeBeforeExpiration
+    nonisolated func pumpDidUpdateState() {
+        Task { @MainActor in
+            // only publish when values actually change
+            if pumpManager.expirationReminderTimeBeforeExpiration != expiryWarningDuration {
+                expiryWarningDuration = pumpManager.expirationReminderTimeBeforeExpiration
+            }
+
+            if pumpManager.lowReservoirWarningThresholdInUnits != lowReservoirWarningThresholdInUnits {
+                lowReservoirWarningThresholdInUnits = pumpManager.lowReservoirWarningThresholdInUnits
+            }
+
+            if !transitioningSuspendResumeInsulinDelivery && pumpManager.suspendedAt != suspendedAt {
+                suspendedAt = pumpManager.suspendedAt
+            }
+
+            if let deviceInformation = pumpManager.deviceInformation, deviceInformation != self.deviceInformation {
+                self.deviceInformation = deviceInformation
+            }
+
+            lastCommsDate = pumpManager.state.pumpState.lastCommsDate
+            lastStatusDate = pumpManager.state.lastStatusDate
+
+            updateDescriptiveText()
         }
-
-        if pumpManager.lowReservoirWarningThresholdInUnits != lowReservoirWarningThresholdInUnits {
-            lowReservoirWarningThresholdInUnits = pumpManager.lowReservoirWarningThresholdInUnits
-        }
-
-        if !transitioningSuspendResumeInsulinDelivery && pumpManager.suspendedAt != suspendedAt {
-            suspendedAt = pumpManager.suspendedAt
-        }
-
-        if let deviceInformation = pumpManager.deviceInformation, deviceInformation != self.deviceInformation {
-            self.deviceInformation = deviceInformation
-        }
-
-        lastCommsDate = pumpManager.state.pumpState.lastCommsDate
-        lastStatusDate = pumpManager.state.lastStatusDate
-
-        updateDescriptiveText()
     }
 
     private func updateDisplayOfPumpTime() {
@@ -368,17 +378,20 @@ extension SettingsViewModel: InsulinDeliveryPumpObserver {
 }
 
 extension SettingsViewModel: InsulinDeliveryPumpManagerStateObserver {
-    func pumpManagerDidUpdateState(_ pumpManager: InsulinDeliveryPumpManager, _ state: InsulinDeliveryPumpManagerState) {
-        doesPumpNeedsReplacement = state.replacementWorkflowState.doesPumpNeedsReplacement
-        automaticDosingEnabled = pumpManager.automaticDosingEnabled
-
-        updateDescriptiveText()
+    nonisolated func pumpManagerDidUpdateState(_ pumpManager: InsulinDeliveryPumpManager, _ state: InsulinDeliveryPumpManagerState) {
+        Task { @MainActor in
+            doesPumpNeedsReplacement = state.replacementWorkflowState.doesPumpNeedsReplacement
+            automaticDosingEnabled = pumpManager.automaticDosingEnabled
+            updateDescriptiveText()
+        }
     }
 }
 
 extension SettingsViewModel: PumpManagerStatusObserver {
-    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
-        updateDescriptiveText()
+    nonisolated func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
+        Task { @MainActor in
+            updateDescriptiveText()
+        }
     }
 }
 

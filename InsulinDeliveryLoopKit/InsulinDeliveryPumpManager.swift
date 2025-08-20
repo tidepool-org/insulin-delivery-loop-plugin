@@ -1291,6 +1291,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         pumpManagerDelegate?.detectedSystemTimeOffset ?? 0
     }
 
+    @MainActor
     public var automaticDosingEnabled: Bool {
         pumpManagerDelegate?.automaticDosingEnabled ?? false
     }
