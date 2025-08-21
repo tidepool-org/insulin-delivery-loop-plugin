@@ -15,6 +15,7 @@ import BluetoothCommonKit
 @testable import InsulinDeliveryLoopKit
 @testable import InsulinDeliveryLoopKitUI
 
+@MainActor
 class SettingsViewModelTests: XCTestCase {
 
     private var viewModel: SettingsViewModel!
