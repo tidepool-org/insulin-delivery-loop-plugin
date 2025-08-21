@@ -341,31 +341,35 @@ class SettingsViewModel: ObservableObject {
 }
 
 extension SettingsViewModel: InsulinDeliveryPumpObserver {
-    
+
     nonisolated func pumpDidUpdateState() {
         Task { @MainActor in
-            // only publish when values actually change
-            if pumpManager.expirationReminderTimeBeforeExpiration != expiryWarningDuration {
-                expiryWarningDuration = pumpManager.expirationReminderTimeBeforeExpiration
-            }
-
-            if pumpManager.lowReservoirWarningThresholdInUnits != lowReservoirWarningThresholdInUnits {
-                lowReservoirWarningThresholdInUnits = pumpManager.lowReservoirWarningThresholdInUnits
-            }
-
-            if !transitioningSuspendResumeInsulinDelivery && pumpManager.suspendedAt != suspendedAt {
-                suspendedAt = pumpManager.suspendedAt
-            }
-
-            if let deviceInformation = pumpManager.deviceInformation, deviceInformation != self.deviceInformation {
-                self.deviceInformation = deviceInformation
-            }
-
-            lastCommsDate = pumpManager.state.pumpState.lastCommsDate
-            lastStatusDate = pumpManager.state.lastStatusDate
-
-            updateDescriptiveText()
+            updateStateFromPumpManager()
         }
+    }
+
+    func updateStateFromPumpManager() {
+        // only publish when values actually change
+        if pumpManager.expirationReminderTimeBeforeExpiration != expiryWarningDuration {
+            expiryWarningDuration = pumpManager.expirationReminderTimeBeforeExpiration
+        }
+
+        if pumpManager.lowReservoirWarningThresholdInUnits != lowReservoirWarningThresholdInUnits {
+            lowReservoirWarningThresholdInUnits = pumpManager.lowReservoirWarningThresholdInUnits
+        }
+
+        if !transitioningSuspendResumeInsulinDelivery && pumpManager.suspendedAt != suspendedAt {
+            suspendedAt = pumpManager.suspendedAt
+        }
+
+        if let deviceInformation = pumpManager.deviceInformation, deviceInformation != self.deviceInformation {
+            self.deviceInformation = deviceInformation
+        }
+
+        lastCommsDate = pumpManager.state.pumpState.lastCommsDate
+        lastStatusDate = pumpManager.state.lastStatusDate
+
+        updateDescriptiveText()
     }
 
     private func updateDisplayOfPumpTime() {

@@ -250,6 +250,7 @@ class SettingsViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.descriptiveText)
         pumpManager.pumpStatusHighlight = SignalLossPumpStatusHighlight()
         viewModel.pumpManager(pumpManager, didUpdate: pumpManager.status, oldStatus: pumpManager.status)
+        viewModel.updateStateFromPumpManager()
         XCTAssertEqual(viewModel.descriptiveText, viewModel.signalLossDescriptiveText)
     }
 }
@@ -267,6 +268,6 @@ extension SettingsViewModelTests {
                                                   batteryLevel: batteryLevel,
                                                   reportedRemainingLifetime: reportedRemainingLifetime ?? InsulinDeliveryPumpManager.lifespan)
         pumpManager.pump.state.deviceInformation = deviceInformation
-        viewModel.pumpDidUpdateState()
+        viewModel.updateStateFromPumpManager()
     }
 }
