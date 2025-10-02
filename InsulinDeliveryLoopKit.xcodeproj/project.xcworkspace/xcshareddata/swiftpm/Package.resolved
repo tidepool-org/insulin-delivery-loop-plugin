@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:tidepool-org/BluetoothCommonKit.git",
       "state" : {
-        "branch" : "nate/IDS-refactoring",
-        "revision" : "5a13754bd3873003f9834cc7fefa4c69e2d21311"
+        "branch" : "dev",
+        "revision" : "795492804ed1a9ed46b7a2545fcc46d44eb1a50a"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:tidepool-org/InsulinDeliveryServiceKit.git",
       "state" : {
-        "branch" : "nate/IDS-refactor",
-        "revision" : "ac33837f5d347c26c38e0a4380f48e4194720924"
+        "branch" : "dev",
+        "revision" : "e4f5183560bb4380b160e354400172e22ca07eba"
       }
     },
     {
