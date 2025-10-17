@@ -2005,7 +2005,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:tidepool-org/InsulinDeliveryServiceKit.git";
 			requirement = {
-				branch = dev;
+				branch = "nate/crash-fix";
 				kind = branch;
 			};
 		};
