@@ -2350,6 +2350,7 @@ extension InsulinDeliveryPumpManager {
             state.pumpConfiguration = pumpConfiguration
         }
         pumpDidCompleteConfiguration(pump)
+        completion(.success)
     }
 }
 
