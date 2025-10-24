@@ -97,6 +97,14 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         return state.onboardingCompleted
     }
 
+    public var inSignalLoss: Bool {
+        Self.isSignalLost(lastCommsDate: state.pumpState.lastCommsDate, isPumpConnected: isPumpConnected)
+    }
+    
+    public var isInoperable: Bool {
+        basalDeliveryState(for: state) == .pumpInoperable
+    }
+    
     public func markOnboardingCompleted() {
         mutateState { state in
             state.onboardingCompleted = true
