@@ -57,6 +57,8 @@ public struct MockInsulinDeliveryPumpStatus {
     public var activeBolusUpdateHandler: ((BolusDeliveryStatus) -> Void)?
 
     private var lastDeliveryUpdate: Date
+    
+    private var lastBolusID: BolusID = 0
 
     public var initialReservoirLevel: Int {
         didSet {
@@ -255,7 +257,8 @@ public struct MockInsulinDeliveryPumpStatus {
                                      bolusAmount: amount,
                                      startTime: now,
                                      scheduledCertainty: .certain)
-        activeBolusDeliveryStatus = BolusDeliveryStatus(id: (activeBolusDeliveryStatus.id ?? 0) + 1,
+        lastBolusID += 1
+        activeBolusDeliveryStatus = BolusDeliveryStatus(id: lastBolusID,
                                                         progressState: .inProgress,
                                                         type: .fast,
                                                         insulinProgrammed: amount,
@@ -337,6 +340,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
         case bolusDelivered
         case initialReservoirLevel
         case isAuthenticated
+        case lastBolusID
         case lastDeliveryUpdate
         case pumpConfiguration
         case pumpState
@@ -350,6 +354,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
             let bolusDelivered = rawValue[MockInsulinDeliveryPumpStatusKey.bolusDelivered.rawValue] as? Double,
             let initialReservoirLevel = rawValue[MockInsulinDeliveryPumpStatusKey.initialReservoirLevel.rawValue] as? Int,
             let isAuthenticated = rawValue[MockInsulinDeliveryPumpStatusKey.isAuthenticated.rawValue] as? Bool,
+            let lastBolusID = rawValue[MockInsulinDeliveryPumpStatusKey.lastBolusID.rawValue] as? BolusID,
             let lastDeliveryUpdate = rawValue[MockInsulinDeliveryPumpStatusKey.lastDeliveryUpdate.rawValue] as? Date,
             let rawConfiguration = rawValue[MockInsulinDeliveryPumpStatusKey.pumpConfiguration.rawValue] as? Data,
             let pumpConfiguration = try? PropertyListDecoder().decode(PumpConfiguration.self, from: rawConfiguration),
@@ -376,6 +381,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
         self.bolusDelivered = bolusDelivered
         self.initialReservoirLevel = initialReservoirLevel
         self.isAuthenticated = isAuthenticated
+        self.lastBolusID = lastBolusID
         self.lastDeliveryUpdate = lastDeliveryUpdate
         self.pumpConfiguration = pumpConfiguration
         self.pumpState = pumpState
@@ -388,6 +394,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
             MockInsulinDeliveryPumpStatusKey.bolusDelivered.rawValue: bolusDelivered,
             MockInsulinDeliveryPumpStatusKey.initialReservoirLevel.rawValue: initialReservoirLevel,
             MockInsulinDeliveryPumpStatusKey.isAuthenticated.rawValue: isAuthenticated,
+            MockInsulinDeliveryPumpStatusKey.lastBolusID.rawValue: lastBolusID,
             MockInsulinDeliveryPumpStatusKey.lastDeliveryUpdate.rawValue: lastDeliveryUpdate,
             MockInsulinDeliveryPumpStatusKey.pumpState.rawValue: pumpState.rawValue,
             MockInsulinDeliveryPumpStatusKey.totalPrimingInsulin.rawValue: totalPrimingInsulin,
