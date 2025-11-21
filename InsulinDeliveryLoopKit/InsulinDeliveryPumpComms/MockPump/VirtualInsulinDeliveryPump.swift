@@ -189,6 +189,8 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
 
     private var pendingResponse: (() -> Void)?
 
+    private var deliveryTimer: Timer?
+    
     public init(status: MockInsulinDeliveryPumpStatus? = nil, schedulerDelay: TimeInterval = VirtualInsulinDeliveryPump.defaultSchedulerTimeDelay)
     {
         self.schedulerDelay = schedulerDelay
@@ -197,6 +199,20 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
             return
         }
         lockedStatus = Locked(status)
+        
+        deliveryTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true, block: { _ in
+            self.status.activeBolusUpdateHandler = { [weak self] bolusDeliveryStatus in
+                guard let self else { return }
+                switch bolusDeliveryStatus.progressState {
+                case .canceled, .completed:
+                    self.reportBolusDelivered(bolusDeliveryStatus)
+                default:
+                    break
+                }
+            }
+            
+            self.status.updateDeliveryIfNeeded()
+        })
     }
 
     private func scheduleTask(after time: TimeInterval, task: @escaping () -> Void) {
@@ -488,7 +504,7 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
             updateHandler(bolusDeliveryStatus)
             guard let self else { return }
             switch bolusDeliveryStatus.progressState {
-            case  .canceled, .completed:
+            case .canceled, .completed:
                 self.reportBolusDelivered(bolusDeliveryStatus)
             default:
                 break
