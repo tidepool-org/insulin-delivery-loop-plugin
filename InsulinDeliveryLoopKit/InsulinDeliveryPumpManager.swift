@@ -592,6 +592,8 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     private func bolusState(for state: InsulinDeliveryPumpManagerState) -> PumpManagerStatus.BolusState {
         if let transition = state.activeTransition {
             switch transition {
+            case .startingBolus:
+                return .initiating
             case .cancelingBolus:
                 return .canceling
             default:
