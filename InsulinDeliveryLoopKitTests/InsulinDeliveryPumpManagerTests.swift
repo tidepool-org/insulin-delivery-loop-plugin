@@ -1910,10 +1910,10 @@ extension InsulinDeliveryPumpManagerTests {
 
     func testStatusUpdateForDifferentDevices() {
         statusUpdates = []
-        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "test1234", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
+        pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "test1234", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         wait(for: [statusUpdateExpectation!], timeout: 30)
         XCTAssertNotNil(statusUpdates.last?.status.device)
         XCTAssertNotNil(statusUpdates.last?.oldStatus.device)
