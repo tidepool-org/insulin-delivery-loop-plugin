@@ -599,11 +599,14 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
         XCTAssertNotNil(pumpManager.pumpStatusHighlight)
         XCTAssertEqual(1, statusUpdates.count)
+        waitOnThread()
         
         // Ok, now reset and see if replacement clears the status highlight
         setUpExpectations()
-        statusUpdates = []
         alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
+        alertExpectation?.assertForOverFulfill = false
+        statusUpdateExpectation?.assertForOverFulfill = false
+        lookupExpectation?.assertForOverFulfill = false
         completeReplacementWorkflow()
         await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
 
