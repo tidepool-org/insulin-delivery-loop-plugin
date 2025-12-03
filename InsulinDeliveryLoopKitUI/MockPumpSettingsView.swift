@@ -65,7 +65,7 @@ struct MockPumpSettingsView: View {
 
                 Section(header: SectionHeader(label: "Bolus")) {
                     MockPumpNumberEntryView(title: "min", value: $viewModel.minBolusVolumeString, placeholder: "Enter min bolus amount")
-                    MockPumpNumberEntryView(title: "max", value: $viewModel.maxBolusVolumeString, placeholder: "Enter min bolus amount")
+                    MockPumpNumberEntryView(title: "max", value: $viewModel.maxBolusVolumeString, placeholder: "Enter max bolus amount")
                     if viewModel.isBolusActive {
                         Text("Bolus In Progress")
                         Toggle(isOn: $viewModel.causeBolusInterruption) {
@@ -75,6 +75,8 @@ struct MockPumpSettingsView: View {
                 }
 
                 Section(header: SectionHeader(label: "Basal")) {
+                    MockPumpNumberEntryView(title: "min", value: $viewModel.minBasalRateString, placeholder: "Enter min basal amount")
+                    MockPumpNumberEntryView(title: "max", value: $viewModel.maxBasalRateString, placeholder: "Enter max basal amount")
                     if viewModel.isTempBasalActive {
                         Text("Temp Basal In Progress")
                         Toggle(isOn: $viewModel.causeTempBasalInterruption) {

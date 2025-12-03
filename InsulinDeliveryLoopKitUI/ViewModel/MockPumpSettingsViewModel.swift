@@ -68,6 +68,8 @@ class MockPumpSettingsViewModel: ObservableObject {
     var maxBolusVolumeString: String
     var causeBolusInterruption: Bool = false
 
+    var minBasalRateString: String
+    var maxBasalRateString: String
     var causeTempBasalInterruption: Bool = false
 
     init(virtualPump: VirtualInsulinDeliveryPump = VirtualInsulinDeliveryPump(), pumpManager: InsulinDeliveryPumpManager? = nil, annunciationTypeToIssueDelay: TimeInterval = .seconds(10)) {
@@ -79,8 +81,10 @@ class MockPumpSettingsViewModel: ObservableObject {
         reservoirString = numberFormatter.string(from: reservoirAmount) ?? ""
         let batteryLevel = virtualPump.deviceInformation?.batteryLevel ?? 100
         batteryLevelString = "\(batteryLevel)"
-        minBolusVolumeString = "\(InsulinDeliveryPumpManager.minBolusVolume)"
-        maxBolusVolumeString = "\(InsulinDeliveryPumpManager.maxBolusVolume)"
+        minBolusVolumeString = "\(InsulinDeliveryPumpManager.minimumBolusVolume)"
+        maxBolusVolumeString = "\(InsulinDeliveryPumpManager.maximumBolusVolume)"
+        minBasalRateString = "\(InsulinDeliveryPumpManager.minimumBasalRateAmount)"
+        maxBasalRateString = "\(InsulinDeliveryPumpManager.maximumBasalRateAmount)"
         stoppedNotificationDelay = virtualPump.stoppedNotificationDelay
         self.annunciationTypeToIssueDelay = annunciationTypeToIssueDelay
         self.pumpManager = pumpManager
@@ -114,8 +118,10 @@ class MockPumpSettingsViewModel: ObservableObject {
             virtualPump.updateReservoirRemaining(reservoirRemaining)
         }
         virtualPump.deviceInformation?.batteryLevel = Int(batteryLevelString)
-        InsulinDeliveryPumpManager.minBolusVolume = Double(minBolusVolumeString) ?? 0
-        InsulinDeliveryPumpManager.maxBolusVolume = Double(maxBolusVolumeString) ?? 0
+        InsulinDeliveryPumpManager.minimumBolusVolume = Double(minBolusVolumeString) ?? 0
+        InsulinDeliveryPumpManager.maximumBolusVolume = Double(maxBolusVolumeString) ?? 0
+        InsulinDeliveryPumpManager.minimumBasalRateAmount = Double(minBasalRateString) ?? 0
+        InsulinDeliveryPumpManager.maximumBasalRateAmount = Double(maxBasalRateString) ?? 0
         if let annunciationTypeToIssue = annunciationTypeToIssue {
             virtualPump.issueAnnunciationForType(annunciationTypeToIssue, delayedBy: annunciationTypeToIssueDelay)
             self.annunciationTypeToIssue = nil

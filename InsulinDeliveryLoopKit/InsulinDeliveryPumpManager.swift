@@ -1543,10 +1543,10 @@ extension InsulinDeliveryPumpManager {
 
     // Supported bolus volumes in IU
     public static var supportedBolusVolumes: [Double] {
-        return Array((0...Int(maxBolusVolume*20)).map { minBolusVolume + Double($0) / Double(20) })
+        return Array((0...Int(maximumBolusVolume*20)).map { minimumBolusVolume + Double($0) / Double(20) })
     }
-    public static var minBolusVolume: Double = 0.2
-    public static var maxBolusVolume: Double = 35.0
+    public static var minimumBolusVolume: Double = 0.2
+    public static var maximumBolusVolume: Double = 35
     public static func roundToSupportedBolusVolume(units: Double) -> Double {
         return supportedBolusVolumes.filter({$0 <= units}).max() ?? 0
     }
@@ -1554,19 +1554,13 @@ extension InsulinDeliveryPumpManager {
     // Supported maximum bolus volumes in IU
     public static let supportedMaximumBolusVolumes: [Double] = Array((10...350).map { Double($0) / Double(10) })
     
-    // maximum allowed basal rate amount in IU/hr
-    public static let maximumBasalRateAmount: Double = 25
-    
     // Supported basal rates in IU/hr
     public static var supportedBasalRates: [Double] {
-        var supportedBasalRates: [Double] = [0] // a rate of 0 IU/hr is supported
-        // 0.01 IU step for rates between 0.1-4.99 IU/hr
-        supportedBasalRates.append(contentsOf: Array((10...499).map { Double($0) / Double(100) }))
-        // 0.1 IU step for rates between 5.0-25.0 IU/hr
-        supportedBasalRates.append(contentsOf: Array((50...250).map { Double($0) / Double(10) }))
-        
-        return supportedBasalRates
+        return Array((0...Int(maximumBasalRateAmount*20)).map { minimumBasalRateAmount + Double($0) / Double(20) })
     }
+    public static var minimumBasalRateAmount: Double = 0
+    // maximum allowed basal rate amount in IU/hr
+    public static var maximumBasalRateAmount: Double = 25
 
     public static let maximumBasalScheduleEntryCount: Int = 24
 
