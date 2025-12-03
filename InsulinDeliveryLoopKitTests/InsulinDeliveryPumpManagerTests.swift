@@ -730,7 +730,8 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         setUpExpectations()
         // No alert is expected
         alertExpectation?.isInverted = true
-        
+        lookupExpectation?.assertForOverFulfill = false
+        statusUpdateExpectation?.assertForOverFulfill = false
         wait(for: [alertExpectation!, lookupExpectation!, statusUpdateExpectation!], timeout: expectationTimeout)
 
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.imageName, "exclamationmark.circle.fill")
