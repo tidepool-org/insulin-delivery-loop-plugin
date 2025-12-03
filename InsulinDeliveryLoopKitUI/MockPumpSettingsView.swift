@@ -64,6 +64,8 @@ struct MockPumpSettingsView: View {
                 }
 
                 Section(header: SectionHeader(label: "Bolus")) {
+                    MockPumpNumberEntryView(title: "min", value: $viewModel.minBolusVolumeString, placeholder: "Enter min bolus amount")
+                    MockPumpNumberEntryView(title: "max", value: $viewModel.maxBolusVolumeString, placeholder: "Enter max bolus amount")
                     if viewModel.isBolusActive {
                         Text("Bolus In Progress")
                         Toggle(isOn: $viewModel.causeBolusInterruption) {
@@ -73,6 +75,8 @@ struct MockPumpSettingsView: View {
                 }
 
                 Section(header: SectionHeader(label: "Basal")) {
+                    MockPumpNumberEntryView(title: "min", value: $viewModel.minBasalRateString, placeholder: "Enter min basal amount")
+                    MockPumpNumberEntryView(title: "max", value: $viewModel.maxBasalRateString, placeholder: "Enter max basal amount")
                     if viewModel.isTempBasalActive {
                         Text("Temp Basal In Progress")
                         Toggle(isOn: $viewModel.causeTempBasalInterruption) {
@@ -123,32 +127,48 @@ struct MockPumpSettingsView: View {
     }
     
     var reservoirRemainingEntry: some View {
-        return MockPumpReservoirRemainingEntryView(reservoirRemaining: $viewModel.reservoirString)
+        return MockPumpDecimalEntryView(value: $viewModel.reservoirString, placeholder: "Enter reservoir remaining value")
     }
 
-    struct MockPumpReservoirRemainingEntryView: View {
-        @Binding var reservoirRemaining: String
+    struct MockPumpDecimalEntryView: View {
+        var title: String? = nil
+        @Binding var value: String
+        var placeholder: String
 
         var body: some View {
-            // TextField only updates continuously as the user types if the value is a String
-            TextField("Enter reservoir remaining value",
-                      text: $reservoirRemaining)
+            HStack {
+                if let title {
+                    Text(title)
+                }
+                // TextField only updates continuously as the user types if the value is a String
+                TextField(placeholder,
+                          text: $value)
                 .keyboardType(.decimalPad)
+            }
         }
     }
     
     var batteryPercentEntry: some View {
-        return MockPumpBatteryPercentEntryView(batteryLevel: $viewModel.batteryLevelString)
+        return MockPumpNumberEntryView(value: $viewModel.batteryLevelString, placeholder: "Enter battery percent value")
     }
 
-    struct MockPumpBatteryPercentEntryView: View {
-        @Binding var batteryLevel: String
+    struct MockPumpNumberEntryView: View {
+        var title: String? = nil
+        @Binding var value: String
+        var placeholder: String
 
         var body: some View {
-            // TextField only updates continuously as the user types if the value is a String
-            TextField("Enter battery percent value",
-                      text: $batteryLevel)
+            HStack {
+                if let title {
+                    Text(title)
+                }
+                Spacer()
+                // TextField only updates continuously as the user types if the value is a String
+                TextField(placeholder,
+                          text: $value)
                 .keyboardType(.numberPad)
+                .foregroundStyle(Color.accentColor)
+            }
         }
     }
     
@@ -196,6 +216,7 @@ struct MockPumpSettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .frame(width: 50)
                 Picker("seconds, issue alert:", selection: $alert) {
                     ForEach(annunciations, id: \.self) { annunciation in
                         Text(pickerValue(for: annunciation)).tag(annunciation)

@@ -78,7 +78,7 @@ struct SetReservoirFillValueView: View {
     }
 
     private var footerText: String {
-        LocalizedString("The reservoir must always be filled with at least 20 U (0.2 ml). The reservoir has a maximum holding capacity of 100 U (1.0 ml). The set fill amount will be saved as the default setting for when the reservoir is filled the next time.", comment: "Description of the set reservoir fill amount values")
+        LocalizedString("The reservoir must always be filled with at least 20 U (0.2 ml). The reservoir has a maximum holding capacity of 300 U (3.0 ml). The set fill amount will be saved as the default setting for when the reservoir is filled the next time.", comment: "Description of the set reservoir fill amount values")
     }
 
     private var saveButton: some View {
