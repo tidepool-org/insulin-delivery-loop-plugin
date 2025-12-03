@@ -64,6 +64,8 @@ class MockPumpSettingsViewModel: ObservableObject {
 
     var causeInsulinDeliveryInterruption: Bool = false
 
+    var minBolusVolumeString: String
+    var maxBolusVolumeString: String
     var causeBolusInterruption: Bool = false
 
     var causeTempBasalInterruption: Bool = false
@@ -77,6 +79,8 @@ class MockPumpSettingsViewModel: ObservableObject {
         reservoirString = numberFormatter.string(from: reservoirAmount) ?? ""
         let batteryLevel = virtualPump.deviceInformation?.batteryLevel ?? 100
         batteryLevelString = "\(batteryLevel)"
+        minBolusVolumeString = "\(InsulinDeliveryPumpManager.minBolusVolume)"
+        maxBolusVolumeString = "\(InsulinDeliveryPumpManager.maxBolusVolume)"
         stoppedNotificationDelay = virtualPump.stoppedNotificationDelay
         self.annunciationTypeToIssueDelay = annunciationTypeToIssueDelay
         self.pumpManager = pumpManager
@@ -110,6 +114,8 @@ class MockPumpSettingsViewModel: ObservableObject {
             virtualPump.updateReservoirRemaining(reservoirRemaining)
         }
         virtualPump.deviceInformation?.batteryLevel = Int(batteryLevelString)
+        InsulinDeliveryPumpManager.minBolusVolume = Double(minBolusVolumeString) ?? 0
+        InsulinDeliveryPumpManager.maxBolusVolume = Double(maxBolusVolumeString) ?? 0
         if let annunciationTypeToIssue = annunciationTypeToIssue {
             virtualPump.issueAnnunciationForType(annunciationTypeToIssue, delayedBy: annunciationTypeToIssueDelay)
             self.annunciationTypeToIssue = nil

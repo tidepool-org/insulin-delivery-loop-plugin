@@ -212,7 +212,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     public var supportedBolusVolumes: [Double] {
         return InsulinDeliveryPumpManager.supportedBolusVolumes
     }
-
+    
     public var supportedMaximumBolusVolumes: [Double] {
         return InsulinDeliveryPumpManager.supportedMaximumBolusVolumes
     }
@@ -1543,10 +1543,10 @@ extension InsulinDeliveryPumpManager {
 
     // Supported bolus volumes in IU
     public static var supportedBolusVolumes: [Double] {
-        var supportedBolusVolumes: [Double] = Array((20...2045).map { Double($0) / Double(100) })
-        supportedBolusVolumes.append(contentsOf: Array((205...350).map { Double($0) / Double(10) }))
-        return supportedBolusVolumes
+        return Array((0...Int(maxBolusVolume*20)).map { minBolusVolume + Double($0) / Double(20) })
     }
+    public static var minBolusVolume: Double = 0.2
+    public static var maxBolusVolume: Double = 35.0
     public static func roundToSupportedBolusVolume(units: Double) -> Double {
         return supportedBolusVolumes.filter({$0 <= units}).max() ?? 0
     }
