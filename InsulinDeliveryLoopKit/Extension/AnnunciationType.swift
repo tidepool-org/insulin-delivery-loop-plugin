@@ -41,7 +41,7 @@ extension AnnunciationType {
     
     public var isResolvedByPumpReplacement: Bool {
         switch self {
-        case .airPressureOutOfRange, .batteryEmpty, .infusionSetDetached, .infusionSetIncomplete, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .primingIssue, .reservoirEmpty, .reservoirIssue, .systemIssue, .temperatureOutOfRange:
+        case .airPressureOutOfRange, .batteryEmpty, .batteryLow, .batteryMedium, .infusionSetDetached, .infusionSetIncomplete, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .primingIssue, .reservoirEmpty, .reservoirIssue, .systemIssue, .temperatureOutOfRange:
             return true
         default:
             return false

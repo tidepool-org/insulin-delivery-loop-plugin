@@ -2401,7 +2401,7 @@ extension InsulinDeliveryPumpManager: DeviceCommLoggingDelegate {
 extension AnnunciationType {
     var statusBadge: InsulinDeliveryPumpStatusBadge? {
         switch self {
-        case .batteryLow:
+        case .batteryLow, .batteryEmpty:
             return .lowBattery
         default:
             return nil
