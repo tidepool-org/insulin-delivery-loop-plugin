@@ -489,7 +489,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         XCTAssertNotNil(pumpManager.pumpStatusHighlight)
         XCTAssertEqual(expected.statusHighlight, try XCTUnwrap(pumpManager.pumpStatusHighlight as? PumpStatusHighlight))
-        XCTAssertEqual("No Insulin", try XCTUnwrap(pumpManager.pumpStatusHighlight as? PumpStatusHighlight).localizedMessage)
+        XCTAssertEqual("Pump Error", try XCTUnwrap(pumpManager.pumpStatusHighlight as? PumpStatusHighlight).localizedMessage)
         XCTAssertEqual(1, statusUpdates.count)
         XCTAssertNil(pumpManager.pumpStatusBadge)
     }
