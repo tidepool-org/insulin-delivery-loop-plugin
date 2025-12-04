@@ -1543,20 +1543,21 @@ extension InsulinDeliveryPumpManager {
 
     // Supported bolus volumes in IU
     public static var supportedBolusVolumes: [Double] {
-        return Array((0...Int(maximumBolusVolume*20)).map { minimumBolusVolume + Double($0) / Double(20) })
+        return Array((0...Int((maximumBolusVolume-minimumBolusVolume)*20)).map { minimumBolusVolume + Double($0) / Double(20) })
+    }
+    // Supported maximum bolus volumes in IU
+    public static var supportedMaximumBolusVolumes: [Double] {
+        Array((max(1,Int(minimumBolusVolume))*10...Int(maximumBolusVolume*10)).map { Double($0) / Double(10) })
     }
     public static var minimumBolusVolume: Double = 0.2
     public static var maximumBolusVolume: Double = 35
     public static func roundToSupportedBolusVolume(units: Double) -> Double {
         return supportedBolusVolumes.filter({$0 <= units}).max() ?? 0
     }
-
-    // Supported maximum bolus volumes in IU
-    public static let supportedMaximumBolusVolumes: [Double] = Array((10...350).map { Double($0) / Double(10) })
     
     // Supported basal rates in IU/hr
     public static var supportedBasalRates: [Double] {
-        return Array((0...Int(maximumBasalRateAmount*20)).map { minimumBasalRateAmount + Double($0) / Double(20) })
+        return Array((0...Int((maximumBasalRateAmount-minimumBasalRateAmount)*20)).map { minimumBasalRateAmount + Double($0) / Double(20) })
     }
     public static var minimumBasalRateAmount: Double = 0
     // maximum allowed basal rate amount in IU/hr
