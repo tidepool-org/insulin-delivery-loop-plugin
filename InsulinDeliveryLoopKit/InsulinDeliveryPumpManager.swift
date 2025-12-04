@@ -603,7 +603,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
 
         guard let activeBolusID = state.pumpState.activeBolusDeliveryStatus.id,
               state.unfinalizedBoluses[activeBolusID] != nil,
-              let activeBolus = state.pumpState.activeBolusDeliveryStatus.unfinalizedBolus(at: now, automatic: state.unfinalizedBoluses[activeBolusID]?.automatic)
+              let activeBolus = state.pumpState.activeBolusDeliveryStatus.unfinalizedBolus(at: now, automatic: state.unfinalizedBoluses[activeBolusID]?.automatic, decisionId: state.unfinalizedBoluses[activeBolusID]?.decisionId)
         else {
             return .noBolus
         }
@@ -855,7 +855,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         pump.updateActiveBolusDeliveryDetails { [weak self] bolusDeliveryStatus in
             guard let self = self,
                   let bolusID = bolusDeliveryStatus.id,
-                  let unfinalizedBolus = bolusDeliveryStatus.unfinalizedBolus(at: self.now, automatic: state.unfinalizedBoluses[bolusID]?.automatic)
+                  let unfinalizedBolus = bolusDeliveryStatus.unfinalizedBolus(at: self.now, automatic: state.unfinalizedBoluses[bolusID]?.automatic, decisionId: state.unfinalizedBoluses[bolusID]?.decisionId)
             else {
                 return
             }
