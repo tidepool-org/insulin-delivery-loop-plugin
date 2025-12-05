@@ -10,11 +10,11 @@
 import InsulinDeliveryServiceKit
 
 extension BolusDeliveryStatus {
-    func unfinalizedBolus(at now: Date = Date(), automatic: Bool? = nil) -> UnfinalizedDose? {
+    func unfinalizedBolus(at now: Date = Date(), automatic: Bool? = nil, decisionId: UUID? = nil) -> UnfinalizedDose? {
         guard self.progressState != .noActiveBolus else { return nil }
         
         let startTime = self.startTime ?? now.addingTimeInterval(-self.insulinDelivered / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
-        var unfinalizedBolus = UnfinalizedDose(decisionId: nil,
+        var unfinalizedBolus = UnfinalizedDose(decisionId: decisionId,
                                                bolusAmount: self.insulinProgrammed,
                                                startTime: startTime,
                                                scheduledCertainty: progressState == .estimatingProgress ? .uncertain : .certain,
