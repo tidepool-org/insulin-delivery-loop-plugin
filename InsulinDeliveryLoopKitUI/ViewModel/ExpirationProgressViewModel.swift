@@ -21,17 +21,11 @@ class ExpirationProgressViewModel: ObservableObject {
     }
     
     var expirationProgress: DeviceLifecycleProgress? {
-        let expiration = pumpExpirationProgressViewModel.timeUntilExpiration
-        
-        guard let expiration,
-              expiration < .hours(8)
-        else {
-            return nil
-        }
+        guard pumpExpirationProgressViewModel.shouldDisplayLifeCycleProgress else { return nil }
         assert(pumpExpirationProgressViewModel.expirationProgress != nil)
         return pumpExpirationProgressViewModel.expirationProgress
     }
-    
+        
     var pumpExpired: Bool {
         pumpExpirationProgressViewModel.isExpired
     }
@@ -100,7 +94,7 @@ extension PumpExpirationProgressViewModel {
         return timeUntilExpiration <= 0
     }
     var timeUntilExpiration: TimeInterval? {
-        expirationDate?.timeIntervalSince(now())
+        statePublisher?.state.timeUntilExpiration(now())
     }
     var expirationProgress: DeviceLifecycleProgress? {
         timeUntilExpiration.map { ComponentLifecycleProgress(percentComplete: (1 - $0 / lifespan).clamped(to: 0...1), progressState: progressState) }
@@ -117,6 +111,9 @@ extension PumpExpirationProgressViewModel {
         }
     }
     var isHiddenFromPumpManager: Bool { false }
+    var shouldDisplayLifeCycleProgress: Bool {
+        statePublisher?.state.shouldDisplayLifeCycleProgress == true
+    }
     
     static let timeFormatter: DateFormatter = {
         let timeFormatter = DateFormatter()

@@ -427,6 +427,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
                 insulinDeliveryPumpStatusBadge = .timeSyncNeeded
                 shouldNotify = true
             }
+            
+            if state.shouldDisplayLifeCycleProgress {
+                shouldNotify = true
+            }
 
             if shouldNotify {
                 self.notifyStatusObservers(oldStatus: self.status(for: oldState ?? self.state))

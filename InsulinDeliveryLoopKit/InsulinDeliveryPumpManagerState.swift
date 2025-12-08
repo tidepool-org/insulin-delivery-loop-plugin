@@ -498,4 +498,18 @@ extension InsulinDeliveryPumpManagerState {
     public func getExpirationDate() -> Date? {
         pumpState.deviceInformation?.estimatedExpirationDate
     }
+    
+    public func timeUntilExpiration(_ now: Date = Date()) -> TimeInterval? {
+        getExpirationDate()?.timeIntervalSince(now)
+    }
+    
+    public var shouldDisplayLifeCycleProgress: Bool {
+        guard let expiration = timeUntilExpiration(Date()),
+              expiration < .hours(24)
+        else {
+            return false
+        }
+        
+        return true
+    }
 }
