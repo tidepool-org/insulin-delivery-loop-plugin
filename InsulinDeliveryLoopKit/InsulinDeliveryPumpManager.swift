@@ -102,7 +102,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public var isInoperable: Bool {
-        basalDeliveryState(for: state) == .pumpInoperable
+        basalDeliveryState(for: state) == .pumpInoperable || replacementWorkflowState.doesPumpNeedsReplacement == true
     }
     
     public func markOnboardingCompleted() {
