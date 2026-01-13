@@ -74,4 +74,9 @@ class MockInsulinDeliveryPumpManagerStatePublisher: InsulinDeliveryPumpManagerSt
     var isPumpConnected: Bool {
         pumpManager.pump.isConnected
     }
+    
+    @MainActor
+    var automatedTreatmentState: AutomatedTreatmentState? {
+        pumpManager.automatedTreatmentState
+    }
 }
