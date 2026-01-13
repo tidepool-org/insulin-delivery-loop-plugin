@@ -19,6 +19,33 @@ class InsulinStatusViewModel: ObservableObject {
 
     @Published var basalDeliveryRate: Double?
 
+    @Published private(set) var basalDeliveryRateDate: Date?
+    var basalDeliveryRateDateString: String? {
+        guard let basalDeliveryRateDate else { return nil }
+        return Self.shortTimeFormatter.string(from: basalDeliveryRateDate)
+    }
+    
+    static private let shortTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+    
+    @Published private(set) var automatedTreatmentState: AutomatedTreatmentState
+    var basalDisplayStateString: String {
+        switch automatedTreatmentState {
+        case .neutralOverride:
+            return LocalizedString("Preset\nDelivery", comment: "Label for neutral basal with override")
+        case .neutralNoOverride:
+            return LocalizedString("Scheduled\nBasal", comment: "Label for neutral basal without override")
+        case .increasedInsulin:
+            return LocalizedString("Increased\nDelivery", comment: "Label for when temp basal is above the neutral basal")
+        default:
+            return LocalizedString("Decreased\nDelivery", comment: "Label for when temp basal is below the neutral basal")
+        }
+    }
+    
     var isScheduledBasal: Bool {
         switch basalDeliveryState {
         case .active:
@@ -67,6 +94,8 @@ class InsulinStatusViewModel: ObservableObject {
         self.statePublisher = statePublisher
         self.reservoirViewModel = ReservoirHUDViewModel(userThreshold: Double(statePublisher.state.lowReservoirWarningThresholdInUnits))
         self.now = now
+        self.basalDeliveryRateDate = now()
+        self.automatedTreatmentState = statePublisher.automatedTreatmentState ?? .neutralNoOverride
         if let statusPublisher = statePublisher as? PumpManagerStatusPublisher {
             self.basalDeliveryState = statusPublisher.status.basalDeliveryState
             update(with: statusPublisher.status, pumpStatusHighlight: statusPublisher.pumpStatusHighlight)
@@ -131,6 +160,8 @@ class InsulinStatusViewModel: ObservableObject {
         }
         reservoirViewModel = ReservoirHUDViewModel(userThreshold: Double(state.lowReservoirWarningThresholdInUnits), reservoirLevel: state.pumpState.deviceInformation?.reservoirLevel)
         lastCommsDate = state.pumpState.lastCommsDate
+        basalDeliveryRateDate = now()
+        automatedTreatmentState = statePublisher?.automatedTreatmentState ?? .neutralNoOverride
     }
     
     private func update(with status: PumpManagerStatus, pumpStatusHighlight: DeviceStatusHighlight?) {
@@ -143,6 +174,8 @@ class InsulinStatusViewModel: ObservableObject {
             basalDeliveryState = status.basalDeliveryState
         }
         self.statusHighlight = pumpStatusHighlight
+        basalDeliveryRateDate = now()
+        automatedTreatmentState = statePublisher?.automatedTreatmentState ?? .neutralNoOverride
     }
 }
 
