@@ -55,9 +55,12 @@ struct InsulinStatusView: View {
         VStack(alignment: .leading, spacing: deliveryStatusSpacing) {
             FixedHeightText(deliverySectionTitle)
                 .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             if viewModel.isInsulinSuspended {
                 insulinSuspended
-            } else if let basalRate = viewModel.basalDeliveryRate {
+            } else if let basalRate = viewModel.basalDeliveryRate,
+                      let date = viewModel.basalDeliveryRateDate
+            {
                 basalRateView(basalRate)
             } else {
                 noDelivery
@@ -82,24 +85,19 @@ struct InsulinStatusView: View {
         HStack(alignment: .center) {
             VStack(alignment: .leading) {
                 HStack(alignment: .lastTextBaseline, spacing: 3) {
-                    let unit = LoopUnit.internationalUnitsPerHour
-                    let quantity = LoopQuantity(unit: unit, doubleValue: basalRate)
-                    Text(basalRateFormatter.string(from: quantity, includeUnit: false) ?? "")
-                        .font(.system(size: 28))
+                    Image(systemName: viewModel.automatedTreatmentState.imageName)
+                        .font(.largeTitle)
+                        .foregroundColor(.accentColor)
+                    Text(viewModel.basalDisplayStateString)
+                        .lineSpacing(1)
+                        .font(.callout)
                         .fontWeight(.heavy)
-                        .fixedSize()
-                    Text(basalRateFormatter.localizedUnitStringWithPlurality(forQuantity: quantity))
-                        .foregroundColor(.secondary)
                 }
-                Group {
-                    if viewModel.isScheduledBasal {
-                        FrameworkLocalizedText("Scheduled\(String.nonBreakingSpace)Basal", comment: "Subtitle of insulin delivery section during scheduled basal")
-                    } else if viewModel.isTempBasal {
-                        FrameworkLocalizedText("Temporary\(String.nonBreakingSpace)Basal", comment: "Subtitle of insulin delivery section during temporary basal")
-                    }
+                if let basalDeliveryRateDateString = viewModel.basalDeliveryRateDateString {
+                    Text("at \(basalDeliveryRateDateString)")
+                        .font(.footnote)
+                        .foregroundColor(.accentColor)
                 }
-                .font(.footnote)
-                .foregroundColor(.accentColor)
             }
         }
     }

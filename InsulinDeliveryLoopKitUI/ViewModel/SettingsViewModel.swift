@@ -36,6 +36,15 @@ class SettingsViewModel: ObservableObject {
     
     let completionHandler: () -> Void
     
+    static private let basalRateFormatter: QuantityFormatter = {
+        QuantityFormatter(for: .internationalUnitsPerHour)
+    }()
+    @Published var basalDeliveryRate: Double?
+    var currentBasalRate: String {
+        guard let basalDeliveryRate = basalDeliveryRate else { return "-" }
+        return Self.basalRateFormatter.string(from: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: basalDeliveryRate)) ?? "-"
+    }
+    
     var deletePumpManagerHandler: ((_ completion: @escaping (Error?) -> Void) -> Void)? = nil
 
     @Published var expiryWarningDuration: TimeInterval
@@ -223,6 +232,7 @@ class SettingsViewModel: ObservableObject {
         self.canSynchronizePumpTime = pumpManager.canSynchronizePumpTime
         self.doesPumpNeedsReplacement = pumpManager.state.replacementWorkflowState.doesPumpNeedsReplacement
         self.automaticDosingEnabled = pumpManager.automaticDosingEnabled
+        self.basalDeliveryRate = pumpManager.state.basalDeliveryRate(at: Date())
 
         deletePumpManagerHandler = { [weak self] completion in
             self?.pumpManager.prepareForDeactivation { error in
@@ -366,6 +376,10 @@ extension SettingsViewModel: InsulinDeliveryPumpObserver {
             self.deviceInformation = deviceInformation
         }
 
+        if basalDeliveryRate != pumpManager.state.basalDeliveryRate(at: Date()) {
+            basalDeliveryRate = pumpManager.state.basalDeliveryRate(at: Date())
+        }
+        
         lastCommsDate = pumpManager.state.pumpState.lastCommsDate
         lastStatusDate = pumpManager.state.lastStatusDate
 

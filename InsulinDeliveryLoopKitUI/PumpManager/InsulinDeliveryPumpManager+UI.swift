@@ -57,7 +57,14 @@ extension InsulinDeliveryPumpManager: PumpManagerUI {
     }
 }
 
-extension InsulinDeliveryPumpManager: InsulinDeliveryPumpManagerStatePublisher { }
+extension InsulinDeliveryPumpManager: InsulinDeliveryPumpManagerStatePublisher {
+    
+    @MainActor
+    public var automatedTreatmentState: AutomatedTreatmentState? {
+        pumpDelegate.delegate?.automatedTreatmentState
+    }
+    
+}
 
 // MARK: - PumpStatusIndicator
 extension InsulinDeliveryPumpManager {
