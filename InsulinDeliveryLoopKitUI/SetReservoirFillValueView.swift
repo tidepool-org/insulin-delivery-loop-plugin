@@ -15,8 +15,8 @@ import InsulinDeliveryLoopKit
 struct SetReservoirFillValueView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
-    var viewModel: WorkflowViewModel
-    
+    @ObservedObject var viewModel: WorkflowViewModel
+
     @State private var pickerSelection: Int
 
     private let insulinQuantityFormatter = QuantityFormatter(for: .internationalUnit)
@@ -49,6 +49,16 @@ struct SetReservoirFillValueView: View {
                             .font(.subheadline)
                     }
                 }
+                RoundedCard() {
+                    NavigationLink(destination: InsulinTypeSetting(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, allowUnsetInsulinType: false, didChange: viewModel.didChangeInsulinType)) {
+                        RoundedCardValueRow(
+                            label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
+                            value: viewModel.insulinType?.brandName ?? "[Name]",
+                            disclosure: true
+                        )
+                    }
+                }
+
                 RoundedCard(footer: footerText) {
                     ExpandableSetting(
                         isEditing: .constant(true),
@@ -109,7 +119,8 @@ struct SetReservoirFillValueView_Previews: PreviewProvider {
         let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                          navigator: MockNavigator())
+                                          navigator: MockNavigator(),
+                                          supportedInsulinTypes: [.novolog, .humalog, .fiasp])
         return Group {
             SetReservoirFillValueView(viewModel: viewModel)
                 .colorScheme(.light)

@@ -22,7 +22,7 @@ extension InsulinDeliveryPumpManager: PumpManagerUI {
     public static func setupViewController(initialSettings settings: PumpManagerSetupSettings, bluetoothProvider: BluetoothProvider, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool, prefersToSkipUserInteraction: Bool, allowedInsulinTypes: [InsulinType]) -> SetupUIResult<PumpManagerViewController, PumpManagerUI> {
         
         if prefersToSkipUserInteraction,
-           let manager = self.init(state: InsulinDeliveryPumpManagerState(basalRateSchedule: settings.basalSchedule, maxBolusUnits: settings.maxBolusUnits)) as? MockInsulinDeliveryPumpManager
+           let manager = self.init(state: InsulinDeliveryPumpManagerState(basalRateSchedule: settings.basalSchedule, maxBolusUnits: settings.maxBolusUnits, insulinType: .novolog)) as? MockInsulinDeliveryPumpManager
         {
             manager.acceptDefaultsAndSkipOnboarding()
             return .createdAndOnboarded(manager)
@@ -31,17 +31,18 @@ extension InsulinDeliveryPumpManager: PumpManagerUI {
                                         pumpManagerType: self,
                                         basalSchedule: settings.basalSchedule,
                                         maxBolusUnits: settings.maxBolusUnits,
+                                        allowedInsulinTypes: allowedInsulinTypes,
                                         allowDebugFeatures: allowDebugFeatures)
             return .userInteractionRequired(vc)
         }
     }
 
     public func settingsViewController(bluetoothProvider: BluetoothProvider, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool, allowedInsulinTypes: [InsulinType]) -> PumpManagerViewController {
-        return IDSViewCoordinator(pumpManager: self, colorPalette: colorPalette, allowDebugFeatures: allowDebugFeatures)
+        return IDSViewCoordinator(pumpManager: self, colorPalette: colorPalette, allowedInsulinTypes: allowedInsulinTypes, allowDebugFeatures: allowDebugFeatures)
     }
 
     public func deliveryUncertaintyRecoveryViewController(colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool) -> (UIViewController & CompletionNotifying) {
-        return IDSViewCoordinator(pumpManager: self, colorPalette: colorPalette, allowDebugFeatures: allowDebugFeatures)
+        return IDSViewCoordinator(pumpManager: self, colorPalette: colorPalette, allowedInsulinTypes: [], allowDebugFeatures: allowDebugFeatures)
     }
     
     public var smallImage: UIImage? {

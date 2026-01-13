@@ -165,10 +165,17 @@ struct DeviceDetailsView: View {
 
 struct IDSDeviceDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = SettingsViewModel(pumpManager: InsulinDeliveryPumpManager(state: InsulinDeliveryPumpManagerState.forPreviewsAndTests), navigator: MockNavigator(), completionHandler: { })
+        let viewModel = SettingsViewModel(
+            pumpManager: InsulinDeliveryPumpManager(
+                state: InsulinDeliveryPumpManagerState.forPreviewsAndTests
+            ),
+            navigator: MockNavigator(),
+            supportedInsulinTypes: [.novolog, .humalog, .fiasp],
+            completionHandler: {
+            })
         return ContentPreview {
             DeviceDetailsView(viewModel: viewModel,
-                                 pumpManagerState: InsulinDeliveryPumpManagerState(basalRateSchedule: BasalRateSchedule(dailyItems: [], timeZone: nil)!, maxBolusUnits: 0),
+                              pumpManagerState: InsulinDeliveryPumpManagerState(basalRateSchedule: BasalRateSchedule(dailyItems: [], timeZone: nil)!, maxBolusUnits: 0, insulinType: .novolog),
                                  insulinQuantityFormatter: QuantityFormatter(for: .internationalUnit),
                                  getBatteryLevel: { })
         }

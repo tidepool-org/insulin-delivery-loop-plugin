@@ -43,6 +43,7 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
         case pumpState
         case replacementWorkflowState
         case suspendState
+        case insulinType
         case totalInsulinDelivery
         case unfinalizedBoluses
         case unfinalizedSuspendDetected
@@ -76,7 +77,9 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
     public var lastPumpTime: Date?
 
     public var totalInsulinDelivery: Double?
-    
+
+    public var insulinType: InsulinType?
+
     public static let version = 1
 
     public var pumpState: IDPumpState {
@@ -254,6 +257,7 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
 
     public init(basalRateSchedule: BasalRateSchedule,
                 maxBolusUnits: Double,
+                insulinType: InsulinType?,
                 pumpState: IDPumpState = IDPumpState(),
                 pumpConfiguration: PumpConfiguration = PumpConfiguration.defaultConfiguration,
                 unfinalizedBoluses: [BolusID: UnfinalizedDose] = [:],
@@ -305,6 +309,10 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
 
         if let rawSuspendState = rawValue[InsulinDeliveryPumpManagerStateKey.suspendState.rawValue] as? SuspendState.RawValue {
             self.suspendState = SuspendState(rawValue: rawSuspendState)
+        }
+
+        if let rawInsulinType = rawValue[InsulinDeliveryPumpManagerStateKey.insulinType.rawValue] as? InsulinType.RawValue {
+            self.insulinType = InsulinType(rawValue: rawInsulinType)
         }
 
         if let rawUnfinalizedBoluses = rawValue[InsulinDeliveryPumpManagerStateKey.unfinalizedBoluses.rawValue] as? Data,
@@ -388,6 +396,7 @@ public struct InsulinDeliveryPumpManagerState: RawRepresentable, Equatable {
         rawValue[InsulinDeliveryPumpManagerStateKey.lastPumpTime.rawValue] = lastPumpTime
         rawValue[InsulinDeliveryPumpManagerStateKey.lowReservoirWarningThresholdInUnits.rawValue] = lowReservoirWarningThresholdInUnits
         rawValue[InsulinDeliveryPumpManagerStateKey.expirationReminderTimeBeforeExpiration.rawValue] = expirationReminderTimeBeforeExpiration
+        rawValue[InsulinDeliveryPumpManagerStateKey.insulinType.rawValue] = insulinType?.rawValue
 
         let rawUnfinalizedBoluses = try? PropertyListEncoder().encode(unfinalizedBoluses)
         rawValue[InsulinDeliveryPumpManagerStateKey.unfinalizedBoluses.rawValue] = rawUnfinalizedBoluses
@@ -409,6 +418,7 @@ extension InsulinDeliveryPumpManagerState: CustomDebugStringConvertible {
             "* basalRateSchedule: \(basalRateSchedule)",
             "* pumpState: \(pumpState)",
             "* pumpConfiguration: \(pumpConfiguration)",
+            "* insulinType: \(insulinType?.brandName ?? "unset")",
             "* finalizedDoses: \(finalizedDoses)",
             "* unfinalizedBoluses: \(String(describing: unfinalizedBoluses))",
             "* unfinalizedTempBasal: \(String(describing: unfinalizedTempBasal))",
@@ -484,7 +494,7 @@ extension InsulinDeliveryPumpManagerState {
         let basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0)])!
         let pumpState = IDPumpState(deviceInformation: DeviceInformation(identifier: UUID(), serialNumber: "12345678", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan))
         let pumpConfiguration = PumpConfiguration.defaultConfiguration
-        var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState, pumpConfiguration: pumpConfiguration)
+        var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, insulinType: .novolog, pumpState: pumpState, pumpConfiguration: pumpConfiguration)
         state.suspendState = SuspendState.resumed(Date())
         return state
     }

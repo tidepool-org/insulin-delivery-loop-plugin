@@ -99,8 +99,10 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
     private let colorPalette: LoopUIColorPalette
 
     public var basalSchedule: BasalRateSchedule?
-    
+
     private var allowDebugFeatures: Bool
+
+    private var allowedInsulinTypes: [InsulinType]?
 
     var workflowType: IDSWorkflowType?
 
@@ -196,6 +198,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
         case .settings:
             let viewModel = SettingsViewModel(pumpManager: pumpManager,
                                               navigator: self,
+                                              supportedInsulinTypes: self.allowedInsulinTypes ?? [],
                                               completionHandler: { [weak self] in
                 guard let self = self else {
                     return
@@ -267,6 +270,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
 
         workflowViewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
                                               navigator: self,
+                                              supportedInsulinTypes: allowedInsulinTypes ?? [],
                                               workflowStepCompletionHandler: { [weak self] in self?.setupStepFinished() },
                                               workflowCanceledHandler: { [weak self] in self?.workflowCanceled() })
 
@@ -283,6 +287,8 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
          pumpManagerType:InsulinDeliveryPumpManager.Type? = nil,
          basalSchedule: BasalRateSchedule? = nil,
          maxBolusUnits: Double? = nil,
+         insulinType: InsulinType? = nil,
+         allowedInsulinTypes: [InsulinType],
          allowDebugFeatures: Bool)
     {
         if pumpManager == nil,
@@ -291,7 +297,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
            let maxBolusUnits = maxBolusUnits
         {
             let pumpState = pump?.state ?? IDPumpState()
-            let pumpManagerState = InsulinDeliveryPumpManagerState(basalRateSchedule: basalSchedule, maxBolusUnits: maxBolusUnits, pumpState: pumpState)
+            let pumpManagerState = InsulinDeliveryPumpManagerState(basalRateSchedule: basalSchedule, maxBolusUnits: maxBolusUnits, insulinType: insulinType, pumpState: pumpState)
             let pumpManager = pumpManagerType.init(state: pumpManagerState)
             self.pumpManager = pumpManager
             self.pump = pumpManager.pump
@@ -310,6 +316,8 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
         self.colorPalette = colorPalette
 
         self.allowDebugFeatures = allowDebugFeatures
+
+        self.allowedInsulinTypes = allowedInsulinTypes
 
         super.init(navigationBarClass: UINavigationBar.self, toolbarClass: UIToolbar.self)
     }

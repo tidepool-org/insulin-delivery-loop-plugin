@@ -81,7 +81,7 @@ struct ReplaceComponentsView_Previews: PreviewProvider {
         let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                          navigator: MockNavigator())
+                                          navigator: MockNavigator(), supportedInsulinTypes: [.novolog, .humalog, .apidra])
         return ReplaceComponentsView(viewModel: viewModel)
     }
 }

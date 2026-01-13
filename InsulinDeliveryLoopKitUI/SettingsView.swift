@@ -192,7 +192,17 @@ struct SettingsView: View {
         ) {
             FrameworkLocalizedText("Pump Details", comment: "Description label for device details in pump settings")
         }
-        
+
+        NavigationLink(destination:
+                        InsulinTypeSetting(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, allowUnsetInsulinType: false, didChange: viewModel.didChangeInsulinType)
+        ) {
+            RoundedCardValueRow(
+                label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
+                value: viewModel.insulinType?.brandName ?? "[Name]",
+                disclosure: true
+            )
+        }
+
         pumpTimeSubSection
             .disabled(viewModel.insulinDeliveryDisabled)
     }
@@ -387,9 +397,15 @@ struct SettingsView_Previews: PreviewProvider {
                                                    reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         let pumpManagerState = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                                         maxBolusUnits: 10.0,
+                                                        insulinType: .novolog, 
                                                         pumpState: IDPumpState(deviceInformation: deviceInformation))
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
-        let viewModel = SettingsViewModel(pumpManager: pumpManager, navigator: MockNavigator(), completionHandler: { })
+        let viewModel = SettingsViewModel(
+            pumpManager: pumpManager,
+            navigator: MockNavigator(),
+            supportedInsulinTypes: [.novolog, .humalog, .fiasp],
+            completionHandler: {
+            })
         return Group {
             SettingsView(viewModel: viewModel)
                 .colorScheme(.light)
