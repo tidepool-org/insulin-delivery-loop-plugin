@@ -470,6 +470,7 @@ public enum SuspendState: Equatable, RawRepresentable {
 public protocol InsulinDeliveryPumpManagerStatePublisher: AnyObject {
     var state: InsulinDeliveryPumpManagerState { get }
     var isPumpConnected: Bool { get }
+    var automatedTreatmentState: AutomatedTreatmentState? { get }
     func addPumpManagerStateObserver(_ observer: InsulinDeliveryPumpManagerStateObserver, queue: DispatchQueue)
     func removePumpManagerStateObserver(_ observer: InsulinDeliveryPumpManagerStateObserver)
 }

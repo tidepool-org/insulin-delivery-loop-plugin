@@ -41,6 +41,10 @@ struct DeviceDetailsView: View {
                     .openVirtualPumpSettingsOnLongPress(enabled: allowDebugFeatures, pumpManager: viewModel.pumpManager)
             }
             
+            RoundedCard {
+                LabeledValueView(label: "Current Basal Rate", value: viewModel.currentBasalRate)
+            }
+            
             RoundedCard(title: LocalizedString("System Information", comment: "System Information section title")) {
                 systemInformationDetail
                 if allowDebugFeatures && showDebug {
