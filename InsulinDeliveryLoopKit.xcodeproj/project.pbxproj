@@ -147,6 +147,7 @@
 		B4E1BFB92E3D343C00D843ED /* ReplacePumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E1BFB82E3D343C00D843ED /* ReplacePumpView.swift */; };
 		B4F85C7A29B28E9400561B57 /* Shield in Frameworks */ = {isa = PBXBuildFile; productRef = B4F85C7929B28E9400561B57 /* Shield */; };
 		C12E4BB8288F21CE009C98A2 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */; };
+		C1746EBC2F16E089008D8BB3 /* InsulinTypeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1746EBB2F16E084008D8BB3 /* InsulinTypeSelection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -351,6 +352,7 @@
 		B4FF9ABC24375A4D009608ED /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4FF9ABF24375A52009608ED /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C12E4BB7288F21CE009C98A2 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1746EBB2F16E084008D8BB3 /* InsulinTypeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinTypeSelection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -811,6 +813,7 @@
 		B4E318B9270B5350003B0EEB /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				C1746EBB2F16E084008D8BB3 /* InsulinTypeSelection.swift */,
 				B45D2F932DC4A02600EFCCE4 /* PumpExpirationProgressView.swift */,
 				B45D2F9B2DC4A1A900EFCCE4 /* DeviceDetailsView.swift */,
 				B45D2F9D2DC4A1E200EFCCE4 /* InsulinStatusView.swift */,
@@ -1169,6 +1172,7 @@
 				B45D2F9C2DC4A1A900EFCCE4 /* DeviceDetailsView.swift in Sources */,
 				B43E0635241C0FB5008FB913 /* LocalizedString.swift in Sources */,
 				1D6E1C6128131A1C00256AA3 /* DateComponentsFormatter.swift in Sources */,
+				C1746EBC2F16E089008D8BB3 /* InsulinTypeSelection.swift in Sources */,
 				B45D2FC82DC4AF5500EFCCE4 /* BackButton.swift in Sources */,
 				B45D2F9A2DC4A19100EFCCE4 /* ContentPreview.swift in Sources */,
 				B45D2F922DC3FBED00EFCCE4 /* Image.swift in Sources */,

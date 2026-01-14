@@ -50,7 +50,7 @@ struct SetReservoirFillValueView: View {
                     }
                 }
                 RoundedCard() {
-                    NavigationLink(destination: InsulinTypeSetting(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, allowUnsetInsulinType: false, didChange: viewModel.didChangeInsulinType)) {
+                    NavigationLink(destination: InsulinTypeSelection(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, didConfirm: viewModel.didChangeInsulinType)) {
                         RoundedCardValueRow(
                             label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
                             value: viewModel.insulinType?.brandName ?? "[Name]",
@@ -91,12 +91,17 @@ struct SetReservoirFillValueView: View {
         LocalizedString("The reservoir must always be filled with at least 20 U (0.2 ml). The reservoir has a maximum holding capacity of 300 U (3.0 ml). The set fill amount will be saved as the default setting for when the reservoir is filled the next time.", comment: "Description of the set reservoir fill amount values")
     }
 
+    private var okToContinue: Bool {
+        return viewModel.insulinType != nil
+    }
+
     private var saveButton: some View {
         Button(action: saveTapped) {
             saveButtonText
-                .actionButtonStyle()
+                .actionButtonStyle(okToContinue ? .primary : .deactivated)
                 .padding()
         }
+        .disabled(!okToContinue)
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
     

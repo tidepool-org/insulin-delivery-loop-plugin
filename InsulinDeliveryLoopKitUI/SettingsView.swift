@@ -194,12 +194,12 @@ struct SettingsView: View {
         }
 
         NavigationLink(destination:
-                        InsulinTypeSetting(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, allowUnsetInsulinType: false, didChange: viewModel.didChangeInsulinType)
+                        InsulinTypeSelection(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, didConfirm: viewModel.didChangeInsulinType)
         ) {
             RoundedCardValueRow(
                 label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
                 value: viewModel.insulinType?.brandName ?? "[Name]",
-                disclosure: true
+                disclosure: false
             )
         }
 
