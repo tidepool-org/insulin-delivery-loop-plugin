@@ -156,7 +156,8 @@ struct AttachPumpView_Previews: PreviewProvider {
         let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                             navigator: MockNavigator())
+                                          navigator: MockNavigator(),
+                                          supportedInsulinTypes: [.novolog, .humalog, .fiasp])
         return Group {
             AttachPumpView(viewModel: viewModel)
                 .colorScheme(.light)

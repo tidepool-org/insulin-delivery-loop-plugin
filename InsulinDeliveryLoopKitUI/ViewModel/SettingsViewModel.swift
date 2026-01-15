@@ -30,6 +30,21 @@ class SettingsViewModel: ObservableObject {
         pumpManager.localizedTitle
     }
 
+    var insulinType: InsulinType? {
+        get {
+            pumpManager.insulinType
+        }
+        set {
+            pumpManager.insulinType = newValue
+        }
+    }
+
+    var supportedInsulinTypes: [InsulinType]
+
+    func didChangeInsulinType(_ insulinType: InsulinType?) {
+        self.insulinType = insulinType
+    }
+
     lazy var insulinQuantityFormatter: QuantityFormatter = {
         return QuantityFormatter(for: .internationalUnit)
     }()
@@ -214,6 +229,7 @@ class SettingsViewModel: ObservableObject {
 
     init(pumpManager: InsulinDeliveryPumpManager,
          navigator: IDSViewNavigator,
+         supportedInsulinTypes: [InsulinType],
          completionHandler: @escaping () -> Void)
     {
         self.pumpManager = pumpManager
@@ -221,6 +237,7 @@ class SettingsViewModel: ObservableObject {
         self.insulinStatusViewModel = InsulinStatusViewModel(statePublisher: pumpManager)
         self.navigator = navigator
         self.deviceInformation = pumpManager.deviceInformation
+        self.supportedInsulinTypes = supportedInsulinTypes
         self.completionHandler = completionHandler
         self.expiryWarningDuration = pumpManager.expirationReminderTimeBeforeExpiration
         self.expiryReminderRepeat = pumpManager.expiryReminderRepeat

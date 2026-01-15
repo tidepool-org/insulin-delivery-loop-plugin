@@ -72,7 +72,9 @@ public struct UnfinalizedDose: RawRepresentable, Equatable, CustomStringConverti
     var programmedRate: Double?  // Tracks the original temp rate, as during finalization the units are discretized to pump pulses, changing the actual rate
     
     var decisionId: UUID?
-    
+
+    var insulinType: InsulinType?
+
     let startTime: Date
     
     var duration: TimeInterval?

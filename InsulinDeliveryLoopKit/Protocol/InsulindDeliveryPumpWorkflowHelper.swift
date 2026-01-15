@@ -20,7 +20,9 @@ public protocol InsulinDeliveryPumpWorkflowHelper: AnyObject {
     var operationalState: PumpOperationalState { get }
 
     var initialReservoirLevel: Int { get set }
-    
+
+    var insulinType: InsulinType? { get set }
+
     var remainingPumpLifetime: TimeInterval? { get }
     
     func addPumpObserver(_ observer: InsulinDeliveryPumpObserver, queue: DispatchQueue)

@@ -78,7 +78,8 @@ struct PumpKeyEntryManualView_Previews: PreviewProvider {
         let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                          navigator: MockNavigator())
+                                          navigator: MockNavigator(),
+                                          supportedInsulinTypes: [.novolog, .humalog, .fiasp])
         PumpKeyEntryManualView(viewModel: viewModel)
     }
 }

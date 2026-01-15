@@ -346,7 +346,8 @@ struct PrimePumpView_Previews: PreviewProvider {
         let pumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                          navigator: MockNavigator())
+                                          navigator: MockNavigator(),
+                                          supportedInsulinTypes: [.novolog, .humalog, .fiasp])
         return Group {
             PrimePumpView(viewModel: viewModel)
                 .colorScheme(.light)

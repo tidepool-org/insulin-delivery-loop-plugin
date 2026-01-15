@@ -144,6 +144,17 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         }
     }
 
+    public var insulinType: InsulinType? {
+        get {
+            state.insulinType
+        }
+        set {
+            mutateState { state in
+                state.insulinType = newValue
+            }
+        }
+    }
+
     public func updateReplacementWorkflowState(milestoneProgress: [Int], pumpSetupState: PumpSetupState?) {
         replacementWorkflowState = replacementWorkflowState.updatedWith(milestoneProgress: milestoneProgress,
                                                                         pumpSetupState: pumpSetupState,
@@ -471,7 +482,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         let now = now()
         return now.timeIntervalSince(lastCommsDate) > InsulinDeliveryPumpManager.signalLossTimeout
     }
-    
+
     static func determinePumpStatusHighlight(state: InsulinDeliveryPumpManagerState, latestAnnunciationType: AnnunciationType?, isPumpConnected: Bool, now: @escaping () -> Date) -> DeviceStatusHighlight? {
         // There is a priority order to the status highlight. This determines it.
         if !state.onboardingCompleted {
@@ -521,7 +532,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
             pumpBatteryChargeRemaining: pumpBatteryChargeRemaining,
             basalDeliveryState: basalDeliveryState(for: state),
             bolusState: bolusState(for: state),
-            insulinType: nil, // Not supporting insulin type yet
+            insulinType: state.insulinType,
             deliveryIsUncertain: !state.replacementWorkflowState.isWorkflowIncomplete && state.pendingInsulinDeliveryCommand != nil // workflows have specific handling of uncertain commands
         )
     }
@@ -1053,7 +1064,12 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
             }
         }
         
-        var pumpEventsToStore = dosesToStore.map { NewPumpEvent($0.key, at: self.now, isFinalized: $0.value) }
+        var pumpEventsToStore = dosesToStore.map { dose, isFinalized in
+            var doseWithInsulinType = dose
+            doseWithInsulinType.insulinType = state.insulinType
+            return NewPumpEvent(doseWithInsulinType, at: self.now, isFinalized: isFinalized)
+        }
+
         if let additionalEvents {
             pumpEventsToStore.append(contentsOf: additionalEvents)
         }

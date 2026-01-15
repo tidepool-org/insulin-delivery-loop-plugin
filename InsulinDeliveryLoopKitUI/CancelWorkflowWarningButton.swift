@@ -85,7 +85,8 @@ struct CancelWorkflowWarningButton_Previews: PreviewProvider {
         let insulinDeliveryPumpManagerState = InsulinDeliveryPumpManagerState.forPreviewsAndTests
         let pumpManager = InsulinDeliveryPumpManager(state: insulinDeliveryPumpManagerState)
         let viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
-                                             navigator: MockNavigator())
+                                          navigator: MockNavigator(),
+                                          supportedInsulinTypes: [.novolog, .humalog, .fiasp])
         return CancelWorkflowWarningButton(viewModel: viewModel)
     }
 }

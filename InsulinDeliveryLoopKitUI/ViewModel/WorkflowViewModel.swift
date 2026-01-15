@@ -47,6 +47,10 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
     
     @Published var receivedReservoirIssue: Bool = false
 
+    @Published var insulinType: InsulinType?
+
+    var supportedInsulinTypes: [InsulinType]
+
     var remainingPumpLifetime: TimeInterval? {
         pumpWorkflowHelper.remainingPumpLifetime
     }
@@ -86,6 +90,7 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
     
     init(pumpWorkflowHelper: InsulinDeliveryPumpWorkflowHelper,
          navigator: IDSViewNavigator,
+         supportedInsulinTypes: [InsulinType],
          pumpSetupState: PumpSetupState = .advertising,
          workflowStepCompletionHandler: @escaping () -> Void = { },
          workflowCanceledHandler: @escaping () -> Void = { })
@@ -93,11 +98,13 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
         self.pumpWorkflowHelper = pumpWorkflowHelper
         self.navigator = navigator
         self.pumpSetupState = pumpSetupState
+        self.supportedInsulinTypes = supportedInsulinTypes
         self.workflowStepCompletionHandler = { DispatchQueue.main.async { workflowStepCompletionHandler() }}
         self.workflowCanceledHandler = workflowCanceledHandler
         isPumpConnected = pumpWorkflowHelper.isPumpConnected
         operationalState = pumpWorkflowHelper.operationalState
-        
+        insulinType = pumpWorkflowHelper.insulinType
+
         pumpWorkflowHelper.addPumpObserver(self, queue: .main)
         pumpWorkflowHelper.addPumpManagerStateObserver(self, queue: .main)
     }
@@ -117,7 +124,7 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
     }
     
     func connectToSelectedDevice() {
-        guard let serialNumber = selectedDeviceSerialNumber else { return }
+        guard selectedDeviceSerialNumber != nil else { return }
         workflowStepCompletionHandler()
     }
     
@@ -127,6 +134,11 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
             startPumpConnectionTimer()
             pumpSetupState = .connecting
         }
+    }
+
+    func didChangeInsulinType(_ insulinType: InsulinType?) {
+        self.insulinType = insulinType
+        self.pumpWorkflowHelper.insulinType = insulinType
     }
 
     private func startPumpConnectionTimer() {
