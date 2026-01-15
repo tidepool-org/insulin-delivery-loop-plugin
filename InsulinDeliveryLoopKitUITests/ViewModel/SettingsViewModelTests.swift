@@ -72,11 +72,22 @@ class SettingsViewModelTests: XCTestCase {
                                    isConnectedHandler: { self.pumpIsConnected })
 
         basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0)])!
-        pumpManager = InsulinDeliveryPumpManager(state: InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState), pump: pump)
+        pumpManager = InsulinDeliveryPumpManager(
+            state: InsulinDeliveryPumpManagerState(
+                basalRateSchedule: basalRateSchedule,
+                maxBolusUnits: 10.0,
+                insulinType: .novolog,
+                pumpState: pumpState
+            ),
+            pump: pump
+        )
         
-        viewModel = SettingsViewModel(pumpManager: pumpManager,
-                                      navigator: mockNavigator,
-                                      completionHandler: { })
+        viewModel = SettingsViewModel(
+            pumpManager: pumpManager,
+            navigator: mockNavigator,
+            supportedInsulinTypes: [.novolog, .humalog, .fiasp],
+            completionHandler: {
+            })
     }
 
     func testInitialization() {
@@ -133,11 +144,17 @@ class SettingsViewModelTests: XCTestCase {
     }
      
     func testIsInsulinDeliverySuspendedByUserActuallySuspended() throws {
-        var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState)
+        var state = InsulinDeliveryPumpManagerState(
+            basalRateSchedule: basalRateSchedule,
+            maxBolusUnits: 10.0,
+            insulinType: .novolog,
+            pumpState: pumpState
+        )
         state.suspendState = .suspended(Date.distantPast)
         pumpManager = InsulinDeliveryPumpManager(state: state, pump: pump)
         viewModel = SettingsViewModel(pumpManager: pumpManager,
                                       navigator: mockNavigator,
+                                      supportedInsulinTypes: [.novolog, .humalog, .fiasp],
                                       completionHandler: { })
         XCTAssertTrue(viewModel.isInsulinDeliverySuspended)
         XCTAssertTrue(viewModel.isInsulinDeliverySuspendedByUser)
@@ -145,13 +162,19 @@ class SettingsViewModelTests: XCTestCase {
     }
     
     func testIsInsulinDeliverySuspendedByUserWithPumpNeedingReplacement() throws {
-        var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState)
+        var state = InsulinDeliveryPumpManagerState(
+            basalRateSchedule: basalRateSchedule,
+            maxBolusUnits: 10.0,
+            insulinType: .novolog,
+            pumpState: pumpState
+        )
         state.replacementWorkflowState.lastPumpReplacementDate = .distantPast
         state.replacementWorkflowState.doesPumpNeedsReplacement = true
         state.suspendState = .suspended(Date.distantPast)
         pumpManager = InsulinDeliveryPumpManager(state: state, pump: pump)
         viewModel = SettingsViewModel(pumpManager: pumpManager,
                                       navigator: mockNavigator,
+                                      supportedInsulinTypes: [.novolog, .humalog, .fiasp],
                                       completionHandler: { })
         XCTAssertTrue(viewModel.isInsulinDeliverySuspended)
         XCTAssertFalse(viewModel.isInsulinDeliverySuspendedByUser)
@@ -170,13 +193,19 @@ class SettingsViewModelTests: XCTestCase {
     func testInsulinDeliveryDisabledWithPumpNeedingReplacement() throws {
         pumpManager.pump.state.deviceInformation?.pumpOperationalState = .ready
         XCTAssertFalse(viewModel.insulinDeliveryDisabled)
-        var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule, maxBolusUnits: 10.0, pumpState: pumpState)
+        var state = InsulinDeliveryPumpManagerState(
+            basalRateSchedule: basalRateSchedule,
+            maxBolusUnits: 10.0,
+            insulinType: .novolog,
+            pumpState: pumpState
+        )
         state.replacementWorkflowState.lastPumpReplacementDate = .distantPast
         state.replacementWorkflowState.doesPumpNeedsReplacement = true
         state.suspendState = .suspended(Date.distantPast)
         pumpManager = InsulinDeliveryPumpManager(state: state, pump: pump)
         viewModel = SettingsViewModel(pumpManager: pumpManager,
                                       navigator: mockNavigator,
+                                      supportedInsulinTypes: [.novolog, .humalog, .fiasp],
                                       completionHandler: { })
         XCTAssertTrue(viewModel.insulinDeliveryDisabled)
     }

@@ -30,6 +30,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
     func testInitialization() {
         let state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                                     maxBolusUnits: 10.0,
+                                                    insulinType: .novolog,
                                                     pumpState: pumpState,
                                                     dateGenerator: dateGenerator)
         
@@ -56,6 +57,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         let now = Date()
         var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                          maxBolusUnits: 10.0,
+                                         insulinType: .novolog,
                                          pumpState: pumpState,
                                          dateGenerator: dateGenerator)
         state.suspendState = .suspended(now)
@@ -108,6 +110,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         let expectedNotificationsSettingsState = InsulinDeliveryPumpManagerState.NotificationSettingsState()
         var state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                          maxBolusUnits: 10.0,
+                                         insulinType: .novolog,
                                          pumpState: pumpState,
                                          dateGenerator: dateGenerator)
 
@@ -202,6 +205,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
         let expectedFinalizedDoses = [bolus, expectedUnfinalizedTempBasal]
         var expectedState = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                                             maxBolusUnits: 10.0,
+                                                            insulinType: .novolog,
                                                             pumpState: pumpState,
                                                             dateGenerator: dateGenerator)
 
@@ -277,6 +281,7 @@ class InsulinDeliveryPumpManagerStateTests: XCTestCase {
     func testRestoreFromRawValueInvalid() {
         let state = InsulinDeliveryPumpManagerState(basalRateSchedule: basalRateSchedule,
                                          maxBolusUnits: 10.0,
+                                         insulinType: .novolog,
                                          pumpState: pumpState,
                                          dateGenerator: dateGenerator)
         var rawValue = state.rawValue

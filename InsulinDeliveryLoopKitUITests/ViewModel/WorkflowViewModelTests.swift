@@ -54,6 +54,7 @@ class WorkflowViewModelTests: XCTestCase {
         mockNavigator.screenStack = []
         viewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
                                       navigator: mockNavigator,
+                                      supportedInsulinTypes: [.novolog, .humalog, .fiasp],
                                       workflowStepCompletionHandler: {
             guard let nextScreen = self.mockNavigator.currentScreen.setupNext(workflowType: .replacement) else { return }
             self.mockNavigator.currentScreen = nextScreen

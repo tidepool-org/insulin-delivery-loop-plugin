@@ -29,7 +29,7 @@ class InsulinStatusViewModelTests: XCTestCase {
         now = Date()
         deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "serialNumber", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         pumpState = IDPumpState(deviceInformation: deviceInformation)
-        state = InsulinDeliveryPumpManagerState(basalRateSchedule: schedule, maxBolusUnits: 0)
+        state = InsulinDeliveryPumpManagerState(basalRateSchedule: schedule, maxBolusUnits: 0, insulinType: .novolog)
         state.suspendState = .resumed(now)
         state.pumpState = pumpState
         mockPublisher = MockInsulinDeliveryPumpManagerStatePublisher(state: state, pumpManager: nil, now: { self.now })

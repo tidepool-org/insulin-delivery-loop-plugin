@@ -48,11 +48,17 @@ class IDSViewCoordinatorTests: XCTestCase {
                                        state: pumpManagerState.pumpState)
         let pumpManager = InsulinDeliveryPumpManager(state: pumpManagerState, pump: pump)
 
-        viewCoordinator = IDSViewCoordinator(pumpManager: pumpManager, colorPalette: loopColorPalette, allowDebugFeatures: false)
+        viewCoordinator = IDSViewCoordinator(
+            pumpManager: pumpManager,
+            colorPalette: loopColorPalette,
+            allowedInsulinTypes: [.novolog, .humalog, .fiasp],
+            allowDebugFeatures: false,
+        )
         viewCoordinator.basalSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1)])
         viewCoordinator.maxBolusUnits = 10.0
         viewCoordinator.workflowViewModel = WorkflowViewModel(pumpWorkflowHelper: pumpManager,
                                                               navigator: viewCoordinator,
+                                                              supportedInsulinTypes: [.humalog, .novolog, .fiasp],
                                                               workflowStepCompletionHandler: { })
         viewCoordinator.pumpManagerOnboardingDelegate = self
     }
