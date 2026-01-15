@@ -193,8 +193,14 @@ struct SettingsView: View {
             FrameworkLocalizedText("Pump Details", comment: "Description label for device details in pump settings")
         }
 
-        NavigationLink(destination:
-                        InsulinTypeSelection(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, didConfirm: viewModel.didChangeInsulinType)
+        NavigationLink(
+            destination:
+                InsulinTypeSelection(
+                    initialValue: viewModel.insulinType,
+                    supportedInsulinTypes: viewModel.supportedInsulinTypes,
+                    isInitialSetup: false,
+                    didConfirm: viewModel.didChangeInsulinType
+                )
         ) {
             RoundedCardValueRow(
                 label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),

@@ -103,7 +103,8 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
         self.workflowCanceledHandler = workflowCanceledHandler
         isPumpConnected = pumpWorkflowHelper.isPumpConnected
         operationalState = pumpWorkflowHelper.operationalState
-        
+        insulinType = pumpWorkflowHelper.insulinType
+
         pumpWorkflowHelper.addPumpObserver(self, queue: .main)
         pumpWorkflowHelper.addPumpManagerStateObserver(self, queue: .main)
     }
@@ -137,6 +138,7 @@ class WorkflowViewModel: OnboardingWorkflowViewModel, ObservableObject {
 
     func didChangeInsulinType(_ insulinType: InsulinType?) {
         self.insulinType = insulinType
+        self.pumpWorkflowHelper.insulinType = insulinType
     }
 
     private func startPumpConnectionTimer() {

@@ -50,7 +50,14 @@ struct SetReservoirFillValueView: View {
                     }
                 }
                 RoundedCard() {
-                    NavigationLink(destination: InsulinTypeSelection(initialValue: viewModel.insulinType, supportedInsulinTypes: viewModel.supportedInsulinTypes, didConfirm: viewModel.didChangeInsulinType)) {
+                    NavigationLink(
+                        destination: InsulinTypeSelection(
+                            initialValue: viewModel.insulinType,
+                            supportedInsulinTypes: viewModel.supportedInsulinTypes,
+                            isInitialSetup: true,
+                            didConfirm: viewModel.didChangeInsulinType
+                        )
+                    ) {
                         RoundedCardValueRow(
                             label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
                             value: viewModel.insulinType?.brandName ?? "[Name]",
