@@ -413,7 +413,8 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     private func maybeUpdateStatusHighlight(oldState: InsulinDeliveryPumpManagerState? = nil, completion: (() -> Void)? = nil) {
-        lookupLatestAnnunciation { [self] annunciationType in
+        lookupLatestAnnunciation { [weak self] annunciationType in
+            guard let self else { return }
             var shouldNotify: Bool
             if let oldState = oldState, status(for: oldState) != status(for: state) {
                 shouldNotify = true
@@ -421,9 +422,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
                 shouldNotify = false
             }
             let newStatusHighlight = Self.determinePumpStatusHighlight(state: state, latestAnnunciationType: annunciationType, isPumpConnected: isPumpConnected, now: dateGenerator)
+            let newStatusHighlightCopy = newStatusHighlight
             let oldStatusHighlight = self.pumpStatusHighlight
-            if !newStatusHighlight.isEqual(to: oldStatusHighlight) || annunciationType?.statusBadge != insulinDeliveryPumpStatusBadge {
-                pumpStatusHighlight = newStatusHighlight
+            if !newStatusHighlightCopy.isEqual(to: oldStatusHighlight) || annunciationType?.statusBadge != insulinDeliveryPumpStatusBadge {
+                pumpStatusHighlight = newStatusHighlightCopy
                 // Status badge should persist until replacement workflow, so unless `annunciationType` is nil (which
                 // means there are no outstanding, unretracted, annunciations) keep the badge persistent.
                 if annunciationType == nil || annunciationType?.statusBadge != nil {
@@ -2247,7 +2249,7 @@ extension InsulinDeliveryPumpManager: AlertIssuer {
 
     func issueTimeZoneChangedAlert() {
         Task {
-            await   issueAlert(timeZoneChangedAlert)
+            await issueAlert(timeZoneChangedAlert)
         }
     }
 
