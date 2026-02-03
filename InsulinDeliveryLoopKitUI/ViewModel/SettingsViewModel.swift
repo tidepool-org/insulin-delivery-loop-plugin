@@ -121,7 +121,12 @@ class SettingsViewModel: ObservableObject {
     }
     
     var insulinDeliveryDisabled: Bool {
-        transitioningSuspendResumeInsulinDelivery || transitioningSuspendInsulinDelivery || !canSuspendResumeInsulinDelivery || pumpManager.status.deliveryIsUncertain == true
+        transitioningSuspendResumeInsulinDelivery || transitioningSuspendInsulinDelivery || !canSuspendResumeInsulinDelivery || pumpManager.status.deliveryIsUncertain == true || isPumpExpired
+    }
+    
+    var isPumpExpired: Bool {
+        guard let timeUntilExpiration = pumpManager.state.timeUntilExpiration() else { return false }
+        return timeUntilExpiration < 0
     }
 
     @Published var transitioningSuspendResumeInsulinDelivery: Bool

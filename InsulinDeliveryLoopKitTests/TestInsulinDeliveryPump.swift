@@ -397,7 +397,7 @@ class TestInsulinDeliveryPump: InsulinDeliveryPump {
 
         var data = Data(AnnunciationStatusFlag([.presentAnnunciation]).rawValue)
         data.append(annunciationID)
-        data.append(AnnunciationType.endOfPumpLifetime.rawValue)
+        data.append(AnnunciationType.pumpLifetimeWarning.rawValue)
         data.append(AnnunciationStatus.pending.rawValue)
         data.append(UInt8(0x01)) // E2E counter
         data = data.appendingCRC()

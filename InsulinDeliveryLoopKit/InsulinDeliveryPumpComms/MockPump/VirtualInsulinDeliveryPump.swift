@@ -692,7 +692,7 @@ extension VirtualInsulinDeliveryPump {
         switch annunciationType {
         case .reservoirLow:
             issueLowReservoirAnnunciation(currentReservoirWarningLevel: status.pumpConfiguration.reservoirLevelWarningThresholdInUnits, delayedBy: delayedBy)
-        case .endOfPumpLifetime:
+        case .pumpLifetimeWarning:
             if let remainingLifetime = deviceInformation?.estimatedRemainingLifeTime {
                 issuePumpExpiresSoonAnnunciation(timeRemaining: remainingLifetime, delayedBy: delayedBy)
             }
@@ -721,6 +721,10 @@ extension VirtualInsulinDeliveryPump {
         currentAnnunciationIdentifier += 1
         issueAnnunciation(annunciation, delayedBy: delayedBy)
     }
+    
+    private func issuePumpExpiredAnnunciation(delayedBy: TimeInterval? = nil) {
+        issueAnnunciationForType(.pumpLifetimeEnd, delayedBy: delayedBy)
+    }
 
     private func issueBolusCanceledAnnunciation(bolusDeliveryStatus: BolusDeliveryStatus) {
         let bolusCanceledAnnunciation = BolusCanceledAnnunciation(identifier: currentAnnunciationIdentifier, bolusDeliveryStatus: bolusDeliveryStatus)
@@ -731,7 +735,7 @@ extension VirtualInsulinDeliveryPump {
     private func issueTempBasalCanceledAnnunciation() {
         issueAnnunciationForType(.tempBasalCanceled)
     }
-
+    
     public func interruptBolus() {
         cancelBolus(completion: { _ in })
     }
@@ -739,6 +743,15 @@ extension VirtualInsulinDeliveryPump {
     public func interruptTempBasal() {
         status.endTempBasal() { tempBasalDuration in
             self.reportTempBasalEnded(tempBasalDuration: tempBasalDuration)
+        }
+    }
+    
+    public func updateExpirationDate(replacementDate: Date?, lifespan: TimeInterval, reportedAt: Date = Date()) {
+        deviceInformation?.updateExpirationDate(replacementDate: replacementDate, lifespan: lifespan, reportedAt: reportedAt)
+        if let reportedRemainingLifetime = deviceInformation?.reportedRemainingLifetime
+        {
+            let delayedBy = reportedRemainingLifetime <= 0 ? 0 : reportedRemainingLifetime
+            issuePumpExpiredAnnunciation(delayedBy: delayedBy)
         }
     }
 
@@ -786,7 +799,9 @@ extension VirtualInsulinDeliveryPump {
             if self.isConnected {
                 self.delegate?.pump(self, didReceiveAnnunciation: annunciation)
             }
-            if annunciation.type.isInsulinDeliveryStopped {
+            if annunciation.type.isInsulinDeliveryStopped ||
+                annunciation.type == .pumpLifetimeEnd
+            {
                 self.interruptInsulinDelivery()
             }
             self.endBackgroundTask()

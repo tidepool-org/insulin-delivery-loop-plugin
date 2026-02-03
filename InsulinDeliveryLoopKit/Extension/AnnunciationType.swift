@@ -10,7 +10,8 @@ import LoopKit
 import InsulinDeliveryServiceKit
 
 extension AnnunciationType {
-    public static let endOfPumpLifetime = AnnunciationType(rawValue: 0xffff)
+    public static let pumpLifetimeWarning = AnnunciationType(rawValue: 0xffff)
+    public static let pumpLifetimeEnd = AnnunciationType(rawValue: 0xfffe)
     
     public var interruptionLevel: Alert.InterruptionLevel {
         switch self {
@@ -41,7 +42,7 @@ extension AnnunciationType {
     
     public var isResolvedByPumpReplacement: Bool {
         switch self {
-        case .airPressureOutOfRange, .batteryEmpty, .batteryLow, .batteryMedium, .infusionSetDetached, .infusionSetIncomplete, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .primingIssue, .reservoirEmpty, .reservoirIssue, .systemIssue, .temperatureOutOfRange:
+        case .airPressureOutOfRange, .batteryEmpty, .batteryLow, .batteryMedium, .infusionSetDetached, .infusionSetIncomplete, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .primingIssue, .reservoirEmpty, .reservoirIssue, .systemIssue, .temperatureOutOfRange, .pumpLifetimeEnd:
             return true
         default:
             return false
@@ -50,7 +51,7 @@ extension AnnunciationType {
     
     public var doesPumpNeedsReplacement: Bool {
         switch self {
-        case .batteryEmpty, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .reservoirEmpty, .reservoirIssue, .systemIssue:
+        case .batteryEmpty, .mechanicalIssue, .occlusionDetected, .powerSourceInsufficient, .reservoirEmpty, .reservoirIssue, .systemIssue, .pumpLifetimeEnd:
             return true
         default:
             return false
@@ -85,6 +86,8 @@ extension AnnunciationType {
             return NSLocalizedString("Reservoir empty.", comment: "Reservoir empty problem descriptive hint text")
         case .reservoirIssue:
             return NSLocalizedString("Programmed insulin amount differs from detected insulin amount.", comment: "Reservoir issue problem descriptive hint text")
+        case .pumpLifetimeEnd:
+            return NSLocalizedString("Pump has expired.", comment: "Pump lifetime end descriptive hint text")
         default:
             return isInsulinDeliveryStopped ? NSLocalizedString("Insulin delivery stopped.", comment: "Descriptive hint problem text when insulin delivery is stopped") : nil
         }
@@ -96,6 +99,8 @@ extension AnnunciationType {
             return LocalizedString("Replace the reservoir soon.", comment: "Battery low solution descriptive hint text")
         case .mechanicalIssue:
             return LocalizedString("Replace the reservoir now. If the error is still not resolved, replace the pump.", comment: "Mechanical issue solution descriptive hint text")
+        case .pumpLifetimeEnd:
+            return LocalizedString("Replace pump now.", comment: "Pump lifetime end solution descriptive hint text")
         default:
             return nil
         }

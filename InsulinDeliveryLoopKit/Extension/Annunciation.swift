@@ -48,8 +48,10 @@ extension Annunciation {
             return LocalizedString("Temporary basal canceled", comment: "Title of the temp basal canceled annunciation")
         case .bolusCanceled:
             return LocalizedString("Bolus Delivery Interrupted", comment: "Title of the bolus canceled annunciation")
-        case .endOfPumpLifetime:
-            return LocalizedString("Running time of the pump will end soon", comment: "title of the end of pump lifetime annunciation")
+        case .pumpLifetimeWarning:
+            return LocalizedString("Running time of the pump will end soon", comment: "title of the end of pump lifetime warning annunciation")
+        case .pumpLifetimeEnd:
+            return LocalizedString("Running time of the pump has ended", comment: "title of the end of pump lifetime end annunciation")
         default:
             return LocalizedString("Unknown annunciation", comment: "Title of an unknown annunciation")
         }
@@ -75,8 +77,10 @@ extension Annunciation {
             return LocalizedString("An active temporary basal rate was canceled.", comment: "Temporary basal rate canceled possible cause message.")
         case .bolusCanceled:
             return LocalizedString("Approximately %1$@ of %2$@ of insulin were delivered of a programmed bolus.", comment: "Bolus canceled possible cause message. (1: partial bolus amount delivered, 2: programmed total amount)")
-        case .endOfPumpLifetime:
-            return LocalizedString("The period of use of the pump base will end soon.", comment: "End of pump lifetime possible cause message.")
+        case .pumpLifetimeWarning:
+            return LocalizedString("The period of use of the pump will end soon.", comment: "Pump lifetime warning possible cause message.")
+        case .pumpLifetimeEnd:
+            return LocalizedString("The pump has expired.", comment: "Pump lifetime end possible cause message.")
         default:
             return nil
         }
@@ -108,8 +112,10 @@ extension Annunciation {
             return LocalizedString("Make sure that the cancellation was intentional. Program a new temporary basal rate if required.", comment: "Temporary basal rate canceled possible solution message.")
         case .bolusCanceled:
             return LocalizedString("Note the insulin amount already delivered and schedule a new bolus if necessary.", comment: "Bolus canceled possible solution message.")
-        case .endOfPumpLifetime:
-            return LocalizedString("Ensure that you have a new pump as a replacement. Replace the pump after the remaining time.", comment: "End of pump lifetime possible solution message.")
+        case .pumpLifetimeWarning:
+            return LocalizedString("Ensure that you have a new pump as a replacement. Replace the pump after the remaining time.", comment: "Pump lifetime warning possible solution message.")
+        case .pumpLifetimeEnd:
+            return LocalizedString("Replace the pump as soon as possible.", comment: "Pump lifetime end possible solution message.")
         default:
             return nil
         }

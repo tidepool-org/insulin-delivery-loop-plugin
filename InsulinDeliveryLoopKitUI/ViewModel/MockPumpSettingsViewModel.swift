@@ -136,7 +136,7 @@ class MockPumpSettingsViewModel: ObservableObject {
             virtualPump.interruptTempBasal()
         }
         pumpManager?.lastPumpReplacementDate = fakePumpReplacementDate
-        virtualPump.deviceInformation?.updateExpirationDate(replacementDate: fakePumpReplacementDate, lifespan: InsulinDeliveryPumpManager.lifespan)
+        virtualPump.updateExpirationDate(replacementDate: fakePumpReplacementDate, lifespan: InsulinDeliveryPumpManager.lifespan)
     }
 }
 

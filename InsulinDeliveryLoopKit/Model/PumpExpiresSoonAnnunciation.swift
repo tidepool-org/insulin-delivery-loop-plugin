@@ -11,7 +11,7 @@ import LoopKit
 import InsulinDeliveryServiceKit
 
 public struct PumpExpiresSoonAnnunciation: Annunciation {
-    public static let type: AnnunciationType = .endOfPumpLifetime
+    public static let type: AnnunciationType = .pumpLifetimeWarning
     public let type: AnnunciationType = type
 
     public let identifier: UInt16
