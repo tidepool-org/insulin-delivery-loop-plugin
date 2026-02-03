@@ -913,7 +913,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
 
         pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .tempBasalCanceled, identifier: 1, status: .pending, auxiliaryData: Data()))
         wait(for: [alertExpectation!], timeout: expectationTimeout)
-        // We do not issue an alert for W-36
+        // We do not issue an alert for temp basal canceled
         XCTAssertTrue(issuedAlerts.isEmpty)
         // But we do report a retracted alert such that it is present in the alert store
         XCTAssertTrue(!retractedAlerts.isEmpty)
@@ -1308,7 +1308,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
     
     func testAutoConfirmStopWarningW41Annunciation() {
-        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
+        let annunciation = GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 123, status: .pending, auxiliaryData: Data())
         pumpManager.pump(pump, didReceiveAnnunciation: annunciation)
         XCTAssertTrue(pump.idCommand.lockedRequestQueue.value.contains(where: { IDCommandControlPointOpcode(rawValue: $0.request[$0.request.startIndex...].to(IDCommandControlPointOpcode.RawValue.self)) ==  .confirmAnnunciation}))
     }
@@ -1488,7 +1488,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         let exp = expectation(description: #function)
         alertExpectation = expectation(description: "alert." + #function)
         alertExpectation?.assertForOverFulfill = false
-        let expectedAlert = Alert(with: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 1, status: .pending, auxiliaryData: Data()), managerIdentifier: InsulinDeliveryPumpManager.managerIdentifier)
+        let expectedAlert = Alert(with: GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 1, status: .pending, auxiliaryData: Data()), managerIdentifier: InsulinDeliveryPumpManager.managerIdentifier)
         await pumpManager.issueAlert(expectedAlert)
         await fulfillment(of: [alertExpectation!], timeout: 30)
 
@@ -2115,7 +2115,7 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testLoggingHistoricalAnnunciation() {
-        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data()), at: Date())
+        pumpManager.pumpDidDetectHistoricalAnnunciation(pump, annunciation: GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 123, status: .pending, auxiliaryData: Data()), at: Date())
         loggingExpectation = expectation(description: #function)
         loggingExpectation?.expectedFulfillmentCount = 2
         wait(for: [loggingExpectation!], timeout: 30)
@@ -2178,12 +2178,12 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testLoggingPumpDidReceiveAnnunciation() {
-        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data()))
+        pumpManager.pump(pump, didReceiveAnnunciation: GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 123, status: .pending, auxiliaryData: Data()))
         loggingExpectation = expectation(description: #function)
         loggingExpectation?.assertForOverFulfill = false
         wait(for: [loggingExpectation!], timeout: 30)
         XCTAssertTrue(logEntryMessages.contains(where: { $0.contains("didReceiveAnnunciation") }))
-        XCTAssertTrue(logEntryMessages.contains(where: { $0.contains("\(AnnunciationType.endOfPumpLifetime)") }))
+        XCTAssertTrue(logEntryMessages.contains(where: { $0.contains("\(AnnunciationType.pumpLifetimeWarning)") }))
     }
 
     func testLoggingHandleBolusCancelledAnnunciation() {
@@ -2228,7 +2228,7 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testLoggingIssueAlert() async {
-        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
+        let annunciation = GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 123, status: .pending, auxiliaryData: Data())
         loggingExpectation = expectation(description: #function)
         loggingExpectation?.assertForOverFulfill = false
         await pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
@@ -2237,7 +2237,7 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testLoggingRetractAlert() async {
-        let annunciation = GeneralAnnunciation(type: .endOfPumpLifetime, identifier: 123, status: .pending, auxiliaryData: Data())
+        let annunciation = GeneralAnnunciation(type: .pumpLifetimeWarning, identifier: 123, status: .pending, auxiliaryData: Data())
         loggingExpectation = expectation(description: #function)
         loggingExpectation?.assertForOverFulfill = false
         await pumpManager.retractAlert(identifier: Alert.Identifier(managerIdentifier: pumpManager.pluginIdentifier, alertIdentifier: annunciation.alertIdentifier))

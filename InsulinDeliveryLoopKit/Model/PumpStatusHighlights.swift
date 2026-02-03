@@ -15,6 +15,12 @@ public struct SignalLossPumpStatusHighlight: DeviceStatusHighlight {
     public var state = DeviceStatusHighlightState.critical
 }
 
+public struct PumpExpiredStatusHighlight: DeviceStatusHighlight {
+    public var localizedMessage = NSLocalizedString("Pump Expired", comment: "Status highlight that the pump has expired.")
+    public var imageName = "exclamationmark.circle.fill"
+    public var state = DeviceStatusHighlightState.critical
+}
+
 public struct InsulinSuspendedPumpStatusHighlight: DeviceStatusHighlight {
     public var localizedMessage = NSLocalizedString("Insulin Suspended", comment: "Status highlight that insulin delivery was suspended.")
     public var imageName = "pause.circle.fill"

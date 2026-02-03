@@ -493,6 +493,8 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
             return IncompleteReplacementPumpStatusHighlight()
         } else if let statusHighlight = latestAnnunciationType?.statusHighlight {
             return statusHighlight
+        } else if let timeUntilExpiration = state.timeUntilExpiration(), timeUntilExpiration < 0 {
+            return PumpExpiredStatusHighlight()
         } else if Self.isSignalLost(lastCommsDate: state.pumpState.lastCommsDate, isPumpConnected: isPumpConnected, asOf: now) ||
                     state.pendingInsulinDeliveryCommand != nil
         {
@@ -1923,7 +1925,9 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
             reportPumpAlarm(.lowInsulin)
         } else if annunciation.type == .reservoirEmpty {
             reportPumpAlarm(.noInsulin)
-        } else if annunciation.type.isInsulinDeliveryStopped {
+        } else if annunciation.type.isInsulinDeliveryStopped,
+                  annunciation.type == .pumpLifetimeEnd
+        {
             reportPumpAlarm(.noDelivery)
         }
         
@@ -1931,7 +1935,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
         case .bolusCanceled where annunciation is BolusCanceledAnnunciation:
             handleReceivedBolusCanceledAnnunciation(pump, annunciation as! BolusCanceledAnnunciation)
         case .tempBasalCanceled:
-            // W-36's are auto-confirmed, in favor of other signalizations (e.g. in the pump pill and status)
+            // Temp Basal Canceled are auto-confirmed, in favor of other signalizations (e.g. in the pump pill and status)
             autoConfirmAndReportAnnunciation(annunciation)
         case .primingIssue where state.replacementWorkflowState.isWorkflowIncomplete:
             autoConfirmAndReportAnnunciation(annunciation)
@@ -1940,7 +1944,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
                 observer.pumpEncounteredReservoirIssue()
             }
             autoConfirmAndReportAnnunciation(annunciation)
-        case .reservoirLow, .endOfPumpLifetime:
+        case .reservoirLow, .pumpLifetimeWarning:
             // These states are tracked and alerted on with configuration outside of the pump for now.
             autoConfirmAnnunciation(annunciation)
         default:
@@ -1987,7 +1991,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
         }
         
         if autoConfirm {
-            // Auto-confirm the `bolusCanceled` annunciation (W-38)
+            // Auto-confirm the `bolusCanceled` annunciation
             logDelegateEvent("Auto-confirming bolusCanceled, id \(bolusID)")
             autoConfirmAndReportAnnunciation(bolusCanceledAnnunciation)
         } else {
