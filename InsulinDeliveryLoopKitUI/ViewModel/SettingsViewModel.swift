@@ -321,7 +321,7 @@ class SettingsViewModel: ObservableObject {
         
         if pumpManager.status.deliveryIsUncertain == true {
             descriptiveText = uncertainDeliveryDescriptiveText
-        } else if pumpManager.pumpStatusHighlight is SignalLossPumpStatusHighlight {
+        } else if pumpManager.pumpStatusHighlight?.isEqual(to: SignalLossPumpStatusHighlight()) == true {
             descriptiveText = signalLossDescriptiveText
         } else if isClockOffset {
             descriptiveTextTitle = clockOffsetTitle

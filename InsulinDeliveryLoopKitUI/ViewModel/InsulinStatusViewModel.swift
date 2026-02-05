@@ -75,14 +75,14 @@ class InsulinStatusViewModel: ObservableObject {
         
     @Published var reservoirViewModel: ReservoirHUDViewModel
 
-    @Published private var statusHighlight: DeviceStatusHighlight?
+    @Published private var statusHighlight: PumpStatusHighlight?
     @Published private var lastCommsDate: Date?
     var isSignalLost: Bool {
         InsulinDeliveryPumpManager.isSignalLost(lastCommsDate: lastCommsDate, isPumpConnected: statePublisher?.isPumpConnected ?? false, asOf: now)
     }
-    var pumpStatusHighlight: DeviceStatusHighlight? {
+    var pumpStatusHighlight: PumpStatusHighlight? {
         let shouldShowStatusHighlight = !isInsulinSuspended ||
-            (isSignalLost && statusHighlight is SignalLossPumpStatusHighlight) // This avoids a race condition where we detect signal loss timeout but pumpStatusHighlight has not yet updated.
+        (isSignalLost && statusHighlight.isEqual(to: SignalLossPumpStatusHighlight())) // This avoids a race condition where we detect signal loss timeout but pumpStatusHighlight has not yet updated.
 
         return shouldShowStatusHighlight ? statusHighlight : nil
     }
@@ -164,7 +164,7 @@ class InsulinStatusViewModel: ObservableObject {
         automatedTreatmentState = statePublisher?.automatedTreatmentState ?? .neutralNoOverride
     }
     
-    private func update(with status: PumpManagerStatus, pumpStatusHighlight: DeviceStatusHighlight?) {
+    private func update(with status: PumpManagerStatus, pumpStatusHighlight: PumpStatusHighlight?) {
         internalBasalDeliveryState = status.basalDeliveryState
         guard status.basalDeliveryState != .suspending,
               status.basalDeliveryState != .resuming else {
@@ -173,7 +173,7 @@ class InsulinStatusViewModel: ObservableObject {
         if status.basalDeliveryState != basalDeliveryState {
             basalDeliveryState = status.basalDeliveryState
         }
-        self.statusHighlight = pumpStatusHighlight
+        statusHighlight = pumpStatusHighlight
         basalDeliveryRateDate = now()
         automatedTreatmentState = statePublisher?.automatedTreatmentState ?? .neutralNoOverride
     }
@@ -204,7 +204,7 @@ extension ReservoirHUDViewModel {
 
 public protocol PumpManagerStatusPublisher: AnyObject, PumpStatusIndicator {
     var status: PumpManagerStatus { get }
-    var pumpStatusHighlight: DeviceStatusHighlight? { get }
+    var pumpStatusHighlight: PumpStatusHighlight? { get }
     func addStatusObserver(_ observer: PumpManagerStatusObserver, queue: DispatchQueue)
     func removeStatusObserver(_ observer: PumpManagerStatusObserver)
 }

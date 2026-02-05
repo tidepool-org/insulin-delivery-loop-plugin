@@ -264,7 +264,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     public var tidepoolSecurity: TidepoolSecurity?
 
     // NOTE: Must only be updated on .main
-    public var pumpStatusHighlight: DeviceStatusHighlight?
+    public var pumpStatusHighlight: PumpStatusHighlight?
     public var insulinDeliveryPumpStatusBadge: InsulinDeliveryPumpStatusBadge?
     
     @discardableResult private func mutateState(_ changes: (_ state: inout InsulinDeliveryPumpManagerState) -> Void) -> InsulinDeliveryPumpManagerState {
@@ -485,7 +485,7 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         return now.timeIntervalSince(lastCommsDate) > InsulinDeliveryPumpManager.signalLossTimeout
     }
 
-    static func determinePumpStatusHighlight(state: InsulinDeliveryPumpManagerState, latestAnnunciationType: AnnunciationType?, isPumpConnected: Bool, now: @escaping () -> Date) -> DeviceStatusHighlight? {
+    static func determinePumpStatusHighlight(state: InsulinDeliveryPumpManagerState, latestAnnunciationType: AnnunciationType?, isPumpConnected: Bool, now: @escaping () -> Date) -> PumpStatusHighlight? {
         // There is a priority order to the status highlight. This determines it.
         if !state.onboardingCompleted {
             return CompleteSetupPumpStatusHighlight()
