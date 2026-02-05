@@ -140,7 +140,7 @@ struct InsulinStatusView: View {
     }
 
     @ViewBuilder
-    func pumpStatusWarningText(pumpStatusHighlight: DeviceStatusHighlight) -> some View {
+    func pumpStatusWarningText(pumpStatusHighlight: PumpStatusHighlight) -> some View {
         HStack(alignment: .center, spacing: 2) {
             Image(systemName: pumpStatusHighlight.imageName)
                 .font(.system(size: 34))

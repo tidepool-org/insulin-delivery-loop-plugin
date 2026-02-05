@@ -48,7 +48,7 @@ class MockInsulinDeliveryPumpManagerStatePublisher: InsulinDeliveryPumpManagerSt
         }
     }
     
-    var pumpStatusHighlight: DeviceStatusHighlight? {
+    var pumpStatusHighlight: PumpStatusHighlight? {
         get {
             pumpManager.pumpStatusHighlight
         }
@@ -57,7 +57,7 @@ class MockInsulinDeliveryPumpManagerStatePublisher: InsulinDeliveryPumpManagerSt
             statusObservers.forEach { $0.pumpManager(pumpManager, didUpdate: status, oldStatus: status) }
         }
     }
-    var pumpLifecycleProgress: DeviceLifecycleProgress?
+    var pumpLifecycleProgress: PumpLifecycleProgress?
     
     var pumpStatusBadge: DeviceStatusBadge?
 
