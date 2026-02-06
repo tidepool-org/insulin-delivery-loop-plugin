@@ -57,7 +57,7 @@ class MockInsulinDeliveryPumpManagerStatePublisher: InsulinDeliveryPumpManagerSt
             statusObservers.forEach { $0.pumpManager(pumpManager, didUpdate: status, oldStatus: status) }
         }
     }
-    var pumpLifecycleProgress: PumpLifecycleProgress?
+    var pumpLifecycleProgress: DeviceLifecycleProgress?
     
     var pumpStatusBadge: DeviceStatusBadge?
 
