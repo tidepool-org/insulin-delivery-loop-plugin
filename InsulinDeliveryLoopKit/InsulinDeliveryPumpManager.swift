@@ -1840,6 +1840,10 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
     }
         
     public func pumpDidUpdateState(_ pump: IDPumpComms) {
+        // Capture anything that needs the old state BEFORE mutating to avoid recursive lock usage
+        let oldReservoirLevel = state.pumpState.deviceInformation?.reservoirLevel
+        let newReservoirLevel = pump.state.deviceInformation?.reservoirLevel
+
         // check is the temp basal has completed (triggered by active basal rate changed)
         if var unfinalizedTempBasal = state.unfinalizedTempBasal,
            pump.state.activeTempBasalDeliveryStatus.progressState == .completed
@@ -1851,7 +1855,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
             }
             reportCachedDoses()
         }
-        
+
         if didInsulinSuspendUnexpectedly(for: pump.state) {
             // check if there is a pending suspend
             if case .suspendInsulinDelivery = pendingInsulinDeliveryCommand?.type,
@@ -1879,7 +1883,7 @@ extension InsulinDeliveryPumpManager: IDPumpDelegate {
             }
         }
 
-        checkForLowReservoirCondition(newValue: pump.state.deviceInformation?.reservoirLevel, oldValue: state.pumpState.deviceInformation?.reservoirLevel)
+        checkForLowReservoirCondition(newValue: newReservoirLevel, oldValue: oldReservoirLevel)
 
         mutateState { state in
             state.pumpState = pump.state
