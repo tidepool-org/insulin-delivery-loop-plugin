@@ -98,7 +98,8 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
 
     public var inSignalLoss: Bool {
-        Self.isSignalLost(lastCommsDate: state.pumpState.lastCommsDate, isPumpConnected: isPumpConnected)
+        guard let pumpStatusHighlight else { return false }
+        return pumpStatusHighlight.isEqual(to: SignalLossPumpStatusHighlight())
     }
     
     public var isInoperable: Bool {
