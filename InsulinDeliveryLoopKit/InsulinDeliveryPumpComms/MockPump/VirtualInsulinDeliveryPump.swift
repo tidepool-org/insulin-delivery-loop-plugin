@@ -97,6 +97,9 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
         didSet {
             guard isConnected != oldValue else { return }
 
+            // set the date of the disconnect/reconnect
+            lastCommsDate = Date()
+
             if !isConnected && isBolusActive {
                 status.startEstimatingBolusProgress()
             } else if isConnected && status.isActiveBolusDeliveryInProgress() {
