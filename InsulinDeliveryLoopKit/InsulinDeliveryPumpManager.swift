@@ -508,9 +508,16 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public func lookupLatestAnnunciation(_ completion: @escaping (AnnunciationType?) -> Void) {
-        pumpDelegate.notify { delegate in
-            guard let delegate else { return }
-            Task {
+        pumpDelegate.notify { [weak self] delegate in
+            guard let self = self, let delegate = delegate else { 
+                completion(nil)
+                return 
+            }
+            Task { [weak self] in
+                guard let self = self else { 
+                    completion(nil)
+                    return 
+                }
                 do {
                     let alerts = try await delegate.lookupAllUnretracted(managerIdentifier: self.pluginIdentifier)
                     self.log.debug("Highest priority annunciation type: %{public}@, Latest unretracted alerts: %{public}@",
