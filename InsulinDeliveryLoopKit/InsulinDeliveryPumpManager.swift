@@ -508,13 +508,9 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public func lookupLatestAnnunciation(_ completion: @escaping (AnnunciationType?) -> Void) {
-        pumpDelegate.notify { [weak self] delegate in
-            guard let self = self, let delegate = delegate else { 
-                completion(nil)
-                return 
-            }
-            Task { [weak self] in
-                guard let self = self else { 
+        pumpDelegate.notify { delegate in
+            Task { [weak self, weak delegate] in
+                guard let self, let delegate else { 
                     completion(nil)
                     return 
                 }
