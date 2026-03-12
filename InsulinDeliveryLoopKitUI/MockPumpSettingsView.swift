@@ -61,6 +61,7 @@ struct MockPumpSettingsView: View {
                     Toggle(isOn: $viewModel.causeInsulinDeliveryInterruption) {
                         Text("Cause insulin delivery interruption")
                     }
+                    MockPumpNumberEntryView(title: "delivery resolution", value: $viewModel.deliveryResolutionString, placeholder: "Enter delivery resolution")
                 }
 
                 Section(header: SectionHeader(label: "Bolus")) {

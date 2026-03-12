@@ -320,9 +320,9 @@ extension DoseEntry {
     init (_ dose: UnfinalizedDose, at date: Date, isFinalized: Bool = false) {
         switch dose.doseType {
         case .bolus:
-            self = DoseEntry(type: .bolus, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedUnits ?? dose.units, unit: .units, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date), insulinType: dose.insulinType, automatic: dose.automatic, isMutable: !isFinalized, wasProgrammedByPumpUI: false)
+            self = DoseEntry(type: .bolus, startDate: dose.startTime, endDate: dose.endTime, value: (dose.programmedUnits ?? dose.units).roundedForPumpResolution, unit: .units, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date)?.roundedForPumpResolution, insulinType: dose.insulinType, automatic: dose.automatic, isMutable: !isFinalized, wasProgrammedByPumpUI: false)
         case .tempBasal:
-            self = DoseEntry(type: .tempBasal, startDate: dose.startTime, endDate: dose.endTime, value: dose.programmedRate ?? dose.rate, unit: .unitsPerHour, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date), insulinType: dose.insulinType, automatic: dose.automatic, isMutable: !isFinalized)
+            self = DoseEntry(type: .tempBasal, startDate: dose.startTime, endDate: dose.endTime, value: (dose.programmedRate ?? dose.rate).roundedForPumpResolution, unit: .unitsPerHour, decisionId: dose.decisionId, deliveredUnits: dose.finalizedUnits(at: date)?.roundedForPumpResolution, insulinType: dose.insulinType, automatic: dose.automatic, isMutable: !isFinalized)
         case .suspend:
             self = DoseEntry(suspendDate: dose.startTime, automatic: dose.automatic)
         case .resume:

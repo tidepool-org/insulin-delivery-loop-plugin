@@ -1566,12 +1566,14 @@ extension InsulinDeliveryPumpManager {
     // Number of pulses required to delivery one unit of insulin
     public static let pulsesPerUnit: Double = 1/pulseSize
     
+    public static var deliveryResolution: Double = 0.05
+    
     // Units per second
     public static let estimatedBolusDeliveryRate: Double = 2.5 / TimeInterval.minutes(1)
 
     // Supported bolus volumes in IU
     public static var supportedBolusVolumes: [Double] {
-        return Array((0...Int((maximumBolusVolume-minimumBolusVolume)*20)).map { (minimumBolusVolume + Double($0) / Double(20)).roundedToHundredths })
+        return Array((0...Int((maximumBolusVolume-minimumBolusVolume)/deliveryResolution)).map { (minimumBolusVolume + Double($0) * deliveryResolution).roundedToHundredths })
     }
     // Supported maximum bolus volumes in IU
     public static var supportedMaximumBolusVolumes: [Double] {
@@ -1585,7 +1587,7 @@ extension InsulinDeliveryPumpManager {
     
     // Supported basal rates in IU/hr
     public static var supportedBasalRates: [Double] {
-        return Array((0...Int((maximumBasalRateAmount-minimumBasalRateAmount)*20)).map { (minimumBasalRateAmount + Double($0) / Double(20)).roundedToHundredths })
+        return Array((0...Int((maximumBasalRateAmount-minimumBasalRateAmount)/deliveryResolution)).map { (minimumBasalRateAmount + Double($0) * deliveryResolution).roundedToHundredths })
     }
     public static var minimumBasalRateAmount: Double = 0
     // maximum allowed basal rate amount in IU/hr
