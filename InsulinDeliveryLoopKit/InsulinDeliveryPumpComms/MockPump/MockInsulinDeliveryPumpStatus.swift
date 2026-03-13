@@ -19,7 +19,7 @@ public struct MockInsulinDeliveryPumpStatus {
     public var pumpConfiguration: PumpConfiguration
 
     public var totalInsulinDelivered: Double {
-        return basalDelivered + bolusDelivered + activeBolusDeliveryStatus.insulinDelivered
+        return basalDelivered + bolusDelivered + activeBolusDeliveryStatus.insulinDelivered.roundedForPumpResolution
     }
 
     public var basalDelivered: Double
@@ -35,7 +35,7 @@ public struct MockInsulinDeliveryPumpStatus {
     public private(set) var tempBasal: UnfinalizedDose? {
         didSet {
             if let oldValue = oldValue {
-                pumpState.activeTempBasalDeliveryStatus.insulinDelivered = oldValue.units * oldValue.progress(at: Date())
+                pumpState.activeTempBasalDeliveryStatus.insulinDelivered = (oldValue.units * oldValue.progress(at: Date())).roundedForPumpResolution
             }
         }
     }
@@ -156,7 +156,7 @@ public struct MockInsulinDeliveryPumpStatus {
         
         // calculate the basal delivered
         for deliveredBasalSegment in deliveredBasalSegmentsSinceLastUpdate {
-            basalDelivered += deliveredBasalSegment.duration.hours * deliveredBasalSegment.rate
+            basalDelivered += (deliveredBasalSegment.duration.hours * deliveredBasalSegment.rate).roundedForPumpResolution
         }
         
         lastDeliveryUpdate = now
@@ -164,7 +164,7 @@ public struct MockInsulinDeliveryPumpStatus {
 
     mutating private func updateTempBasalDelivery(until now: Date = Date()) {
         if let tempBasal = tempBasal, tempBasal.isFinished(at: now) {
-            basalDelivered += tempBasal.units
+            basalDelivered += tempBasal.units.roundedForPumpResolution
             basalRateScheduleStartDate = tempBasal.endTime
             lastDeliveryUpdate = tempBasal.endTime ?? now
             self.tempBasal = nil
@@ -185,7 +185,7 @@ public struct MockInsulinDeliveryPumpStatus {
         guard var tempBasal = tempBasal else { return }
 
         tempBasal.cancel(at: now)
-        basalDelivered += tempBasal.units
+        basalDelivered += tempBasal.units.roundedForPumpResolution
         updateReservoirLevel()
         self.tempBasal = nil
         basalRateScheduleStartDate = now
@@ -196,7 +196,7 @@ public struct MockInsulinDeliveryPumpStatus {
         guard var tempBasal = tempBasal else { return }
 
         tempBasal.cancel(at: now)
-        basalDelivered += tempBasal.units
+        basalDelivered += tempBasal.units.roundedForPumpResolution
         updateReservoirLevel()
         self.tempBasal = nil
         basalRateScheduleStartDate = now
@@ -226,8 +226,8 @@ public struct MockInsulinDeliveryPumpStatus {
         {
             self.bolus?.scheduledCertainty = .certain
             if bolus.isFinished(at: now) {
-                bolusDelivered += bolus.units
-                activeBolusDeliveryStatus.insulinDelivered = bolus.units
+                bolusDelivered += bolus.units.roundedForPumpResolution
+                activeBolusDeliveryStatus.insulinDelivered = bolus.units.roundedForPumpResolution
                 activeBolusDeliveryStatus.endTime = now
                 activeBolusDeliveryStatus.progressState = .completed
                 activeBolusUpdateHandler?(activeBolusDeliveryStatus)
@@ -235,12 +235,13 @@ public struct MockInsulinDeliveryPumpStatus {
             } else if let startTime = activeBolusDeliveryStatus.startTime,
                       now.timeIntervalSince(startTime) >= 0
             {
-                let insulinDelivered = now.timeIntervalSince(startTime) * InsulinDeliveryPumpManager.estimatedBolusDeliveryRate
+                let insulinDelivered = (now.timeIntervalSince(startTime) * InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+                let progress = insulinDelivered / activeBolusDeliveryStatus.insulinProgrammed
+                
                 let remainingDuration = (activeBolusDeliveryStatus.insulinProgrammed - insulinDelivered) / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate
                 self.bolus?.endTime = now.addingTimeInterval(remainingDuration)
 
-                let progress = insulinDelivered / activeBolusDeliveryStatus.insulinProgrammed
-                activeBolusDeliveryStatus.insulinDelivered = insulinDelivered.roundedToHundredths
+                activeBolusDeliveryStatus.insulinDelivered = insulinDelivered.roundedForPumpResolution
                 activeBolusDeliveryStatus.progressState = progress > 0 ? .inProgress : .noActiveBolus
                 activeBolusUpdateHandler?(activeBolusDeliveryStatus)
             } else {
@@ -286,8 +287,8 @@ public struct MockInsulinDeliveryPumpStatus {
 
         bolus.cancel(at: now)
 
-        bolusDelivered += bolus.units
-        activeBolusDeliveryStatus.insulinDelivered = bolus.units
+        bolusDelivered += bolus.units.roundedForPumpResolution
+        activeBolusDeliveryStatus.insulinDelivered = bolus.units.roundedForPumpResolution
         activeBolusDeliveryStatus.progressState = .canceled
         activeBolusDeliveryStatus.endTime = now
 
@@ -303,7 +304,7 @@ public struct MockInsulinDeliveryPumpStatus {
     }
 
     mutating public func pumpPrimed(_ amount: Double = 0.5) {
-        totalPrimingInsulin += amount
+        totalPrimingInsulin += amount.roundedForPumpResolution
         updateReservoirLevel()
     }
 
@@ -325,7 +326,7 @@ public struct MockInsulinDeliveryPumpStatus {
     }
 
     mutating public func updateReservoirRemaining(_ reservoirRemaining: Double) {
-        basalDelivered = Double(initialReservoirLevel) - reservoirRemaining - bolusDelivered - activeBolusDeliveryStatus.insulinDelivered - totalPrimingInsulin
+        basalDelivered = Double(initialReservoirLevel) - reservoirRemaining - bolusDelivered - activeBolusDeliveryStatus.insulinDelivered.roundedForPumpResolution - totalPrimingInsulin
         updateReservoirLevel()
     }
 }
