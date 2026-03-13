@@ -1610,6 +1610,12 @@ extension InsulinDeliveryPumpManager {
     static let maxRequestSize: Int = 19
 }
 
+extension Double {
+    var roundedForPumpResolution: Double {
+        (self / InsulinDeliveryPumpManager.deliveryResolution).rounded() * InsulinDeliveryPumpManager.deliveryResolution
+    }
+}
+
 extension InsulinDeliveryPumpManager: IDPumpDelegate {
     public var supportedMaximumBasalRateAmount: Double { InsulinDeliveryPumpManager.maximumBasalRateAmount }
     public var basalRateProfileTemplateNumber: UInt8 { InsulinDeliveryPumpManager.basalRateProfileTemplateNumber }

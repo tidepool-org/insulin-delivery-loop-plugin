@@ -461,9 +461,3 @@ extension UnfinalizedDose {
                                    insulinDelivered: progress * programmedUnits)
     }
 }
-
-extension Double {
-    var roundedForPumpResolution: Double {
-        (self / InsulinDeliveryPumpManager.deliveryResolution).rounded() * InsulinDeliveryPumpManager.deliveryResolution
-    }
-}
