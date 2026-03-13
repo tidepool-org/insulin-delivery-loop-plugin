@@ -235,12 +235,13 @@ public struct MockInsulinDeliveryPumpStatus {
             } else if let startTime = activeBolusDeliveryStatus.startTime,
                       now.timeIntervalSince(startTime) >= 0
             {
-                let insulinDelivered = (now.timeIntervalSince(startTime) * InsulinDeliveryPumpManager.estimatedBolusDeliveryRate).roundedForPumpResolution
+                let insulinDelivered = (now.timeIntervalSince(startTime) * InsulinDeliveryPumpManager.estimatedBolusDeliveryRate)
+                let progress = insulinDelivered / activeBolusDeliveryStatus.insulinProgrammed
+                
                 let remainingDuration = (activeBolusDeliveryStatus.insulinProgrammed - insulinDelivered) / InsulinDeliveryPumpManager.estimatedBolusDeliveryRate
                 self.bolus?.endTime = now.addingTimeInterval(remainingDuration)
 
-                let progress = insulinDelivered / activeBolusDeliveryStatus.insulinProgrammed
-                activeBolusDeliveryStatus.insulinDelivered = insulinDelivered
+                activeBolusDeliveryStatus.insulinDelivered = insulinDelivered.roundedForPumpResolution
                 activeBolusDeliveryStatus.progressState = progress > 0 ? .inProgress : .noActiveBolus
                 activeBolusUpdateHandler?(activeBolusDeliveryStatus)
             } else {
