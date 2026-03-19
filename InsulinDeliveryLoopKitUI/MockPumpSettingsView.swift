@@ -167,7 +167,7 @@ struct MockPumpSettingsView: View {
                 // TextField only updates continuously as the user types if the value is a String
                 TextField(placeholder,
                           text: $value)
-                .keyboardType(.numberPad)
+                .keyboardType(.decimalPad)
                 .foregroundStyle(Color.accentColor)
             }
         }
