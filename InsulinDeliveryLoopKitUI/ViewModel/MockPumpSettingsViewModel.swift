@@ -11,7 +11,8 @@ import InsulinDeliveryLoopKit
 import InsulinDeliveryServiceKit
 import BluetoothCommonKit
 
-class MockPumpSettingsViewModel: ObservableObject {
+@Observable
+class MockPumpSettingsViewModel {
     var virtualPump: VirtualInsulinDeliveryPump
     
     var pumpManager: InsulinDeliveryPumpManager?
@@ -20,23 +21,23 @@ class MockPumpSettingsViewModel: ObservableObject {
 
     var uncertainDeliveryCommandReceived: Bool
 
-    @Published var uncertainDeliveryEnabled: Bool
+    var uncertainDeliveryEnabled: Bool
     
-    @Published var stoppedNotificationDelay: TimeInterval
+    var stoppedNotificationDelay: TimeInterval
     
-    @Published var annunciationTypeToIssue: AnnunciationType?
+    var annunciationTypeToIssue: AnnunciationType?
     
-    @Published var annunciationTypeToIssueDelay: TimeInterval
+    var annunciationTypeToIssueDelay: TimeInterval
 
-    @Published var authenticationError: SimulatedAuthenticationError = .none
+    var authenticationError: SimulatedAuthenticationError = .none
     
-    @Published var errorOnNextComms: SimulatedPumpCommError = .none
+    var errorOnNextComms: SimulatedPumpCommError = .none
 
-    @Published var reservoirString: String
+    var reservoirString: String
 
-    @Published var batteryLevelString: String
+    var batteryLevelString: String
     
-    @Published var fakePumpReplacementDate: Date?
+    var fakePumpReplacementDate: Date?
     
     var reservoirRemaining: Double? {
         guard let reservoirRemaining = numberFormatter.number(from: reservoirString) else { return nil }
@@ -64,7 +65,13 @@ class MockPumpSettingsViewModel: ObservableObject {
 
     var causeInsulinDeliveryInterruption: Bool = false
 
-    var deliveryResolutionString: String
+    var deliveryResolutionString: String {
+        didSet {
+            if deliveryResolutionString.isEmpty || Double(deliveryResolutionString) == Double.nan || Double(deliveryResolutionString) == 0 {
+                deliveryResolutionString = "0.05"
+            }
+        }
+    }
     
     var minBolusVolumeString: String
     var maxBolusVolumeString: String
@@ -121,7 +128,7 @@ class MockPumpSettingsViewModel: ObservableObject {
             virtualPump.updateReservoirRemaining(reservoirRemaining)
         }
         virtualPump.deviceInformation?.batteryLevel = Int(batteryLevelString)
-        InsulinDeliveryPumpManager.deliveryResolution = Double(deliveryResolutionString) ?? 0
+        InsulinDeliveryPumpManager.deliveryResolution = Double(deliveryResolutionString) ?? 0.05
         InsulinDeliveryPumpManager.minimumBolusVolume = Double(minBolusVolumeString) ?? 0
         InsulinDeliveryPumpManager.maximumBolusVolume = Double(maxBolusVolumeString) ?? 0
         InsulinDeliveryPumpManager.minimumBasalRateAmount = Double(minBasalRateString) ?? 0
