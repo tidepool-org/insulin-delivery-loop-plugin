@@ -14,7 +14,7 @@ import InsulinDeliveryServiceKit
 struct MockPumpSettingsView: View {
     @Environment(\.presentationMode) var presentationMode
 
-    @StateObject var viewModel: MockPumpSettingsViewModel
+    @State var viewModel: MockPumpSettingsViewModel
 
     var body: some View {
         Form {
