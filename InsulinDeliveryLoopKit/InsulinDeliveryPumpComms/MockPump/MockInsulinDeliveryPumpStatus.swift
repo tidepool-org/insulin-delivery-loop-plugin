@@ -69,6 +69,8 @@ public struct MockInsulinDeliveryPumpStatus {
 
     public var isAuthenticated: Bool
 
+    public var isConnected: Bool
+
     public init(pumpState: IDPumpState = IDPumpState(),
                 pumpConfiguration: PumpConfiguration = PumpConfiguration.defaultConfiguration,
                 basalDelivered: Double = 0,
@@ -79,7 +81,8 @@ public struct MockInsulinDeliveryPumpStatus {
                 tempBasal: UnfinalizedDose? = nil,
                 lastDeliveryUpdate: Date = Date(),
                 initialReservoirLevel: Int = 200,
-                isAuthenticated: Bool = false)
+                isAuthenticated: Bool = false,
+                isConnected: Bool = true)
     {
         self.pumpState = pumpState
         self.pumpConfiguration = pumpConfiguration
@@ -92,6 +95,7 @@ public struct MockInsulinDeliveryPumpStatus {
         self.lastDeliveryUpdate = lastDeliveryUpdate
         self.initialReservoirLevel = initialReservoirLevel
         self.isAuthenticated = isAuthenticated
+        self.isConnected = isConnected
         self.bolus = pumpState.activeBolusDeliveryStatus.unfinalizedBolus()
 
         self.pumpState.deviceInformation?.reservoirLevel = Double(initialReservoirLevel)
@@ -341,6 +345,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
         case bolusDelivered
         case initialReservoirLevel
         case isAuthenticated
+        case isConnected
         case lastBolusID
         case lastDeliveryUpdate
         case pumpConfiguration
@@ -378,6 +383,8 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
             self.tempBasal = UnfinalizedDose(rawValue: rawTempBasal)
         }
 
+        self.isConnected = rawValue[MockInsulinDeliveryPumpStatusKey.isConnected.rawValue] as? Bool ?? true
+
         self.bolus = pumpState.activeBolusDeliveryStatus.unfinalizedBolus()
         self.bolusDelivered = bolusDelivered
         self.initialReservoirLevel = initialReservoirLevel
@@ -395,6 +402,7 @@ extension MockInsulinDeliveryPumpStatus: RawRepresentable {
             MockInsulinDeliveryPumpStatusKey.bolusDelivered.rawValue: bolusDelivered,
             MockInsulinDeliveryPumpStatusKey.initialReservoirLevel.rawValue: initialReservoirLevel,
             MockInsulinDeliveryPumpStatusKey.isAuthenticated.rawValue: isAuthenticated,
+            MockInsulinDeliveryPumpStatusKey.isConnected.rawValue: isConnected,
             MockInsulinDeliveryPumpStatusKey.lastBolusID.rawValue: lastBolusID,
             MockInsulinDeliveryPumpStatusKey.lastDeliveryUpdate.rawValue: lastDeliveryUpdate,
             MockInsulinDeliveryPumpStatusKey.pumpState.rawValue: pumpState.rawValue,
@@ -438,7 +446,8 @@ extension MockInsulinDeliveryPumpStatus: Equatable {
             lhs.bolus == rhs.bolus &&
             lhs.activeBolusDeliveryStatus == rhs.activeBolusDeliveryStatus &&
             lhs.lastDeliveryUpdate == rhs.lastDeliveryUpdate &&
-            lhs.initialReservoirLevel == rhs.initialReservoirLevel
+            lhs.initialReservoirLevel == rhs.initialReservoirLevel &&
+            lhs.isConnected == rhs.isConnected
     }
 }
 
