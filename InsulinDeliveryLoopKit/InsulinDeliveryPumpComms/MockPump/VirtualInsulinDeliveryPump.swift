@@ -93,16 +93,20 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
 
     public var isTempBasalActive: Bool { status.tempBasal != nil }
 
-    public var isConnected: Bool = true {
-        didSet {
-            guard isConnected != oldValue else { return }
-
+    public var isConnected: Bool {
+        get {
+            status.isConnected
+        }
+        set {
+            guard status.isConnected != newValue else { return }
+            status.isConnected = newValue
+            
             // set the date of the disconnect/reconnect
             lastCommsDate = Date()
 
-            if !isConnected && isBolusActive {
+            if !status.isConnected && isBolusActive {
                 status.startEstimatingBolusProgress()
-            } else if isConnected && status.isActiveBolusDeliveryInProgress() {
+            } else if status.isConnected && status.isActiveBolusDeliveryInProgress() {
                 status.updateDelivery()
             }
             delegate?.pumpDidUpdateState(self)
