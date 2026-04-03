@@ -1577,7 +1577,7 @@ extension InsulinDeliveryPumpManager {
     }
     // Supported maximum bolus volumes in IU
     public static var supportedMaximumBolusVolumes: [Double] {
-        // Commented out until requirements are updates
+        // Commented out until requirements are updated
 //        Array((max(1,Int(minimumBolusVolume))*10...Int(maximumBolusVolume*10)).map { Double($0) / Double(10) })
         supportedBolusVolumes
     }
