@@ -44,6 +44,10 @@ public class VirtualInsulinDeliveryPump: InsulinDeliveryPumpComms {
                 status = newValue
             }
 
+            if oldStatus?.isConnected != newValue.isConnected {
+                delegate?.pumpDidUpdateState(self)
+            }
+
             let newPumpState = newValue.pumpState
             guard let oldPumpState = oldStatus?.pumpState,
                   oldPumpState != newPumpState,
