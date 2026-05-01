@@ -629,8 +629,10 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         
         // Ok, now reset and see if replacement clears the status highlight
         setUpExpectations()
-        statusUpdateExpectation?.assertForOverFulfill = false
         alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
+        alertExpectation?.assertForOverFulfill = false
+        statusUpdateExpectation?.assertForOverFulfill = false
+        lookupExpectation?.assertForOverFulfill = false
         completeReplacementWorkflow()
         await fulfillment(of: [alertExpectation!, statusUpdateExpectation!, lookupExpectation!], timeout: expectationTimeout)
 
@@ -1925,10 +1927,10 @@ extension InsulinDeliveryPumpManagerTests {
 
     func testStatusUpdateForDifferentBasalDeliveryState() {
         statusUpdates = []
-        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2.0, for: .minutes(30), completion: { _ in })
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
+        pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2.0, for: .minutes(30), completion: { _ in })
         wait(for: [statusUpdateExpectation!], timeout: 30)
         XCTAssertNotNil(statusUpdates.last?.status.basalDeliveryState)
         XCTAssertNotNil(statusUpdates.last?.oldStatus.basalDeliveryState)
@@ -1936,10 +1938,10 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testStatusUpdateForDifferentBolusState() {
-        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
+        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         wait(for: [statusUpdateExpectation!], timeout: 30)
         XCTAssertNotNil(statusUpdates.last?.status.bolusState)
         XCTAssertNotNil(statusUpdates.last?.oldStatus.bolusState)
@@ -1947,11 +1949,11 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testStatusUpdateForDifferentDeliveryIsUncertain() {
-        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
-        pump.handleCBError(CBError(.peripheralDisconnected))
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
+        pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
+        pump.handleCBError(CBError(.peripheralDisconnected))
         wait(for: [statusUpdateExpectation!], timeout: 30)
         XCTAssertEqual(statusUpdates.last?.status.deliveryIsUncertain, true)
         XCTAssertEqual(statusUpdates.last?.oldStatus.deliveryIsUncertain, false)
