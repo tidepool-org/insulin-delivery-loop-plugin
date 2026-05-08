@@ -750,16 +750,23 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
 
     public func enactBolus(decisionId: UUID?, units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
+        // Capture pump properties before entering the state lock to avoid recursive lock
+        // acquisition — isBolusActive can trigger status.updateDeliveryIfNeeded() which
+        // calls pumpDidUpdateState, which reads state.
+        let isPumpConnected = pump.isConnected
+        let isValidVolume = pump.isValidBolusVolume(units)
+        let isBolusActive = pump.isBolusActive
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }
-            if !pump.isValidBolusVolume(units) {
+            if !isValidVolume {
                 logDelegateEvent("preflight failed. invalid bolus volume")
                 return .failure(.configuration(InsulinDeliveryPumpManagerError.invalidBolusVolume))
             }
-            if pump.isBolusActive {
+            if isBolusActive {
                 logDelegateEvent("preflight failed. bolus is active")
                 return .failure(.deviceState(InsulinDeliveryPumpManagerError.hasActiveCommand))
             }
@@ -820,8 +827,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public func cancelBolus(completion: @escaping (PumpManagerResult<DoseEntry?>) -> Void) {
+        let isPumpConnected = pump.isConnected
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }
@@ -905,12 +914,15 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
         if case .tempBasal = status.basalDeliveryState {
             replaceExisting = true
         }
+        let isPumpConnected = pump.isConnected
+        let isValidRate = pump.isValidBasalRate(unitsPerHour)
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }
-            if !pump.isValidBasalRate(unitsPerHour) {
+            if !isValidRate {
                 logDelegateEvent("preflight failed. invalid basal rate")
                 return .failure(.deviceState(InsulinDeliveryPumpManagerError.invalidTempBasalRate))
             }
@@ -969,8 +981,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public func cancelTempBasal(completion: @escaping (PumpManagerError?) -> Void) {
+        let isPumpConnected = pump.isConnected
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }
@@ -1118,8 +1132,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
 
     public func suspendDelivery(completion: @escaping (Error?) -> Void) {
+        let isPumpConnected = pump.isConnected
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }
@@ -1218,8 +1234,10 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     }
     
     public func resumeDelivery(completion: @escaping (Error?) -> Void) {
+        let isPumpConnected = pump.isConnected
+
         let preflightResult = setStateWithResult({ state -> PreflightResult in
-            if !pump.isConnected {
+            if !isPumpConnected {
                 logDelegateEvent("preflight failed. pump is not connected")
                 return .failure(.connection(InsulinDeliveryPumpManagerError.commError(.disconnected)))
             }

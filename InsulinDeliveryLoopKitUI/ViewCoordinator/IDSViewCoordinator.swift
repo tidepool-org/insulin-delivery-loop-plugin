@@ -38,7 +38,7 @@ enum IDSScreen: Int {
         case .connectToPump:
             return .primeReservoir
         case .pumpKeyEntryManual:
-            return . connectToPump
+            return .connectToPump
         case .primeReservoir:
             return .attachPump
         case .replaceParts:
