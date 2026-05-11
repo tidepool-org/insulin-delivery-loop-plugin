@@ -20,6 +20,7 @@ struct SettingsView: View {
         case cannotDeletePumpManager(Error)
     }
 
+    @Environment(\.appName) private var appName
     @Environment(\.guidanceColors) var guidanceColors
     @Environment(\.insulinTintColor) var insulinTintColor
     @Environment(\.allowDebugFeatures) var allowDebugFeatures
@@ -37,8 +38,10 @@ struct SettingsView: View {
 
             activitySection
 
-            deviceDetailsSection
-
+            configurationSection
+            
+            supportSection
+            
             if allowDebugFeatures {
                 deletePumpManagerSection
             }
@@ -102,10 +105,10 @@ struct SettingsView: View {
     private var activitySection: some View {
         suspendResumeInsulinSubSection
 
+        replacePumpSubSection
+
         notificationSubSection
             .disabled(viewModel.insulinDeliveryDisabled)
-
-        replacePumpSubSection
     }
 
     private var suspendResumeInsulinSubSection: some View {
@@ -177,41 +180,6 @@ struct SettingsView: View {
             showSuspendOptions = true
         }
     }
-
-    @ViewBuilder
-    private var deviceDetailsSection: some View {
-        NavigationLink(destination:
-                        DeviceDetailsView(
-                            viewModel: viewModel,
-                            pumpManagerState: viewModel.pumpManagerState,
-                            insulinQuantityFormatter: viewModel.insulinQuantityFormatter,
-                            getBatteryLevel: viewModel.getBatteryLevel)
-                        .environment(\.allowDebugFeatures, allowDebugFeatures)
-                        .environment(\.insulinTintColor, insulinTintColor)
-                        .environment(\.guidanceColors, guidanceColors)
-        ) {
-            FrameworkLocalizedText("Pump Details", comment: "Description label for device details in pump settings")
-        }
-
-        NavigationLink(
-            destination:
-                InsulinTypeSelection(
-                    initialValue: viewModel.insulinType,
-                    supportedInsulinTypes: viewModel.supportedInsulinTypes,
-                    isInitialSetup: false,
-                    didConfirm: viewModel.didChangeInsulinType
-                )
-        ) {
-            RoundedCardValueRow(
-                label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
-                value: viewModel.insulinType?.brandName ?? "[Name]",
-                disclosure: false
-            )
-        }
-
-        pumpTimeSubSection
-            .disabled(viewModel.insulinDeliveryDisabled)
-    }
     
     private var replacePumpSubSection: some View {
         Section {
@@ -219,7 +187,7 @@ struct SettingsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 5) {
                         FrameworkLocalizedText("Replace Pump", comment: "Button to replace pump")
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(guidanceColors.critical)
                             .padding(.bottom, 2)
                     }
                     Spacer()
@@ -373,6 +341,63 @@ struct SettingsView: View {
             return localizedError.message
         } else {
             return error.localizedDescription
+        }
+    }
+    
+    @ViewBuilder
+    private var configurationSection: some View {
+        Section(header: SectionHeader(label: "Configuration")) {
+            deviceDetailsSection
+        }
+        
+        pumpTimeSubSection
+            .disabled(viewModel.insulinDeliveryDisabled)
+    }
+    
+    private var deviceDetailsSection: some View {
+        Section {
+            LabeledValueView(label: "Pump Paired", value: viewModel.lastPumpPairedDateTimeString)
+            
+            LabeledValueView(label: "Pump Expires", value:  viewModel.pumpExpirationDateTimeString)
+
+            LabeledValueView(label: "Current Basal Rate", value: viewModel.currentBasalRate)
+
+            NavigationLink(
+                destination:
+                    InsulinTypeSelection(
+                        initialValue: viewModel.insulinType,
+                        supportedInsulinTypes: viewModel.supportedInsulinTypes,
+                        isInitialSetup: false,
+                        didConfirm: viewModel.didChangeInsulinType
+                    )
+            ) {
+                RoundedCardValueRow(
+                    label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
+                    value: viewModel.insulinType?.brandName ?? "[Name]",
+                    disclosure: false
+                )
+            }
+            
+            NavigationLink(destination:
+                            DeviceDetailsView(
+                                viewModel: viewModel,
+                                pumpManagerState: viewModel.pumpManagerState,
+                                insulinQuantityFormatter: viewModel.insulinQuantityFormatter,
+                                getBatteryLevel: viewModel.getBatteryLevel)
+                            .environment(\.allowDebugFeatures, allowDebugFeatures)
+                            .environment(\.insulinTintColor, insulinTintColor)
+                            .environment(\.guidanceColors, guidanceColors)
+            ) {
+                FrameworkLocalizedText("Device Details", comment: "Description label for device details in pump settings")
+            }
+        }
+    }
+    
+    private var supportSection: some View {
+        Section(header: SectionHeader(label: "Support")) {
+            NavigationLink(destination: DemoPlaceHolderView(appName: appName)) {
+                Text("Get help with your pump")
+            }
         }
     }
 }

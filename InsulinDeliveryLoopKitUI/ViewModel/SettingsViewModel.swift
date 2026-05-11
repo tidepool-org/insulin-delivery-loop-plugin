@@ -132,6 +132,22 @@ class SettingsViewModel: ObservableObject {
     @Published var transitioningSuspendResumeInsulinDelivery: Bool
 
     @Published var suspendedAt: Date?
+    
+    var lastPumpPairedDateTimeString: String {
+        guard let lastReplacementDate = expirationProgressViewModel.viewModel().lastReplacementDate else {
+            return "–"
+        }
+        
+        return Self.dateTimeFormatter.string(from: lastReplacementDate)
+    }
+    
+    var pumpExpirationDateTimeString: String {
+        guard let expirationDate = expirationProgressViewModel.viewModel().expirationDate else {
+            return "–"
+        }
+        
+        return Self.dateTimeFormatter.string(from: expirationDate)
+    }
 
     var suspendedAtString: String? {
         guard let suspendedAt = suspendedAt else { return nil }
@@ -332,8 +348,6 @@ class SettingsViewModel: ObservableObject {
                     guard let self = self else { return }
                     if let annunciationType {
                         self.descriptiveText = annunciationType.insulinDeliveryStatusLocalizedString(automaticDosingEnabled: self.automaticDosingEnabled)
-                    } else if self.isInsulinDeliverySuspendedByUser == true {
-                        self.descriptiveText = self.attachPumpDescriptiveText
                     } else {
                         self.descriptiveText = nil
                     }
