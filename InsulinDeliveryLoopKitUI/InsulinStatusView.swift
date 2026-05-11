@@ -48,7 +48,7 @@ struct InsulinStatusView: View {
     }
 
     private var deliveryStatusSpacing: CGFloat {
-        return subViewSpacing
+        (viewModel.isInsulinSuspended || inNoDelivery) ? subViewSpacing : subViewSpacing - 10
     }
 
     var deliveryStatus: some View {
