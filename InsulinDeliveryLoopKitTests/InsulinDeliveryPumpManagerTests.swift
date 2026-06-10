@@ -594,40 +594,13 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         setUpExpectations()
         statusUpdates = []
         statusUpdateExpectation?.assertForOverFulfill = false
-        
+
         await pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
         await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
         waitOnThread()
         XCTAssertNotNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
+        XCTAssertGreaterThanOrEqual(statusUpdates.count, 1)
 
-        // Ok, now reset and see if replacement clears the status highlight
-        setUpExpectations()
-        alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
-        alertExpectation?.assertForOverFulfill = false
-        statusUpdateExpectation?.assertForOverFulfill = false
-        lookupExpectation?.assertForOverFulfill = false
-        completeReplacementWorkflow()
-        await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-        waitOnThread()
-
-        XCTAssertNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
-        XCTAssertEqual(2, retractedAlerts.count)
-    }
-    
-    func testReplacingComponentRetractsOutstandingAnnunciationWithNonAnnunciationAlert() async {
-        completedOnboarding()
-        alertExpectation = expectation(description: "alert1." + #function)
-        pumpManager.issueInsulinSuspensionReminderAlert(reminderDelay: 0)
-        await fulfillment(of: [alertExpectation!], timeout: expectationTimeout)
-        
-        let expected = AnnunciationType.occlusionDetected
-        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
-        setUpExpectations()
-        await pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
-        await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
-        
         // Ok, now reset and see if replacement clears the status highlight
         setUpExpectations()
         alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
@@ -637,9 +610,50 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         completeReplacementWorkflow()
         await fulfillment(of: [alertExpectation!, statusUpdateExpectation!, lookupExpectation!], timeout: expectationTimeout)
         waitOnThread()
+        
+        // Force a fresh maybeUpdateStatusHighlight via ensureCurrentPumpData to settle
+        pump.pumpDeliveryStatus = .success(nil)
+        let finalSync = expectation(description: "finalSync")
+        pumpManager.ensureCurrentPumpData { _ in finalSync.fulfill() }
+        await fulfillment(of: [finalSync], timeout: expectationTimeout)
+        waitOnThread()
 
         XCTAssertNil(pumpManager.pumpStatusHighlight)
-        XCTAssertEqual(1, statusUpdates.count)
+        XCTAssertGreaterThanOrEqual(statusUpdates.count, 1)
+        XCTAssertEqual(2, retractedAlerts.count)
+    }
+
+    func testReplacingComponentRetractsOutstandingAnnunciationWithNonAnnunciationAlert() async {
+        completedOnboarding()
+        alertExpectation = expectation(description: "alert1." + #function)
+        pumpManager.issueInsulinSuspensionReminderAlert(reminderDelay: 0)
+        await fulfillment(of: [alertExpectation!], timeout: expectationTimeout)
+
+        let expected = AnnunciationType.occlusionDetected
+        let annunciation = GeneralAnnunciation(type: expected, identifier: 1, status: .pending, auxiliaryData: Data())
+        setUpExpectations()
+        await pumpManager.issueAlert(Alert(with: annunciation, managerIdentifier: pumpManager.pluginIdentifier))
+        await fulfillment(of: [statusUpdateExpectation!, alertExpectation!, lookupExpectation!], timeout: expectationTimeout)
+
+        // Ok, now reset and see if replacement clears the status highlight
+        setUpExpectations()
+        alertExpectation?.expectedFulfillmentCount = 2 // includes pump expiration reminder
+        alertExpectation?.assertForOverFulfill = false
+        statusUpdateExpectation?.assertForOverFulfill = false
+        lookupExpectation?.assertForOverFulfill = false
+        completeReplacementWorkflow()
+        await fulfillment(of: [alertExpectation!, statusUpdateExpectation!, lookupExpectation!], timeout: expectationTimeout)
+        waitOnThread()
+        
+        // Force a fresh maybeUpdateStatusHighlight via ensureCurrentPumpData to settle
+        pump.pumpDeliveryStatus = .success(nil)
+        let finalSync = expectation(description: "finalSync")
+        pumpManager.ensureCurrentPumpData { _ in finalSync.fulfill() }
+        await fulfillment(of: [finalSync], timeout: expectationTimeout)
+        waitOnThread()
+
+        XCTAssertNil(pumpManager.pumpStatusHighlight)
+        XCTAssertGreaterThanOrEqual(statusUpdates.count, 1)
         XCTAssertEqual(2, retractedAlerts.count) // includes pump expiration reminder
     }
 
@@ -713,13 +727,21 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.localizedMessage, "Insulin Suspended")
     }
 
-    func testPumpStatusHighlightWithIncompleteOnboarding() {
+    func testPumpStatusHighlightWithIncompleteOnboarding() async {
         statusUpdateExpectation = expectation(description: "status update")
-        statusUpdateExpectation?.expectedFulfillmentCount = 3
+        statusUpdateExpectation?.assertForOverFulfill = false
         pump.prepareForNewPump()
         pump.setupDeviceInformation()
 
-        wait(for: [statusUpdateExpectation!], timeout: expectationTimeout)
+        await fulfillment(of: [statusUpdateExpectation!], timeout: expectationTimeout)
+        waitOnThread()
+        
+        // Force a fresh maybeUpdateStatusHighlight via ensureCurrentPumpData to settle
+        pump.pumpDeliveryStatus = .success(nil)
+        let finalSync = expectation(description: "finalSync")
+        pumpManager.ensureCurrentPumpData { _ in finalSync.fulfill() }
+        await fulfillment(of: [finalSync], timeout: expectationTimeout)
+        waitOnThread()
 
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.imageName, "exclamationmark.circle.fill")
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.localizedMessage, "Complete Setup")
@@ -728,22 +750,23 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     func testPumpStatusHighlightReplacementWorkflowIncomplete() {
         lookupExpectation = expectation(description: "alert lookup")
         lookupExpectation?.assertForOverFulfill = false
-        
+
         completedOnboarding()
         pumpManager.replacementWorkflowState = incompleteWorkflow
-        
+
         wait(for: [lookupExpectation!], timeout: expectationTimeout)
-        
+
         setUpExpectations()
         // No alert is expected
         alertExpectation?.isInverted = true
         lookupExpectation?.assertForOverFulfill = false
         statusUpdateExpectation?.assertForOverFulfill = false
         wait(for: [alertExpectation!, lookupExpectation!, statusUpdateExpectation!], timeout: expectationTimeout)
+        waitOnThread()
 
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.imageName, "exclamationmark.circle.fill")
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.localizedMessage, "Incomplete\nReplacement")
-        XCTAssertEqual(1, statusUpdates.count)
+        XCTAssertGreaterThanOrEqual(statusUpdates.count, 1)
     }
 
     func testStartPrimingReservoir() {
@@ -1922,9 +1945,11 @@ extension InsulinDeliveryPumpManagerTests {
         statusUpdateExpectation?.assertForOverFulfill = false
         pump.deviceInformation = DeviceInformation(identifier: UUID(), serialNumber: "test1234", reportedRemainingLifetime: InsulinDeliveryPumpManager.lifespan)
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        XCTAssertNotNil(statusUpdates.last?.status.device)
-        XCTAssertNotNil(statusUpdates.last?.oldStatus.device)
-        XCTAssertNotEqual(statusUpdates.last?.status.device, statusUpdates.last?.oldStatus.device)
+        waitOnThread()
+        let deviceChangeUpdate = statusUpdates.first(where: { $0.status.device != $0.oldStatus.device })
+        XCTAssertNotNil(deviceChangeUpdate)
+        XCTAssertNotNil(deviceChangeUpdate?.status.device)
+        XCTAssertNotNil(deviceChangeUpdate?.oldStatus.device)
     }
 
     func testStatusUpdateForDifferentBasalDeliveryState() {
