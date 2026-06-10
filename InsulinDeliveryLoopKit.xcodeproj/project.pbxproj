@@ -2007,7 +2007,7 @@
 		};
 		B45DB7F62D8CA3B800347D81 /* XCRemoteSwiftPackageReference "InsulinDeliveryServiceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:tidepool-org/InsulinDeliveryServiceKit.git";
+			repositoryURL = "https://github.com/tidepool-org/InsulinDeliveryServiceKit.git";
 			requirement = {
 				branch = dev;
 				kind = branch;

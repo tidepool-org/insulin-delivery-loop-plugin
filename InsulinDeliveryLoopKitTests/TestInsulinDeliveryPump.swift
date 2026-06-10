@@ -91,8 +91,8 @@ class TestInsulinDeliveryPump: InsulinDeliveryPump {
         let statusFlags = DTStatusFlag([.epochYear2000, .utcAligned])
 
         var response = Data(baseTime)
-        response.append(timeZone.gattTimeZoneOffset)
-        response.append(timeZone.dstOffset.rawValue)
+        response.append(timeZone.gattTimeZoneOffset(for: date))
+        response.append(timeZone.dstOffset(for: date).rawValue)
         response.append(statusFlags.rawValue)
         response = response.appendingCRCPrefix()
 
