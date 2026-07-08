@@ -1965,26 +1965,36 @@ extension InsulinDeliveryPumpManagerTests {
     }
 
     func testStatusUpdateForDifferentBolusState() {
+        statusUpdates = []
         statusUpdateExpectation = expectation(description: #function)
-        statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
         pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        XCTAssertNotNil(statusUpdates.last?.status.bolusState)
-        XCTAssertNotNil(statusUpdates.last?.oldStatus.bolusState)
-        XCTAssertNotEqual(statusUpdates.last?.status.bolusState, statusUpdates.last?.oldStatus.bolusState)
+        waitOnThread()
+        // Assert on the update where bolusState actually changed rather than `last`: the bolus
+        // state machine may emit further updates (e.g. .initiating → .inProgress, or an update
+        // that leaves bolusState unchanged), so `last` is nondeterministic.
+        let bolusStateChange = statusUpdates.first(where: { $0.status.bolusState != $0.oldStatus.bolusState })
+        XCTAssertNotNil(bolusStateChange)
+        XCTAssertEqual(bolusStateChange?.oldStatus.bolusState, .noBolus)
+        XCTAssertEqual(bolusStateChange?.status.bolusState, .initiating)
     }
 
     func testStatusUpdateForDifferentDeliveryIsUncertain() {
+        statusUpdates = []
         statusUpdateExpectation = expectation(description: #function)
-        statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
         pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         pump.handleCBError(CBError(.peripheralDisconnected))
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        XCTAssertEqual(statusUpdates.last?.status.deliveryIsUncertain, true)
-        XCTAssertEqual(statusUpdates.last?.oldStatus.deliveryIsUncertain, false)
-        XCTAssertNotEqual(statusUpdates.last?.status.deliveryIsUncertain, statusUpdates.last?.oldStatus.deliveryIsUncertain)
+        waitOnThread()
+        // Assert on the update where deliveryIsUncertain actually changed rather than `last`: the
+        // bolus/disconnect flow may emit further updates that leave deliveryIsUncertain unchanged,
+        // so `last` is nondeterministic.
+        let uncertainChange = statusUpdates.first(where: { $0.status.deliveryIsUncertain != $0.oldStatus.deliveryIsUncertain })
+        XCTAssertNotNil(uncertainChange)
+        XCTAssertEqual(uncertainChange?.oldStatus.deliveryIsUncertain, false)
+        XCTAssertEqual(uncertainChange?.status.deliveryIsUncertain, true)
     }
 
     func testStoreCurrentPumpRemainingLifetime() {
