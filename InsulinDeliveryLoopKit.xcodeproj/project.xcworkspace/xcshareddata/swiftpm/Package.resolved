@@ -13,7 +13,7 @@
     {
       "identity" : "bluetoothcommonkit",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:tidepool-org/BluetoothCommonKit.git",
+      "location" : "https://github.com/tidepool-org/BluetoothCommonKit.git",
       "state" : {
         "branch" : "dev",
         "revision" : "795492804ed1a9ed46b7a2545fcc46d44eb1a50a"
@@ -22,7 +22,7 @@
     {
       "identity" : "cryptoswift",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:krzyzanowskim/CryptoSwift.git",
+      "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
       "state" : {
         "revision" : "729e01bc9b9dab466ac85f21fb9ee2bc1c61b258",
         "version" : "1.8.4"
@@ -40,7 +40,7 @@
     {
       "identity" : "insulindeliveryservicekit",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:tidepool-org/InsulinDeliveryServiceKit.git",
+      "location" : "https://github.com/tidepool-org/InsulinDeliveryServiceKit.git",
       "state" : {
         "branch" : "dev",
         "revision" : "e4f5183560bb4380b160e354400172e22ca07eba"
