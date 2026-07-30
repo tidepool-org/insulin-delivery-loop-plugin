@@ -68,8 +68,10 @@ public struct ImageAlertPresenter: UIViewControllerRepresentable {
                         let titleImageAttachment = NSTextAttachment()
                         switch image {
                         case .warning:
-                            titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(UIColor(guidanceColors.critical))
-                            titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: 40, height: 35)
+                            let iconSize = CGSize(width: 40, height: 35)
+                            titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?
+                                .tintedForTextAttachment(UIColor(guidanceColors.critical), size: iconSize)
+                            titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: iconSize.width, height: iconSize.height)
                         case let .custom(uIImage, bounds):
                             titleImageAttachment.image = uIImage
                             titleImageAttachment.bounds = bounds(titleImageAttachment)
