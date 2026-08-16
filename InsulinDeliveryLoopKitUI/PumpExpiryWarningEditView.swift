@@ -94,20 +94,18 @@ struct PumpExpiryWarningEditView: View {
     }
 
     var content: some View {
-        VStack {
-            RoundedCardScrollView(title: LocalizedString("Pump Expiration", comment: "Title for pump expiry warning edit page")) {
-                if showInstructionalContent {
-                    instructionalContent
-                }
-                warningValueEditor
-                repeatReminderEditor
+        RoundedCardScrollView(title: LocalizedString("Pump Expiration", comment: "Title for pump expiry warning edit page")) {
+            if showInstructionalContent {
+                instructionalContent
             }
-            Spacer()
+            warningValueEditor
+            repeatReminderEditor
+        }
+        .actionAreaInset {
             Button(action: saveTapped) {
                 Text(saveButtonText)
-                    .actionButtonStyle()
-                    .padding()
             }
+            .buttonStyle(ActionButtonStyle())
             .disabled(!valueChanged && presentationMode == .settings)
         }
     }

@@ -33,7 +33,6 @@ struct AttachPumpView: View {
         .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
         .navigationTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .edgesIgnoringSafeArea(.bottom)
     }
     
     @ViewBuilder
@@ -69,7 +68,7 @@ struct AttachPumpView: View {
     }
 
     private var actionContent: some View {
-        VStack {
+        FloatingActionArea {
             if viewModel.receivedReservoirIssue {
                 ReservoirIssueWarningView(action: { })
             } else if !viewModel.isPumpConnected && !alertIsPresented {
@@ -84,8 +83,6 @@ struct AttachPumpView: View {
                 startInsulinDeliveryButton
             }
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
 
     @ViewBuilder
@@ -104,8 +101,8 @@ struct AttachPumpView: View {
     private var startInsulinDeliveryButton: some View {
         Button(action: startInsulinDeliveryTapped) {
             startInsulinDeliveryButtonTitle
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.isPumpConnected || startingInsulinDelivery)
     }
 

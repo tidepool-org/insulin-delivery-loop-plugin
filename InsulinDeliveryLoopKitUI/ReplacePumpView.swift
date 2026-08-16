@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import LoopKitUI
 import InsulinDeliveryLoopKit
 
 struct ReplaceComponentsView: View {
@@ -31,7 +32,6 @@ struct ReplaceComponentsView: View {
         }
         .navigationBarBackButtonHidden(communicationInProgress)
         .navigationBarTitleDisplayMode(.inline)
-        .edgesIgnoringSafeArea(.bottom)
     }
     
     private var replacePump: some View {
@@ -48,18 +48,16 @@ struct ReplaceComponentsView: View {
     }
     
     private var actionContent: some View {
-        VStack {
+        FloatingActionArea {
             replaceButton
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
 
     private var replaceButton: some View {
         Button(action: replaceTapped) {
             Text(replaceButtonText)
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(disableReplaceButton)
     }
 

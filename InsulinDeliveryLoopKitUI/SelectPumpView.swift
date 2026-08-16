@@ -25,7 +25,6 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .edgesIgnoringSafeArea(.bottom)
     }
 
     private var selectPump: some View {
@@ -94,13 +93,12 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     }
 
     private var actionContent: some View {
-        VStack {
+        FloatingActionArea {
             if !viewModel.deviceSelected {
                 progressView
             }
             continueButton
         }
-        .background(Color(UIColor.systemBackground).shadow(radius: 5))
     }
 
     private var progressView: some View {
@@ -115,10 +113,9 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     private var continueButton: some View {
         Button(action: viewModel.connectToSelectedDevice) {
             FrameworkLocalizedText("Continue", comment: "Continue setup button")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.deviceSelected)
-        .padding()
     }
 }
 
