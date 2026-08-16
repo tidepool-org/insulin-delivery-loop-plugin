@@ -39,7 +39,6 @@ struct PrimePumpView: View {
         .navigationTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .edgesIgnoringSafeArea(.bottom)
     }
     
     @ViewBuilder
@@ -147,7 +146,7 @@ struct PrimePumpView: View {
     }
 
     private var actionContent: some View {
-        VStack(spacing: 15) {
+        FloatingActionArea {
             pumpDisconnectedWarningIfNecessary
             if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
                 primingPumpCompleted
@@ -167,8 +166,6 @@ struct PrimePumpView: View {
                 startPrimingPump
             }
         }
-        .padding(15)
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
 
     @ViewBuilder
@@ -203,8 +200,8 @@ struct PrimePumpView: View {
     private var stopPrimingButton: some View {
         Button(action: stopPrimingSelected) {
             FrameworkLocalizedText("Stop Priming", comment: "Action button description to stop priming and continue to the next step")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(stopPrimingButtonDisabled)
     }
 
@@ -262,8 +259,8 @@ struct PrimePumpView: View {
     private var primingCompletedButton: some View {
         Button(action: viewModel.primingHasCompleted) {
                 FrameworkLocalizedText("Continue", comment: "Action button description to continue the workflow after priming pump has completed")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.isPumpConnected)
     }
 
@@ -277,13 +274,13 @@ struct PrimePumpView: View {
         
         Button(action: { withAnimation() { primingCompleted = true } }) {
             FrameworkLocalizedText("Yes, I saw a drop", comment: "Button label for when the user has seen a drop of insulin")
-                .actionButtonStyle()
         }
-        
+        .buttonStyle(ActionButtonStyle())
+
         Button(action: startPrimingPumpSelected) {
             FrameworkLocalizedText("No, continue priming", comment: "Action button description when priming the pump stopped but can continue")
-                .actionButtonStyle(.secondary)
         }
+        .buttonStyle(ActionButtonStyle(.secondary))
     }
 
     private var startPrimingButtonDisabled: Bool {
@@ -293,8 +290,8 @@ struct PrimePumpView: View {
     private var startPrimingPump: some View {
         Button(action: startPrimingPumpSelected) {
             FrameworkLocalizedText("Start Priming", comment: "Action button description to start priming")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(startPrimingButtonDisabled)
     }
 

@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import LoopKitUI
 
 struct ReservoirIssueWarningView: View {
     var action: () -> Void
@@ -30,8 +31,8 @@ struct ReservoirIssueWarningView: View {
     private var restartReservoirFillButton: some View {
         Button(action: action) {
             FrameworkLocalizedText("Re-Enter Reservoir Fill", comment: "Title of restart reservoir fill button")
-                .actionButtonStyle(.destructive)
         }
+        .buttonStyle(ActionButtonStyle(.destructive))
     }
 }
 

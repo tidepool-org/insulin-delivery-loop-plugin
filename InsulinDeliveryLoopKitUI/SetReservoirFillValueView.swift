@@ -34,7 +34,6 @@ struct SetReservoirFillValueView: View {
         content
             .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
             .navigationBarTitleDisplayMode(.inline)
-            .edgesIgnoringSafeArea(.bottom)
     }
     
     private var content: some View {
@@ -80,8 +79,10 @@ struct SetReservoirFillValueView: View {
                     )
                 }
             }
-            Spacer()
-            saveButton
+            Spacer(minLength: 0)
+            FloatingActionArea {
+                saveButton
+            }
         }
     }
 
@@ -106,10 +107,8 @@ struct SetReservoirFillValueView: View {
         Button(action: saveTapped) {
             saveButtonText
                 .actionButtonStyle(okToContinue ? .primary : .deactivated)
-                .padding()
         }
         .disabled(!okToContinue)
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
     
     @ViewBuilder
