@@ -32,7 +32,6 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
-        .edgesIgnoringSafeArea(.bottom)
         .keyboardEntryPage()
         .keyboardToolbar(isFocused: isPumpKeyFocused, dismiss: { isPumpKeyFocused = false })
     }
