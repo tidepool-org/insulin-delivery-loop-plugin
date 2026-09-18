@@ -68,7 +68,7 @@ struct AttachPumpView: View {
     }
 
     private var actionContent: some View {
-        FloatingActionArea {
+        ActionArea {
             if viewModel.receivedReservoirIssue {
                 ReservoirIssueWarningView(action: { })
             } else if !viewModel.isPumpConnected && !alertIsPresented {

@@ -93,7 +93,7 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     }
 
     private var actionContent: some View {
-        FloatingActionArea {
+        ActionArea {
             if !viewModel.deviceSelected {
                 progressView
             }

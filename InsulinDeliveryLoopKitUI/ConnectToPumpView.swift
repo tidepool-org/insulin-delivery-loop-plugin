@@ -84,7 +84,7 @@ struct ConnectToPumpView: View {
 
     @ViewBuilder
     private var actionContent: some View {
-        FloatingActionArea {
+        ActionArea {
             if viewModel.pumpSetupState == .authenticationFailed {
                 VStack {
                     pumpAuthenticationFailedWarning

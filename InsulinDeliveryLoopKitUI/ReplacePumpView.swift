@@ -48,7 +48,7 @@ struct ReplaceComponentsView: View {
     }
     
     private var actionContent: some View {
-        FloatingActionArea {
+        ActionArea {
             replaceButton
         }
     }

@@ -80,7 +80,7 @@ struct SetReservoirFillValueView: View {
                 }
             }
             Spacer(minLength: 0)
-            FloatingActionArea {
+            ActionArea {
                 saveButton
             }
         }

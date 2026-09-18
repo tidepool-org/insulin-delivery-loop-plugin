@@ -146,7 +146,7 @@ struct PrimePumpView: View {
     }
 
     private var actionContent: some View {
-        FloatingActionArea {
+        ActionArea {
             pumpDisconnectedWarningIfNecessary
             if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
                 primingPumpCompleted
