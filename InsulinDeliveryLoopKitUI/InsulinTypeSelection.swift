@@ -50,30 +50,28 @@ struct InsulinTypeSelection: View {
     }
 
     var body: some View {
-        VStack {
-            List {
-                Section(content: {
-                    Text(LocalizedString("Select the type of insulin that you are using in this pump.", comment: "Title text for insulin type confirmation page"))
-                        .font(.subheadline)
-                }, header: {
-                    Text("Insulin Type", comment: "Title of insulin selection screen")
-                        .font(.largeTitle)
-                        .bold()
-                        .padding(.vertical)
-                        .foregroundStyle(.foreground)
-                })
-                Section {
-                    InsulinTypeChooser(insulinType: $insulinType, supportedInsulinTypes: supportedInsulinTypes)
-                        .listRowSeparator(.hidden)
-                }
-                .buttonStyle(PlainButtonStyle()) // Disable row highlighting on selection
+        List {
+            Section(content: {
+                Text(LocalizedString("Select the type of insulin that you are using in this pump.", comment: "Title text for insulin type confirmation page"))
+                    .font(.subheadline)
+            }, header: {
+                Text("Insulin Type", comment: "Title of insulin selection screen")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding(.vertical)
+                    .foregroundStyle(.foreground)
+            })
+            Section {
+                InsulinTypeChooser(insulinType: $insulinType, supportedInsulinTypes: supportedInsulinTypes)
+                    .listRowSeparator(.hidden)
             }
-            .insetGroupedListStyle()
-
+            .buttonStyle(PlainButtonStyle()) // Disable row highlighting on selection
+        }
+        .insetGroupedListStyle()
+        .actionAreaInset {
             Button(action: { self.saveTapped(insulinType) }) {
                 Text(LocalizedString("Save", comment: "Text for save button"))
                     .actionButtonStyle(hasSelectionChanged ? .primary : .deactivated)
-                    .padding()
             }
             .disabled(!hasSelectionChanged)
         }

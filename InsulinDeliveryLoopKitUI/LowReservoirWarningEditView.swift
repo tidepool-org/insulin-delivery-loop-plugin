@@ -98,31 +98,29 @@ struct LowReservoirWarningEditView: View {
     }
 
     private var content: some View {
-        VStack {
-            RoundedCardScrollView(title: LocalizedString("Low Reservoir", comment: "Title for low reservoir warning edit page")) {
-                if showInstructionalContent {
-                    instructionalContent
-                }
-                RoundedCard(footer: footerText) {
-                    ExpandableSetting(
-                        isEditing: .constant(true),
-                        leadingValueContent: {
-                            FrameworkLocalizedText("Low Reservoir Warning", comment: "Label for low reservoir warning row")
-                        },
-                        trailingValueContent: {
-                            Text(formatValue(selectedValue))
-                                .foregroundColor(.accentColor)
-                        },
-                        expandedContent: { picker }
-                    )
-                }
+        RoundedCardScrollView(title: LocalizedString("Low Reservoir", comment: "Title for low reservoir warning edit page")) {
+            if showInstructionalContent {
+                instructionalContent
             }
-            Spacer()
+            RoundedCard(footer: footerText) {
+                ExpandableSetting(
+                    isEditing: .constant(true),
+                    leadingValueContent: {
+                        FrameworkLocalizedText("Low Reservoir Warning", comment: "Label for low reservoir warning row")
+                    },
+                    trailingValueContent: {
+                        Text(formatValue(selectedValue))
+                            .foregroundColor(.accentColor)
+                    },
+                    expandedContent: { picker }
+                )
+            }
+        }
+        .actionAreaInset {
             Button(action: saveTapped) {
                 Text(saveButtonText)
-                    .actionButtonStyle()
-                    .padding()
             }
+            .buttonStyle(ActionButtonStyle())
             .disabled(!valueChanged && presentationMode == .settings)
         }
     }

@@ -349,16 +349,6 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
         }
     }
     
-    var customTraitCollection: UITraitCollection {
-        // Select height reduced layouts on iPhone SE and iPod Touch,
-        // and select regular width layouts on larger screens, for list rendering styles
-        if UIScreen.main.bounds.height <= 640 {
-            return UITraitCollection(traitsFrom: [super.traitCollection, UITraitCollection(verticalSizeClass: .compact)])
-        } else {
-            return UITraitCollection(traitsFrom: [super.traitCollection, UITraitCollection(horizontalSizeClass: .regular)])
-        }
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationBar.prefersLargeTitles = true
@@ -368,7 +358,13 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
 
     public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
 
-        setOverrideTraitCollection(customTraitCollection, forChild: viewController)
+        if UIScreen.main.bounds.height <= 640 {
+            viewController.traitOverrides.remove(UITraitHorizontalSizeClass.self)
+            viewController.traitOverrides.verticalSizeClass = .compact
+        } else {
+            viewController.traitOverrides.remove(UITraitVerticalSizeClass.self)
+            viewController.traitOverrides.horizontalSizeClass = .regular
+        }
         
         if viewControllers.count < screenStack.count {
             // Navigation back

@@ -27,25 +27,22 @@ struct AdditionalDescriptionView: View, HorizontalSizeClassOverride {
                     FixedHeightText(additionalDescription)
                 }
             }) {
-                VStack(alignment: .leading, spacing: 15) {
+                Button(action: {
+                    confirmAction?()
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    FixedHeightText(confirmButtonTitle)
+                        .actionButtonStyle(confirmButtonType)
+                }
+
+                if displayCancelButton {
                     Button(action: {
-                        confirmAction?()
                         presentationMode.wrappedValue.dismiss()
                     }) {
-                        FixedHeightText(confirmButtonTitle)
-                            .actionButtonStyle(confirmButtonType)
+                        FrameworkLocalizedText("Cancel", comment: "Cancel button title")
                     }
-                    
-                    if displayCancelButton {
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            FrameworkLocalizedText("Cancel", comment: "Cancel button title")
-                                .actionButtonStyle(confirmButtonType == .destructive ? .primary : .secondary)
-                        }
-                    }
+                    .buttonStyle(ActionButtonStyle(confirmButtonType == .destructive ? .primary : .secondary))
                 }
-                .padding()
             }
             .navigationBarTitle(title)
             .environment(\.horizontalSizeClass, horizontalOverride)

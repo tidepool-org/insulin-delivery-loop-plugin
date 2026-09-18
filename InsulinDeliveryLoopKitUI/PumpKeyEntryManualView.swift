@@ -16,6 +16,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
     @State private var typedPumpKey = ""
     @State private var displayConfirmation = false
     @State private var showPumpKeyLocation = false
+    @FocusState private var isPumpKeyFocused: Bool
 
     private let pumpKeyLengthMin: Int = InsulinDeliveryPumpManager.pumpKeyLengthRange.lowerBound
     private let pumpKeyLengthMax: Int = InsulinDeliveryPumpManager.pumpKeyLengthRange.upperBound
@@ -31,20 +32,22 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
-        .edgesIgnoringSafeArea(.bottom)
+        .defaultFocus($isPumpKeyFocused, typedPumpKey.isEmpty)
+        .inputForm(focus: $isPumpKeyFocused)
     }
 
     private var pumpKeyInput: some View {
-        DismissibleKeyboardTextField(text: $typedPumpKey,
-                                     placeholder: LocalizedString("Enter Pump Key", comment: "Placeholder text until the pump key is entered"),
-                                     font: .preferredFont(forTextStyle: .largeTitle),
-                                     textAlignment: .center,
-                                     keyboardType: .asciiCapable,
-                                     autocapitalizationType: .allCharacters,
-                                     autocorrectionType: .no,
-                                     shouldBecomeFirstResponder: true,
-                                     maxLength: pumpKeyLengthMax,
-                                     isDismissible: false)
+        TextField(LocalizedString("Enter Pump Key", comment: "Placeholder text until the pump key is entered"), text: $typedPumpKey)
+            .font(.largeTitle)
+            .foregroundStyle(.primary)
+            .multilineTextAlignment(.center)
+            .textFieldStyle(.plain)
+            .keyboardType(.asciiCapable)
+            .textInputAutocapitalization(.characters)
+            .autocorrectionDisabled()
+            .inputField(focus: $isPumpKeyFocused)
+            .limitTextLength($typedPumpKey, to: pumpKeyLengthMax)
+            .accessibilityIdentifier("dismissibleKeyboardTextField")
             .padding()
     }
 
@@ -53,7 +56,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
             typedPumpKey = typedPumpKey.trimmingCharacters(in: .whitespacesAndNewlines)
             displayConfirmation = true
         })
-        .disabled(typedPumpKey.count < pumpKeyLengthMin)
+        .disabled(typedPumpKey.count < pumpKeyLengthMin || typedPumpKey.utf16.count > pumpKeyLengthMax)
         .alert(isPresented: $displayConfirmation) {
             confirmEntryAlert
         }
