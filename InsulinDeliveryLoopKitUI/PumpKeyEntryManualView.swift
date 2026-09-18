@@ -16,6 +16,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
     @State private var typedPumpKey = ""
     @State private var displayConfirmation = false
     @State private var showPumpKeyLocation = false
+    @State private var shouldPumpKeyBecomeFirstResponder = false
 
     private let pumpKeyLengthMin: Int = InsulinDeliveryPumpManager.pumpKeyLengthRange.lowerBound
     private let pumpKeyLengthMax: Int = InsulinDeliveryPumpManager.pumpKeyLengthRange.upperBound
@@ -43,9 +44,10 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
                                      keyboardType: .asciiCapable,
                                      autocapitalizationType: .allCharacters,
                                      autocorrectionType: .no,
-                                     shouldBecomeFirstResponder: true,
+                                     shouldBecomeFirstResponder: shouldPumpKeyBecomeFirstResponder,
                                      maxLength: pumpKeyLengthMax)
             .padding()
+            .autoFocusOnFirstAppearance($shouldPumpKeyBecomeFirstResponder, enabled: typedPumpKey.isEmpty)
     }
 
     private var saveButton: some View {
