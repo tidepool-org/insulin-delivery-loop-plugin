@@ -32,8 +32,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
-        .keyboardEntryPage()
-        .keyboardToolbar(isFocused: isPumpKeyFocused, dismiss: { isPumpKeyFocused = false })
+        .inputForm(focus: $isPumpKeyFocused)
     }
 
     private var pumpKeyInput: some View {
@@ -45,14 +44,12 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
             .keyboardType(.asciiCapable)
             .textInputAutocapitalization(.characters)
             .autocorrectionDisabled()
-            .submitLabel(.done)
-            .onSubmit { isPumpKeyFocused = false }
-            .focused($isPumpKeyFocused)
+            .inputField(focus: $isPumpKeyFocused)
             .limitTextLength($typedPumpKey, to: pumpKeyLengthMax)
             .accessibilityIdentifier("dismissibleKeyboardTextField")
             .padding()
             .autoFocusOnFirstAppearance(
-                Binding(get: { isPumpKeyFocused }, set: { isPumpKeyFocused = $0 }),
+                $isPumpKeyFocused,
                 enabled: typedPumpKey.isEmpty
             )
     }
