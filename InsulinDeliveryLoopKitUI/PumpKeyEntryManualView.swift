@@ -32,6 +32,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
         .edgesIgnoringSafeArea(.bottom)
+        .keyboardEntryPage()
     }
 
     private var pumpKeyInput: some View {
@@ -43,8 +44,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
                                      autocapitalizationType: .allCharacters,
                                      autocorrectionType: .no,
                                      shouldBecomeFirstResponder: true,
-                                     maxLength: pumpKeyLengthMax,
-                                     isDismissible: false)
+                                     maxLength: pumpKeyLengthMax)
             .padding()
     }
 
