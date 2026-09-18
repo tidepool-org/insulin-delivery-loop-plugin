@@ -32,6 +32,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
+        .defaultFocus($isPumpKeyFocused, typedPumpKey.isEmpty)
         .inputForm(focus: $isPumpKeyFocused)
     }
 
@@ -48,10 +49,6 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
             .limitTextLength($typedPumpKey, to: pumpKeyLengthMax)
             .accessibilityIdentifier("dismissibleKeyboardTextField")
             .padding()
-            .autoFocusOnFirstAppearance(
-                $isPumpKeyFocused,
-                enabled: typedPumpKey.isEmpty
-            )
     }
 
     private var saveButton: some View {
