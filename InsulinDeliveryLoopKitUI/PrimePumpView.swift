@@ -29,9 +29,16 @@ struct PrimePumpView: View {
     @State private var presentedImageAlert: ImageAlert?
 
     var body: some View {
-        VStack {
-            content
-            actionContent
+        Group {
+            if #available(iOS 26.0, *) {
+                content
+                    .actionAreaInset { actionContent }
+            } else {
+                VStack {
+                    content
+                    ActionArea { actionContent }
+                }
+            }
         }
         .alert(item: $presentedAlert, content: alert(for:))
         .imageAlert(item: $presentedImageAlert)
@@ -145,26 +152,25 @@ struct PrimePumpView: View {
             .aspectRatio(contentMode: ContentMode.fit)
     }
 
+    @ViewBuilder
     private var actionContent: some View {
-        ActionArea {
-            pumpDisconnectedWarningIfNecessary
-            if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
-                primingPumpCompleted
-            } else if viewModel.receivedReservoirIssue {
-                ReservoirIssueWarningView(action: { })
-            } else if viewModel.pumpSetupState == .primingPump ||
-                        viewModel.pumpSetupState == .primingPumpIssue ||
-                        displayPrimingIssueWarning ||
-                        stopPriming
-            {
-                stopPrimingPump
-            } else if !stopPriming,
-                      viewModel.pumpSetupState == .primingPumpStopped
-            {
-                continuePrimingPump
-            } else {
-                startPrimingPump
-            }
+        pumpDisconnectedWarningIfNecessary
+        if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
+            primingPumpCompleted
+        } else if viewModel.receivedReservoirIssue {
+            ReservoirIssueWarningView(action: { })
+        } else if viewModel.pumpSetupState == .primingPump ||
+                    viewModel.pumpSetupState == .primingPumpIssue ||
+                    displayPrimingIssueWarning ||
+                    stopPriming
+        {
+            stopPrimingPump
+        } else if !stopPriming,
+                  viewModel.pumpSetupState == .primingPumpStopped
+        {
+            continuePrimingPump
+        } else {
+            startPrimingPump
         }
     }
 

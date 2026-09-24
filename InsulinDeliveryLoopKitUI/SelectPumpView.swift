@@ -18,10 +18,17 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     @State private var showFindSerialNumberInstructions = false
 
     var body: some View {
-        VStack {
-            selectPump
-            Spacer()
-            actionContent
+        Group {
+            if #available(iOS 26.0, *) {
+                selectPump
+                    .actionAreaInset { actionContent }
+            } else {
+                VStack {
+                    selectPump
+                    Spacer()
+                    ActionArea { actionContent }
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
@@ -92,13 +99,12 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
             .padding()
     }
 
+    @ViewBuilder
     private var actionContent: some View {
-        ActionArea {
-            if !viewModel.deviceSelected {
-                progressView
-            }
-            continueButton
+        if !viewModel.deviceSelected {
+            progressView
         }
+        continueButton
     }
 
     private var progressView: some View {

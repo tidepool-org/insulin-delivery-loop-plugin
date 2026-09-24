@@ -24,9 +24,16 @@ struct AttachPumpView: View {
     }
 
     var body: some View {
-        VStack {
-            content
-            actionContent
+        Group {
+            if #available(iOS 26.0, *) {
+                content
+                    .actionAreaInset { actionContent }
+            } else {
+                VStack {
+                    content
+                    ActionArea { actionContent }
+                }
+            }
         }
         .alert(isPresented: $alertIsPresented, content: { alert(error: error) })
         .navigationBarBackButtonHidden(viewModel.workflowType == .replacement)
@@ -67,21 +74,20 @@ struct AttachPumpView: View {
             .openVirtualPumpSettingsOnLongPress(viewModel.virtualPump)
     }
 
+    @ViewBuilder
     private var actionContent: some View {
-        ActionArea {
-            if viewModel.receivedReservoirIssue {
-                ReservoirIssueWarningView(action: { })
-            } else if !viewModel.isPumpConnected && !alertIsPresented {
-                pumpDisconnectedWarning
-            } else {
-                if startingInsulinDelivery {
-                    progressView(.indeterminantProgress)
-                } else if displayInsulinDeliveryStarted {
-                    progressView(.completed)
-                    insulinDeliveryStartedMessage
-                }
-                startInsulinDeliveryButton
+        if viewModel.receivedReservoirIssue {
+            ReservoirIssueWarningView(action: { })
+        } else if !viewModel.isPumpConnected && !alertIsPresented {
+            pumpDisconnectedWarning
+        } else {
+            if startingInsulinDelivery {
+                progressView(.indeterminantProgress)
+            } else if displayInsulinDeliveryStarted {
+                progressView(.completed)
+                insulinDeliveryStartedMessage
             }
+            startInsulinDeliveryButton
         }
     }
 

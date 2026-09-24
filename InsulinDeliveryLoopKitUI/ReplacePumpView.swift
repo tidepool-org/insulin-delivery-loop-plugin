@@ -25,10 +25,17 @@ struct ReplaceComponentsView: View {
     }
 
     var body: some View {
-        VStack {
-            replacePump
-            Spacer()
-            actionContent
+        Group {
+            if #available(iOS 26.0, *) {
+                replacePump
+                    .actionAreaInset { replaceButton }
+            } else {
+                VStack {
+                    replacePump
+                    Spacer()
+                    ActionArea { replaceButton }
+                }
+            }
         }
         .navigationBarBackButtonHidden(communicationInProgress)
         .navigationBarTitleDisplayMode(.inline)
@@ -47,12 +54,6 @@ struct ReplaceComponentsView: View {
         }
     }
     
-    private var actionContent: some View {
-        ActionArea {
-            replaceButton
-        }
-    }
-
     private var replaceButton: some View {
         Button(action: replaceTapped) {
             Text(replaceButtonText)

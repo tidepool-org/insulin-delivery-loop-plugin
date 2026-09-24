@@ -21,10 +21,21 @@ struct ConnectToPumpView: View {
     @State private var presentedAlert: PresentedAlert?
 
     var body: some View {
-        VStack {
-            connectingToPumpCard
-            Spacer()
-            actionContent
+        Group {
+            if #available(iOS 26.0, *) {
+                if showsActionArea {
+                    connectingToPumpCard
+                        .actionAreaInset { actionContent }
+                } else {
+                    connectingToPumpCard
+                }
+            } else {
+                VStack {
+                    connectingToPumpCard
+                    Spacer()
+                    ActionArea { actionContent }
+                }
+            }
         }
         .alert(item: $presentedAlert, content: alert(for:))
         .navigationBarBackButtonHidden(true)
@@ -82,41 +93,51 @@ struct ConnectToPumpView: View {
         .foregroundColor(.secondary)
     }
 
+    // Connection progress can have no footer content. Avoid displaying an empty glass tray.
+    private var showsActionArea: Bool {
+        switch viewModel.pumpSetupState {
+        case .authenticationFailed, .authenticationCancelled, .pumpAlreadyPaired:
+            return true
+        default:
+            return (viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished)
+                || (viewModel.pumpSetupState != .connecting && !viewModel.isPumpConnected)
+                || viewModel.connectToPumpTimedOut
+        }
+    }
+
     @ViewBuilder
     private var actionContent: some View {
-        ActionArea {
-            if viewModel.pumpSetupState == .authenticationFailed {
-                VStack {
-                    pumpAuthenticationFailedWarning
-                    enterPumpInformationButton
-                }
-            } else if viewModel.pumpSetupState == .authenticationCancelled {
-                VStack {
-                    pumpAuthenticationCancelledWarning
-                    tryAgainButton
-                }
-            } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
-                VStack {
-                    pumpAlreadyPairedWarning
-                    repeatSetupButton
-                }
-            } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
-                VStack(spacing: 15) {
-                    ProgressIndicatorView(state: .completed)
-                    successMessage
+        if viewModel.pumpSetupState == .authenticationFailed {
+            VStack {
+                pumpAuthenticationFailedWarning
+                enterPumpInformationButton
+            }
+        } else if viewModel.pumpSetupState == .authenticationCancelled {
+            VStack {
+                pumpAuthenticationCancelledWarning
+                tryAgainButton
+            }
+        } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
+            VStack {
+                pumpAlreadyPairedWarning
+                repeatSetupButton
+            }
+        } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
+            VStack(spacing: 15) {
+                ProgressIndicatorView(state: .completed)
+                successMessage
+                continueButton
+            }
+        } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
+            VStack {
+                PumpDisconnectedErrorView()
+                if viewModel.pumpSetupState.isFinished {
                     continueButton
                 }
-            } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
-                VStack {
-                    PumpDisconnectedErrorView()
-                    if viewModel.pumpSetupState.isFinished {
-                        continueButton
-                    }
-                }
-            } else if viewModel.connectToPumpTimedOut {
-                VStack {
-                    connectToPumpTimeoutWarning
-                }
+            }
+        } else if viewModel.connectToPumpTimedOut {
+            VStack {
+                connectToPumpTimeoutWarning
             }
         }
     }
