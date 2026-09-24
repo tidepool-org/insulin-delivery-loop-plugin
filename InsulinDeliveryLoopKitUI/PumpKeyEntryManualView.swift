@@ -32,7 +32,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(trailing: saveButton)
-        .defaultFocus($isPumpKeyFocused, typedPumpKey.isEmpty)
+        .initialFocus($isPumpKeyFocused, when: typedPumpKey.isEmpty)
         .inputForm(focus: $isPumpKeyFocused)
     }
 
