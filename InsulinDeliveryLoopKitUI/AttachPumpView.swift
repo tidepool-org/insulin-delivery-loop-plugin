@@ -27,7 +27,7 @@ struct AttachPumpView: View {
         Group {
             if #available(iOS 26.0, *) {
                 content
-                    .actionAreaInset { actionContent }
+                    .actionAreaInset(animationValue: actionAreaState) { actionContent }
             } else {
                 VStack {
                     content
@@ -95,13 +95,38 @@ struct AttachPumpView: View {
     private var pumpDisconnectedWarning: some View {
         PumpDisconnectedErrorView()
     }
+
+    private struct ActionAreaState: Equatable {
+        let hasReservoirIssue: Bool
+        let isConnected: Bool
+        let alertIsPresented: Bool
+        let starting: Bool
+        let started: Bool
+    }
+
+    private var actionAreaState: ActionAreaState {
+        ActionAreaState(
+            hasReservoirIssue: viewModel.receivedReservoirIssue,
+            isConnected: viewModel.isPumpConnected,
+            alertIsPresented: alertIsPresented,
+            starting: startingInsulinDelivery,
+            started: displayInsulinDeliveryStarted
+        )
+    }
     
+    @ViewBuilder
     private func progressView(_ state: ProgressIndicatorState) -> some View {
-        VStack {
+        if #available(iOS 26.0, *) {
             ProgressIndicatorView(state: state)
                 .padding(.horizontal)
+                .transition(.opacity)
+        } else {
+            VStack {
+                ProgressIndicatorView(state: state)
+                    .padding(.horizontal)
+            }
+            .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
         }
-        .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
     }
 
     private var startInsulinDeliveryButton: some View {

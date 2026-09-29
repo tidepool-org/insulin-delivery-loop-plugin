@@ -32,7 +32,7 @@ struct PrimePumpView: View {
         Group {
             if #available(iOS 26.0, *) {
                 content
-                    .actionAreaInset { actionContent }
+                    .actionAreaInset(animationValue: actionAreaState) { actionContent }
             } else {
                 VStack {
                     content
@@ -174,6 +174,28 @@ struct PrimePumpView: View {
         }
     }
 
+    private struct ActionAreaState: Equatable {
+        let setupState: PumpSetupState
+        let isConnected: Bool
+        let hasReservoirIssue: Bool
+        let starting: Bool
+        let stopping: Bool
+        let showsPrimingIssue: Bool
+        let completed: Bool
+    }
+
+    private var actionAreaState: ActionAreaState {
+        ActionAreaState(
+            setupState: viewModel.pumpSetupState,
+            isConnected: viewModel.isPumpConnected,
+            hasReservoirIssue: viewModel.receivedReservoirIssue,
+            starting: startPriming,
+            stopping: stopPriming,
+            showsPrimingIssue: displayPrimingIssueWarning,
+            completed: primingCompleted
+        )
+    }
+
     @ViewBuilder
     private var pumpDisconnectedWarningIfNecessary: some View {
         if !viewModel.isPumpConnected && !startPriming && !stopPriming {
@@ -191,16 +213,24 @@ struct PrimePumpView: View {
         primingIssueButton
     }
 
+    @ViewBuilder
     private var primingMessage: some View {
-        HStack {
-            Spacer()
-            ProgressView()
-                .padding(.trailing, 5)
-            Text(viewModel.pumpSetupState.statusMessage)
-                .foregroundColor(.secondary)
-            Spacer()
+        if #available(iOS 26.0, *) {
+            ActionAreaHeader(Text(viewModel.pumpSetupState.statusMessage), message: nil) {
+                ProgressView()
+                    .tint(.accentColor)
+            }
+        } else {
+            HStack {
+                Spacer()
+                ProgressView()
+                    .padding(.trailing, 5)
+                Text(viewModel.pumpSetupState.statusMessage)
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+            .padding(.bottom)
         }
-        .padding(.bottom)
     }
 
     private var stopPrimingButton: some View {
@@ -273,12 +303,23 @@ struct PrimePumpView: View {
     @ViewBuilder
     private var continuePrimingPump: some View {
         if viewModel.isPumpConnected {
-            ErrorView(title: LocalizedString("Did you see a drop of insulin?", comment: "Title of warning when the priming command has completed"),
-                      caption: LocalizedString("This means you’re done!\n\nIf you do not see a drop of insulin tap \"continue priming\".", comment: "Message of warning when the priming command has completed"),
-                      displayIcon: true)
+            ErrorView(
+                title: LocalizedString("Did you see a drop of insulin?", comment: "Title of warning when the priming command has completed"),
+                captions: [
+                    LocalizedString("This means you’re done!", comment: "Message of warning when the priming command has completed, part 1"),
+                    LocalizedString("If you do not see a drop of insulin tap \"continue priming\".", comment: "Message of warning when the priming command has completed, part 2")
+                ],
+                displayIcon: true
+            )
         }
         
-        Button(action: { withAnimation() { primingCompleted = true } }) {
+        Button(action: {
+            if #available(iOS 26.0, *) {
+                primingCompleted = true
+            } else {
+                withAnimation { primingCompleted = true }
+            }
+        }) {
             FrameworkLocalizedText("Yes, I saw a drop", comment: "Button label for when the user has seen a drop of insulin")
         }
         .buttonStyle(ActionButtonStyle())

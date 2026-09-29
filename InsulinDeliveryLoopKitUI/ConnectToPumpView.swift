@@ -23,12 +23,10 @@ struct ConnectToPumpView: View {
     var body: some View {
         Group {
             if #available(iOS 26.0, *) {
-                if showsActionArea {
-                    connectingToPumpCard
-                        .actionAreaInset { actionContent }
-                } else {
-                    connectingToPumpCard
-                }
+                connectingToPumpCard
+                    .actionAreaInset(isPresented: showsActionArea, animationValue: actionAreaState) {
+                        actionContent
+                    }
             } else {
                 VStack {
                     connectingToPumpCard
@@ -103,6 +101,20 @@ struct ConnectToPumpView: View {
                 || (viewModel.pumpSetupState != .connecting && !viewModel.isPumpConnected)
                 || viewModel.connectToPumpTimedOut
         }
+    }
+
+    private struct ActionAreaState: Equatable {
+        let setupState: PumpSetupState
+        let isConnected: Bool
+        let timedOut: Bool
+    }
+
+    private var actionAreaState: ActionAreaState {
+        ActionAreaState(
+            setupState: viewModel.pumpSetupState,
+            isConnected: viewModel.isPumpConnected,
+            timedOut: viewModel.connectToPumpTimedOut
+        )
     }
 
     @ViewBuilder

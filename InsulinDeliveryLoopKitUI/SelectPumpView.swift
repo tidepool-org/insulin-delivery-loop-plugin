@@ -21,7 +21,7 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
         Group {
             if #available(iOS 26.0, *) {
                 selectPump
-                    .actionAreaInset { actionContent }
+                    .actionAreaInset(animationValue: viewModel.deviceSelected) { actionContent }
             } else {
                 VStack {
                     selectPump
@@ -108,12 +108,21 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     }
 
     private var progressView: some View {
-        VStack {
-            HStack { Spacer () }
-            ProgressIndicatorView(state: .indeterminantProgress)
-                .padding(.horizontal)
+        Group {
+            if #available(iOS 26.0, *) {
+                ProgressIndicatorView(state: .indeterminantProgress)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .transition(.opacity)
+            } else {
+                VStack {
+                    HStack { Spacer () }
+                    ProgressIndicatorView(state: .indeterminantProgress)
+                        .padding(.horizontal)
+                }
+                .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
-        .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
     }
 
     private var continueButton: some View {
