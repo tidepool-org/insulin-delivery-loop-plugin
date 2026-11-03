@@ -37,7 +37,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
     }
 
     private var pumpKeyInput: some View {
-        TextField(LocalizedString("Enter Pump Key", comment: "Placeholder text until the pump key is entered"), text: $typedPumpKey)
+        LengthLimitedTextField(LocalizedString("Enter Pump Key", comment: "Placeholder text until the pump key is entered"), text: $typedPumpKey, maxLength: pumpKeyLengthMax)
             .font(.largeTitle)
             .foregroundStyle(.primary)
             .multilineTextAlignment(.center)
@@ -46,7 +46,6 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
             .textInputAutocapitalization(.characters)
             .autocorrectionDisabled()
             .inputField(focus: $isPumpKeyFocused)
-            .limitTextLength($typedPumpKey, to: pumpKeyLengthMax)
             .accessibilityIdentifier("dismissibleKeyboardTextField")
             .padding()
     }
@@ -56,7 +55,7 @@ struct PumpKeyEntryManualView: View, HorizontalSizeClassOverride {
             typedPumpKey = typedPumpKey.trimmingCharacters(in: .whitespacesAndNewlines)
             displayConfirmation = true
         })
-        .disabled(typedPumpKey.count < pumpKeyLengthMin || typedPumpKey.utf16.count > pumpKeyLengthMax)
+        .disabled(typedPumpKey.count < pumpKeyLengthMin)
         .alert(isPresented: $displayConfirmation) {
             confirmEntryAlert
         }

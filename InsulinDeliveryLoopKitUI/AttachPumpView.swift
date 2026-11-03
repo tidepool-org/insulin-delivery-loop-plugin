@@ -24,22 +24,13 @@ struct AttachPumpView: View {
     }
 
     var body: some View {
-        Group {
-            if #available(iOS 26.0, *) {
-                content
-                    .actionAreaInset(animationValue: actionAreaState) { actionContent }
-            } else {
-                VStack {
-                    content
-                    ActionArea { actionContent }
-                }
-            }
-        }
-        .alert(isPresented: $alertIsPresented, content: { alert(error: error) })
-        .navigationBarBackButtonHidden(viewModel.workflowType == .replacement)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .navigationTitle(navTitle)
-        .navigationBarTitleDisplayMode(.inline)
+        content
+            .actionAreaInset(animationValue: footer, inlineAtAccessibilitySizes: true) { actionContent }
+            .alert(isPresented: $alertIsPresented, content: { alert(error: error) })
+            .navigationBarBackButtonHidden(viewModel.workflowType == .replacement)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
+            .navigationTitle(navTitle)
+            .navigationBarTitleDisplayMode(.inline)
     }
     
     @ViewBuilder
@@ -74,19 +65,39 @@ struct AttachPumpView: View {
             .openVirtualPumpSettingsOnLongPress(viewModel.virtualPump)
     }
 
+    private enum Footer: Hashable {
+        case reservoirIssue, disconnected, startDelivery, startingDelivery, deliveryStarted
+    }
+
+    private var footer: Footer {
+        if viewModel.receivedReservoirIssue {
+            return .reservoirIssue
+        } else if !viewModel.isPumpConnected && !alertIsPresented {
+            return .disconnected
+        } else if startingInsulinDelivery {
+            return .startingDelivery
+        } else if displayInsulinDeliveryStarted {
+            return .deliveryStarted
+        } else {
+            return .startDelivery
+        }
+    }
+
     @ViewBuilder
     private var actionContent: some View {
-        if viewModel.receivedReservoirIssue {
+        switch footer {
+        case .reservoirIssue:
             ReservoirIssueWarningView(action: { })
-        } else if !viewModel.isPumpConnected && !alertIsPresented {
+        case .disconnected:
             pumpDisconnectedWarning
-        } else {
-            if startingInsulinDelivery {
-                progressView(.indeterminantProgress)
-            } else if displayInsulinDeliveryStarted {
-                progressView(.completed)
-                insulinDeliveryStartedMessage
-            }
+        case .startDelivery:
+            startInsulinDeliveryButton
+        case .startingDelivery:
+            progressView(.indeterminantProgress)
+            startInsulinDeliveryButton
+        case .deliveryStarted:
+            progressView(.completed)
+            insulinDeliveryStartedMessage
             startInsulinDeliveryButton
         }
     }
@@ -96,23 +107,6 @@ struct AttachPumpView: View {
         PumpDisconnectedErrorView()
     }
 
-    private struct ActionAreaState: Equatable {
-        let hasReservoirIssue: Bool
-        let isConnected: Bool
-        let alertIsPresented: Bool
-        let starting: Bool
-        let started: Bool
-    }
-
-    private var actionAreaState: ActionAreaState {
-        ActionAreaState(
-            hasReservoirIssue: viewModel.receivedReservoirIssue,
-            isConnected: viewModel.isPumpConnected,
-            alertIsPresented: alertIsPresented,
-            starting: startingInsulinDelivery,
-            started: displayInsulinDeliveryStarted
-        )
-    }
     
     @ViewBuilder
     private func progressView(_ state: ProgressIndicatorState) -> some View {

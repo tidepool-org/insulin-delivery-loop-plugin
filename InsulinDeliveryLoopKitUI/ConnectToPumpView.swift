@@ -21,24 +21,14 @@ struct ConnectToPumpView: View {
     @State private var presentedAlert: PresentedAlert?
 
     var body: some View {
-        Group {
-            if #available(iOS 26.0, *) {
-                connectingToPumpCard
-                    .actionAreaInset(isPresented: showsActionArea, animationValue: actionAreaState) {
-                        actionContent
-                    }
-            } else {
-                VStack {
-                    connectingToPumpCard
-                    Spacer()
-                    ActionArea { actionContent }
-                }
+        connectingToPumpCard
+            .actionAreaInset(isPresented: footer != nil, animationValue: footer) {
+                actionContent
             }
-        }
-        .alert(item: $presentedAlert, content: alert(for:))
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .navigationBarTitleDisplayMode(.inline)
+            .alert(item: $presentedAlert, content: alert(for:))
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
+            .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder
@@ -91,66 +81,64 @@ struct ConnectToPumpView: View {
         .foregroundColor(.secondary)
     }
 
-    // Connection progress can have no footer content. Avoid displaying an empty glass tray.
-    private var showsActionArea: Bool {
-        switch viewModel.pumpSetupState {
-        case .authenticationFailed, .authenticationCancelled, .pumpAlreadyPaired:
-            return true
-        default:
-            return (viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished)
-                || (viewModel.pumpSetupState != .connecting && !viewModel.isPumpConnected)
-                || viewModel.connectToPumpTimedOut
+    private enum Footer: Hashable {
+        case authenticationFailed, authenticationCancelled, pumpAlreadyPaired, connected, disconnected(canContinue: Bool), timedOut
+    }
+
+    private var footer: Footer? {
+        if viewModel.pumpSetupState == .authenticationFailed {
+            return .authenticationFailed
+        } else if viewModel.pumpSetupState == .authenticationCancelled {
+            return .authenticationCancelled
+        } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
+            return .pumpAlreadyPaired
+        } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
+            return .connected
+        } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
+            return .disconnected(canContinue: viewModel.pumpSetupState.isFinished)
+        } else if viewModel.connectToPumpTimedOut {
+            return .timedOut
         }
-    }
-
-    private struct ActionAreaState: Equatable {
-        let setupState: PumpSetupState
-        let isConnected: Bool
-        let timedOut: Bool
-    }
-
-    private var actionAreaState: ActionAreaState {
-        ActionAreaState(
-            setupState: viewModel.pumpSetupState,
-            isConnected: viewModel.isPumpConnected,
-            timedOut: viewModel.connectToPumpTimedOut
-        )
+        return nil
     }
 
     @ViewBuilder
     private var actionContent: some View {
-        if viewModel.pumpSetupState == .authenticationFailed {
+        switch footer {
+        case .authenticationFailed:
             VStack {
                 pumpAuthenticationFailedWarning
                 enterPumpInformationButton
             }
-        } else if viewModel.pumpSetupState == .authenticationCancelled {
+        case .authenticationCancelled:
             VStack {
                 pumpAuthenticationCancelledWarning
                 tryAgainButton
             }
-        } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
+        case .pumpAlreadyPaired:
             VStack {
                 pumpAlreadyPairedWarning
                 repeatSetupButton
             }
-        } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
+        case .connected:
             VStack(spacing: 15) {
                 ProgressIndicatorView(state: .completed)
                 successMessage
                 continueButton
             }
-        } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
+        case .disconnected(let canContinue):
             VStack {
                 PumpDisconnectedErrorView()
-                if viewModel.pumpSetupState.isFinished {
+                if canContinue {
                     continueButton
                 }
             }
-        } else if viewModel.connectToPumpTimedOut {
+        case .timedOut:
             VStack {
                 connectToPumpTimeoutWarning
             }
+        case nil:
+            EmptyView()
         }
     }
 

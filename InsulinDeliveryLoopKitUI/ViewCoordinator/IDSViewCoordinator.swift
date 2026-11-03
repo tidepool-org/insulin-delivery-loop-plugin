@@ -366,12 +366,13 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
             viewController.traitOverrides.horizontalSizeClass = .regular
         }
         
-        if viewControllers.count < screenStack.count {
-            // Navigation back
-            let _ = screenStack.popLast()
-        }
         viewController.view.backgroundColor = UIColor.systemGroupedBackground
+    }
 
+    public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        let removedScreenCount = screenStack.count - viewControllers.count
+        guard removedScreenCount > 0, !viewControllers.isEmpty else { return }
+        screenStack.removeLast(removedScreenCount)
     }
     
     required init?(coder aDecoder: NSCoder) {

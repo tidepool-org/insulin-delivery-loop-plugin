@@ -31,23 +31,10 @@ struct SetReservoirFillValueView: View {
     }
 
     var body: some View {
-        content
+        reservoirSettings
+            .actionAreaInset(inlineAtAccessibilitySizes: true) { saveButton }
             .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
             .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    @ViewBuilder
-    private var content: some View {
-        if #available(iOS 26.0, *) {
-            reservoirSettings
-                .actionAreaInset { saveButton }
-        } else {
-            VStack {
-                reservoirSettings
-                Spacer(minLength: 0)
-                ActionArea { saveButton }
-            }
-        }
     }
 
     private var reservoirSettings: some View {

@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import LoopKitUI
 
 fileprivate let inset: CGFloat = 16
 
@@ -268,6 +269,8 @@ struct RoundedCardScrollView<Content: View>: View {
                 
                 VStack(alignment: .leading, spacing: 25, content: content)
                     .padding(padding)
+
+                ActionAreaInlineSlot()
             }
         }
     }

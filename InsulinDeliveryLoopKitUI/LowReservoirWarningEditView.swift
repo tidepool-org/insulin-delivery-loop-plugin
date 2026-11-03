@@ -116,7 +116,7 @@ struct LowReservoirWarningEditView: View {
                 )
             }
         }
-        .actionAreaInset {
+        .actionAreaInset(inlineAtAccessibilitySizes: true) {
             Button(action: saveTapped) {
                 Text(saveButtonText)
             }

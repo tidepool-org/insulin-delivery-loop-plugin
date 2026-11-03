@@ -101,7 +101,7 @@ struct PumpExpiryWarningEditView: View {
             warningValueEditor
             repeatReminderEditor
         }
-        .actionAreaInset {
+        .actionAreaInset(inlineAtAccessibilitySizes: true) {
             Button(action: saveTapped) {
                 Text(saveButtonText)
             }

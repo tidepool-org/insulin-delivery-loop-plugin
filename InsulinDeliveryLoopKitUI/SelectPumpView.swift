@@ -18,20 +18,10 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     @State private var showFindSerialNumberInstructions = false
 
     var body: some View {
-        Group {
-            if #available(iOS 26.0, *) {
-                selectPump
-                    .actionAreaInset(animationValue: viewModel.deviceSelected) { actionContent }
-            } else {
-                VStack {
-                    selectPump
-                    Spacer()
-                    ActionArea { actionContent }
-                }
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
+        selectPump
+            .actionAreaInset(animationValue: viewModel.deviceSelected, inlineAtAccessibilitySizes: true) { actionContent }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
     }
 
     private var selectPump: some View {
