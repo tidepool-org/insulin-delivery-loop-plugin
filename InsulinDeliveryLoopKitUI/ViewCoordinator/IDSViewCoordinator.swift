@@ -358,7 +358,7 @@ class IDSViewCoordinator: UINavigationController, PumpManagerOnboarding, Complet
 
     public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
 
-        if UIScreen.main.bounds.height <= 640 {
+        if navigationController.traitCollection.verticalSizeClass == .compact {
             viewController.traitOverrides.remove(UITraitHorizontalSizeClass.self)
             viewController.traitOverrides.verticalSizeClass = .compact
         } else {

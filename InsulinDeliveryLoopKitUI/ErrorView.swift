@@ -75,16 +75,20 @@ struct ErrorView: View {
             .accessibility(label: FrameworkLocalizedText("Error", comment: "Accessibility label indicating an error occurred"))
 
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(captions, id: \.self) { caption in
+                ForEach(Array(captions.enumerated()), id: \.offset) { index, caption in
                     FixedHeightText(caption)
                         .foregroundColor(.secondary)
                         .font(.footnote)
-                        .accessibility(identifier: "label_recovery_suggestion")
+                        .accessibilityIdentifier(Self.recoverySuggestionIdentifier(at: index))
                 }
             }
         }
         .padding(.bottom)
         .accessibilityElement(children: .combine)
+    }
+
+    private static func recoverySuggestionIdentifier(at index: Int) -> String {
+        index == 0 ? "label_recovery_suggestion" : "label_recovery_suggestion_\(index + 1)"
     }
 }
 
