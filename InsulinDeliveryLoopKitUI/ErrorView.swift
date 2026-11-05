@@ -13,7 +13,7 @@ struct ErrorView: View {
     @Environment(\.guidanceColors) var guidanceColors
 
     var title: String
-    var caption: String
+    var captions: [String]
     var criticality: ErrorCriticality
     var displayIcon: Bool
 
@@ -33,12 +33,34 @@ struct ErrorView: View {
 
     init(title: String, caption: String, errorClass: ErrorCriticality = .normal, displayIcon: Bool = false) {
         self.title = title
-        self.caption = caption
+        self.captions = [caption]
+        self.criticality = errorClass
+        self.displayIcon = displayIcon
+    }
+    
+    init(title: String, captions: [String], errorClass: ErrorCriticality = .normal, displayIcon: Bool = false) {
+        self.title = title
+        self.captions = captions
         self.criticality = errorClass
         self.displayIcon = displayIcon
     }
 
     var body: some View {
+        if #available(iOS 26.0, *) {
+            ActionAreaHeader(
+                Text(title),
+                messages: captions.map({ Text($0) }),
+                showsIcon: displayIcon
+            ) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(criticality.symbolColor(using: guidanceColors))
+            }
+        } else {
+            legacyContent
+        }
+    }
+
+    private var legacyContent: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
                 if displayIcon {
@@ -52,13 +74,21 @@ struct ErrorView: View {
             .accessibilityElement(children: .ignore)
             .accessibility(label: FrameworkLocalizedText("Error", comment: "Accessibility label indicating an error occurred"))
 
-            FixedHeightText(caption)
-                .foregroundColor(.secondary)
-                .font(.footnote)
-                .accessibility(identifier: "label_recovery_suggestion")
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(captions.enumerated()), id: \.offset) { index, caption in
+                    FixedHeightText(caption)
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                        .accessibilityIdentifier(Self.recoverySuggestionIdentifier(at: index))
+                }
+            }
         }
         .padding(.bottom)
         .accessibilityElement(children: .combine)
+    }
+
+    private static func recoverySuggestionIdentifier(at index: Int) -> String {
+        index == 0 ? "label_recovery_suggestion" : "label_recovery_suggestion_\(index + 1)"
     }
 }
 

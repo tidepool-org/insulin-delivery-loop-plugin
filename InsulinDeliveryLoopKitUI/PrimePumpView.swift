@@ -29,17 +29,14 @@ struct PrimePumpView: View {
     @State private var presentedImageAlert: ImageAlert?
 
     var body: some View {
-        VStack {
-            content
-            actionContent
-        }
-        .alert(item: $presentedAlert, content: alert(for:))
-        .imageAlert(item: $presentedImageAlert)
-        .navigationBarBackButtonHidden(true)
-        .navigationTitle(navTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .edgesIgnoringSafeArea(.bottom)
+        content
+            .actionAreaInset(animationValue: footer, inlineAtAccessibilitySizes: true) { actionContent }
+            .alert(item: $presentedAlert, content: alert(for:))
+            .imageAlert(item: $presentedImageAlert)
+            .navigationBarBackButtonHidden(true)
+            .navigationTitle(navTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
     }
     
     @ViewBuilder
@@ -146,65 +143,86 @@ struct PrimePumpView: View {
             .aspectRatio(contentMode: ContentMode.fit)
     }
 
-    private var actionContent: some View {
-        VStack(spacing: 15) {
-            pumpDisconnectedWarningIfNecessary
-            if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
-                primingPumpCompleted
-            } else if viewModel.receivedReservoirIssue {
-                ReservoirIssueWarningView(action: { })
-            } else if viewModel.pumpSetupState == .primingPump ||
-                        viewModel.pumpSetupState == .primingPumpIssue ||
-                        displayPrimingIssueWarning ||
-                        stopPriming
-            {
-                stopPrimingPump
-            } else if !stopPriming,
-                      viewModel.pumpSetupState == .primingPumpStopped
-            {
-                continuePrimingPump
-            } else {
-                startPrimingPump
-            }
+    private struct Footer: Hashable {
+        enum Step: Hashable {
+            case startPriming, priming(showsStatus: Bool), confirmDrop(showsQuestion: Bool), primed, reservoirIssue
         }
-        .padding(15)
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
+
+        let showsDisconnectedWarning: Bool
+        let step: Step
+    }
+
+    private var footer: Footer {
+        let step: Footer.Step
+        if primingCompleted || viewModel.pumpSetupState == .pumpPrimed {
+            step = .primed
+        } else if viewModel.receivedReservoirIssue {
+            step = .reservoirIssue
+        } else if viewModel.pumpSetupState == .primingPump ||
+                    viewModel.pumpSetupState == .primingPumpIssue ||
+                    displayPrimingIssueWarning ||
+                    stopPriming
+        {
+            step = .priming(showsStatus: !stopPriming && viewModel.isPumpConnected)
+        } else if viewModel.pumpSetupState == .primingPumpStopped {
+            step = .confirmDrop(showsQuestion: viewModel.isPumpConnected)
+        } else {
+            step = .startPriming
+        }
+        return Footer(
+            showsDisconnectedWarning: !viewModel.isPumpConnected && !startPriming && !stopPriming,
+            step: step
+        )
     }
 
     @ViewBuilder
-    private var pumpDisconnectedWarningIfNecessary: some View {
-        if !viewModel.isPumpConnected && !startPriming && !stopPriming {
+    private var actionContent: some View {
+        if footer.showsDisconnectedWarning {
             PumpDisconnectedErrorView()
         }
+        switch footer.step {
+        case .primed:
+            primingPumpCompleted
+        case .reservoirIssue:
+            ReservoirIssueWarningView(action: { })
+        case .priming(let showsStatus):
+            if showsStatus {
+                primingMessage
+            }
+            stopPrimingButton
+            primingIssueButton
+        case .confirmDrop(let showsQuestion):
+            continuePrimingPump(showsQuestion: showsQuestion)
+        case .startPriming:
+            startPrimingPump
+        }
     }
 
     @ViewBuilder
-    private var stopPrimingPump: some View {
-        if !stopPriming && viewModel.isPumpConnected {
-            primingMessage
-        }
-        
-        stopPrimingButton
-        primingIssueButton
-    }
-
     private var primingMessage: some View {
-        HStack {
-            Spacer()
-            ProgressView()
-                .padding(.trailing, 5)
-            Text(viewModel.pumpSetupState.statusMessage)
-                .foregroundColor(.secondary)
-            Spacer()
+        if #available(iOS 26.0, *) {
+            ActionAreaHeader(Text(viewModel.pumpSetupState.statusMessage), message: nil) {
+                ProgressView()
+                    .tint(.accentColor)
+            }
+        } else {
+            HStack {
+                Spacer()
+                ProgressView()
+                    .padding(.trailing, 5)
+                Text(viewModel.pumpSetupState.statusMessage)
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+            .padding(.bottom)
         }
-        .padding(.bottom)
     }
 
     private var stopPrimingButton: some View {
         Button(action: stopPrimingSelected) {
             FrameworkLocalizedText("Stop Priming", comment: "Action button description to stop priming and continue to the next step")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(stopPrimingButtonDisabled)
     }
 
@@ -262,28 +280,39 @@ struct PrimePumpView: View {
     private var primingCompletedButton: some View {
         Button(action: viewModel.primingHasCompleted) {
                 FrameworkLocalizedText("Continue", comment: "Action button description to continue the workflow after priming pump has completed")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.isPumpConnected)
     }
 
     @ViewBuilder
-    private var continuePrimingPump: some View {
-        if viewModel.isPumpConnected {
-            ErrorView(title: LocalizedString("Did you see a drop of insulin?", comment: "Title of warning when the priming command has completed"),
-                      caption: LocalizedString("This means you’re done!\n\nIf you do not see a drop of insulin tap \"continue priming\".", comment: "Message of warning when the priming command has completed"),
-                      displayIcon: true)
+    private func continuePrimingPump(showsQuestion: Bool) -> some View {
+        if showsQuestion {
+            ErrorView(
+                title: LocalizedString("Did you see a drop of insulin?", comment: "Title of warning when the priming command has completed"),
+                captions: [
+                    LocalizedString("This means you’re done!", comment: "Message of warning when the priming command has completed, part 1"),
+                    LocalizedString("If you do not see a drop of insulin tap \"continue priming\".", comment: "Message of warning when the priming command has completed, part 2")
+                ],
+                displayIcon: true
+            )
         }
         
-        Button(action: { withAnimation() { primingCompleted = true } }) {
+        Button(action: {
+            if #available(iOS 26.0, *) {
+                primingCompleted = true
+            } else {
+                withAnimation { primingCompleted = true }
+            }
+        }) {
             FrameworkLocalizedText("Yes, I saw a drop", comment: "Button label for when the user has seen a drop of insulin")
-                .actionButtonStyle()
         }
-        
+        .buttonStyle(ActionButtonStyle())
+
         Button(action: startPrimingPumpSelected) {
             FrameworkLocalizedText("No, continue priming", comment: "Action button description when priming the pump stopped but can continue")
-                .actionButtonStyle(.secondary)
         }
+        .buttonStyle(ActionButtonStyle(.secondary))
     }
 
     private var startPrimingButtonDisabled: Bool {
@@ -293,8 +322,8 @@ struct PrimePumpView: View {
     private var startPrimingPump: some View {
         Button(action: startPrimingPumpSelected) {
             FrameworkLocalizedText("Start Priming", comment: "Action button description to start priming")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(startPrimingButtonDisabled)
     }
 

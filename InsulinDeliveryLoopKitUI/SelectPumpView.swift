@@ -18,14 +18,10 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
     @State private var showFindSerialNumberInstructions = false
 
     var body: some View {
-        VStack {
-            selectPump
-            Spacer()
-            actionContent
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .edgesIgnoringSafeArea(.bottom)
+        selectPump
+            .actionAreaInset(animationValue: viewModel.deviceSelected, inlineAtAccessibilitySizes: true) { actionContent }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
     }
 
     private var selectPump: some View {
@@ -93,32 +89,38 @@ struct SelectPumpView: View, HorizontalSizeClassOverride {
             .padding()
     }
 
+    @ViewBuilder
     private var actionContent: some View {
-        VStack {
-            if !viewModel.deviceSelected {
-                progressView
-            }
-            continueButton
+        if !viewModel.deviceSelected {
+            progressView
         }
-        .background(Color(UIColor.systemBackground).shadow(radius: 5))
+        continueButton
     }
 
     private var progressView: some View {
-        VStack {
-            HStack { Spacer () }
-            ProgressIndicatorView(state: .indeterminantProgress)
-                .padding(.horizontal)
+        Group {
+            if #available(iOS 26.0, *) {
+                ProgressIndicatorView(state: .indeterminantProgress)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .transition(.opacity)
+            } else {
+                VStack {
+                    HStack { Spacer () }
+                    ProgressIndicatorView(state: .indeterminantProgress)
+                        .padding(.horizontal)
+                }
+                .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
-        .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
     }
 
     private var continueButton: some View {
         Button(action: viewModel.connectToSelectedDevice) {
             FrameworkLocalizedText("Continue", comment: "Continue setup button")
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.deviceSelected)
-        .padding()
     }
 }
 

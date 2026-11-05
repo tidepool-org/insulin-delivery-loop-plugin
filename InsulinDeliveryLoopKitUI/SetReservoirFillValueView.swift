@@ -31,57 +31,53 @@ struct SetReservoirFillValueView: View {
     }
 
     var body: some View {
-        content
+        reservoirSettings
+            .actionAreaInset(inlineAtAccessibilitySizes: true) { saveButton }
             .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
             .navigationBarTitleDisplayMode(.inline)
-            .edgesIgnoringSafeArea(.bottom)
     }
-    
-    private var content: some View {
-        VStack {
-            RoundedCardScrollView(title: LocalizedString("Reservoir Fill Amount", comment: "Title for reservoir fill amount page")) {
-                if viewModel.workflowType == .onboarding {
-                    RoundedCard {
-                        FrameworkLocalizedText("Set your reservoir fill amount", comment: "Subtitle for reservoir fill amount page")
-                            .font(.headline)
-                            .padding(.bottom, 1)
-                        FrameworkLocalizedText("Scroll to set the reservoir fill amount. In Tidepool Loop, the fill amount is reported as an estimate until the reservoir is below 48 U.", comment: "Description for reservoir fill amount page")
-                            .font(.subheadline)
-                    }
-                }
-                RoundedCard() {
-                    NavigationLink(
-                        destination: InsulinTypeSelection(
-                            initialValue: viewModel.insulinType,
-                            supportedInsulinTypes: viewModel.supportedInsulinTypes,
-                            isInitialSetup: true,
-                            didConfirm: viewModel.didChangeInsulinType
-                        )
-                    ) {
-                        RoundedCardValueRow(
-                            label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
-                            value: viewModel.insulinType?.brandName ?? "[Name]",
-                            disclosure: true
-                        )
-                    }
-                }
 
-                RoundedCard(footer: footerText) {
-                    ExpandableSetting(
-                        isEditing: .constant(true),
-                        leadingValueContent: {
-                            FrameworkLocalizedText("Fill Amount", comment: "Label of reservoir fill amount picker")
-                        },
-                        trailingValueContent: {
-                            Text(formatValue(pickerSelection))
-                                .foregroundColor(.accentColor)
-                        },
-                        expandedContent: { picker }
+    private var reservoirSettings: some View {
+        RoundedCardScrollView(title: LocalizedString("Reservoir Fill Amount", comment: "Title for reservoir fill amount page")) {
+            if viewModel.workflowType == .onboarding {
+                RoundedCard {
+                    FrameworkLocalizedText("Set your reservoir fill amount", comment: "Subtitle for reservoir fill amount page")
+                        .font(.headline)
+                        .padding(.bottom, 1)
+                    FrameworkLocalizedText("Scroll to set the reservoir fill amount. In Tidepool Loop, the fill amount is reported as an estimate until the reservoir is below 48 U.", comment: "Description for reservoir fill amount page")
+                        .font(.subheadline)
+                }
+            }
+            RoundedCard() {
+                NavigationLink(
+                    destination: InsulinTypeSelection(
+                        initialValue: viewModel.insulinType,
+                        supportedInsulinTypes: viewModel.supportedInsulinTypes,
+                        isInitialSetup: true,
+                        didConfirm: viewModel.didChangeInsulinType
+                    )
+                ) {
+                    RoundedCardValueRow(
+                        label: LocalizedString("Insulin Type", comment: "Text for confidence reminders navigation link"),
+                        value: viewModel.insulinType?.brandName ?? "[Name]",
+                        disclosure: true
                     )
                 }
             }
-            Spacer()
-            saveButton
+
+            RoundedCard(footer: footerText) {
+                ExpandableSetting(
+                    isEditing: .constant(true),
+                    leadingValueContent: {
+                        FrameworkLocalizedText("Fill Amount", comment: "Label of reservoir fill amount picker")
+                    },
+                    trailingValueContent: {
+                        Text(formatValue(pickerSelection))
+                            .foregroundColor(.accentColor)
+                    },
+                    expandedContent: { picker }
+                )
+            }
         }
     }
 
@@ -106,10 +102,8 @@ struct SetReservoirFillValueView: View {
         Button(action: saveTapped) {
             saveButtonText
                 .actionButtonStyle(okToContinue ? .primary : .deactivated)
-                .padding()
         }
         .disabled(!okToContinue)
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
     
     @ViewBuilder

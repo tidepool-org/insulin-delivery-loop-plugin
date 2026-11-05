@@ -21,16 +21,14 @@ struct ConnectToPumpView: View {
     @State private var presentedAlert: PresentedAlert?
 
     var body: some View {
-        VStack {
-            connectingToPumpCard
-            Spacer()
-            actionContent
-        }
-        .alert(item: $presentedAlert, content: alert(for:))
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .navigationBarTitleDisplayMode(.inline)
-        .edgesIgnoringSafeArea(.bottom)
+        connectingToPumpCard
+            .actionAreaInset(isPresented: footer != nil, animationValue: footer) {
+                actionContent
+            }
+            .alert(item: $presentedAlert, content: alert(for:))
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
+            .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder
@@ -83,45 +81,65 @@ struct ConnectToPumpView: View {
         .foregroundColor(.secondary)
     }
 
+    private enum Footer: Hashable {
+        case authenticationFailed, authenticationCancelled, pumpAlreadyPaired, connected, disconnected(canContinue: Bool), timedOut
+    }
+
+    private var footer: Footer? {
+        if viewModel.pumpSetupState == .authenticationFailed {
+            return .authenticationFailed
+        } else if viewModel.pumpSetupState == .authenticationCancelled {
+            return .authenticationCancelled
+        } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
+            return .pumpAlreadyPaired
+        } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
+            return .connected
+        } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
+            return .disconnected(canContinue: viewModel.pumpSetupState.isFinished)
+        } else if viewModel.connectToPumpTimedOut {
+            return .timedOut
+        }
+        return nil
+    }
+
     @ViewBuilder
     private var actionContent: some View {
-        Group {
-            if viewModel.pumpSetupState == .authenticationFailed {
-                VStack {
-                    pumpAuthenticationFailedWarning
-                    enterPumpInformationButton
-                }
-            } else if viewModel.pumpSetupState == .authenticationCancelled {
-                VStack {
-                    pumpAuthenticationCancelledWarning
-                    tryAgainButton
-                }
-            } else if viewModel.pumpSetupState == .pumpAlreadyPaired {
-                VStack {
-                    pumpAlreadyPairedWarning
-                    repeatSetupButton
-                }
-            } else if viewModel.isPumpConnected && viewModel.pumpSetupState.isFinished {
-                VStack(spacing: 15) {
-                    ProgressIndicatorView(state: .completed)
-                    successMessage
+        switch footer {
+        case .authenticationFailed:
+            VStack {
+                pumpAuthenticationFailedWarning
+                enterPumpInformationButton
+            }
+        case .authenticationCancelled:
+            VStack {
+                pumpAuthenticationCancelledWarning
+                tryAgainButton
+            }
+        case .pumpAlreadyPaired:
+            VStack {
+                pumpAlreadyPairedWarning
+                repeatSetupButton
+            }
+        case .connected:
+            VStack(spacing: 15) {
+                ProgressIndicatorView(state: .completed)
+                successMessage
+                continueButton
+            }
+        case .disconnected(let canContinue):
+            VStack {
+                PumpDisconnectedErrorView()
+                if canContinue {
                     continueButton
                 }
-            } else if viewModel.pumpSetupState != .connecting, !viewModel.isPumpConnected {
-                VStack {
-                    PumpDisconnectedErrorView()
-                    if viewModel.pumpSetupState.isFinished {
-                        continueButton
-                    }
-                }
-            } else if viewModel.connectToPumpTimedOut {
-                VStack {
-                    connectToPumpTimeoutWarning
-                }
             }
+        case .timedOut:
+            VStack {
+                connectToPumpTimeoutWarning
+            }
+        case nil:
+            EmptyView()
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
     }
 
     private var pumpAuthenticationFailedWarning: some View {
@@ -171,22 +189,22 @@ struct ConnectToPumpView: View {
     private var enterPumpInformationButton: some View {
         Button(action: viewModel.selectPumpAgain) {
             FrameworkLocalizedText("Enter Pump Information", comment: "Button label to enter the pump information again")
-                .actionButtonStyle(.destructive)
         }
+        .buttonStyle(ActionButtonStyle(.destructive))
     }
 
     private var tryAgainButton: some View {
         Button(action: viewModel.connectToPumpAgain) {
             FrameworkLocalizedText("Try Again", comment: "Button label to try connecting to the same pump again")
-                .actionButtonStyle(.primary)
         }
+        .buttonStyle(ActionButtonStyle(.primary))
     }
 
     private var repeatSetupButton: some View {
         Button(action: viewModel.repeatPumpSetup) {
             FrameworkLocalizedText("Repeat Setup", comment: "Button label to repeat pump setup again")
-                .actionButtonStyle(.destructive)
         }
+        .buttonStyle(ActionButtonStyle(.destructive))
     }
 
     private var continueButton: some View {
@@ -197,17 +215,16 @@ struct ConnectToPumpView: View {
                 continueText
             }
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(viewModel.pumpSetupState.isProcessing || !viewModel.isPumpConnected)
     }
     
     private var continueText: some View {
         FrameworkLocalizedText("Continue", comment: "Button label to continue pump connection and configuration")
-            .actionButtonStyle()
     }
 
     private var continueSetupText: some View {
         FrameworkLocalizedText("Continue Setup", comment: "Button label to continue pump connection and configuration in setup")
-            .actionButtonStyle()
     }
 
     private func continueButtonTapped() {

@@ -24,16 +24,13 @@ struct AttachPumpView: View {
     }
 
     var body: some View {
-        VStack {
-            content
-            actionContent
-        }
-        .alert(isPresented: $alertIsPresented, content: { alert(error: error) })
-        .navigationBarBackButtonHidden(viewModel.workflowType == .replacement)
-        .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
-        .navigationTitle(navTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .edgesIgnoringSafeArea(.bottom)
+        content
+            .actionAreaInset(animationValue: footer, inlineAtAccessibilitySizes: true) { actionContent }
+            .alert(isPresented: $alertIsPresented, content: { alert(error: error) })
+            .navigationBarBackButtonHidden(viewModel.workflowType == .replacement)
+            .navigationBarItems(trailing: CancelWorkflowWarningButton(viewModel: viewModel))
+            .navigationTitle(navTitle)
+            .navigationBarTitleDisplayMode(.inline)
     }
     
     @ViewBuilder
@@ -68,44 +65,69 @@ struct AttachPumpView: View {
             .openVirtualPumpSettingsOnLongPress(viewModel.virtualPump)
     }
 
-    private var actionContent: some View {
-        VStack {
-            if viewModel.receivedReservoirIssue {
-                ReservoirIssueWarningView(action: { })
-            } else if !viewModel.isPumpConnected && !alertIsPresented {
-                pumpDisconnectedWarning
-            } else {
-                if startingInsulinDelivery {
-                    progressView(.indeterminantProgress)
-                } else if displayInsulinDeliveryStarted {
-                    progressView(.completed)
-                    insulinDeliveryStartedMessage
-                }
-                startInsulinDeliveryButton
-            }
+    private enum Footer: Hashable {
+        case reservoirIssue, disconnected, startDelivery, startingDelivery, deliveryStarted
+    }
+
+    private var footer: Footer {
+        if viewModel.receivedReservoirIssue {
+            return .reservoirIssue
+        } else if !viewModel.isPumpConnected && !alertIsPresented {
+            return .disconnected
+        } else if startingInsulinDelivery {
+            return .startingDelivery
+        } else if displayInsulinDeliveryStarted {
+            return .deliveryStarted
+        } else {
+            return .startDelivery
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
+    }
+
+    @ViewBuilder
+    private var actionContent: some View {
+        switch footer {
+        case .reservoirIssue:
+            ReservoirIssueWarningView(action: { })
+        case .disconnected:
+            pumpDisconnectedWarning
+        case .startDelivery:
+            startInsulinDeliveryButton
+        case .startingDelivery:
+            progressView(.indeterminantProgress)
+            startInsulinDeliveryButton
+        case .deliveryStarted:
+            progressView(.completed)
+            insulinDeliveryStartedMessage
+            startInsulinDeliveryButton
+        }
     }
 
     @ViewBuilder
     private var pumpDisconnectedWarning: some View {
         PumpDisconnectedErrorView()
     }
+
     
+    @ViewBuilder
     private func progressView(_ state: ProgressIndicatorState) -> some View {
-        VStack {
+        if #available(iOS 26.0, *) {
             ProgressIndicatorView(state: state)
                 .padding(.horizontal)
+                .transition(.opacity)
+        } else {
+            VStack {
+                ProgressIndicatorView(state: state)
+                    .padding(.horizontal)
+            }
+            .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
         }
-        .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
     }
 
     private var startInsulinDeliveryButton: some View {
         Button(action: startInsulinDeliveryTapped) {
             startInsulinDeliveryButtonTitle
-                .actionButtonStyle()
         }
+        .buttonStyle(ActionButtonStyle())
         .disabled(!viewModel.isPumpConnected || startingInsulinDelivery)
     }
 
