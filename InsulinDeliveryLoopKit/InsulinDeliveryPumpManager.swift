@@ -415,41 +415,48 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     private func maybeUpdateStatusHighlight(oldState: InsulinDeliveryPumpManagerState? = nil, completion: (() -> Void)? = nil) {
         lookupLatestAnnunciation { [weak self] annunciationType in
-            guard let self else { return }
-            var shouldNotify: Bool
-            if let oldState = oldState, status(for: oldState) != status(for: state) {
-                shouldNotify = true
+            // The lookup completes off-main. `pumpStatusHighlight` and the badge are read by the HUD on
+            // the main thread, so compare-and-write them there (synchronously if already on main).
+            let apply = { [weak self] in
+                self?.applyStatusHighlight(annunciationType: annunciationType, oldState: oldState)
+                completion?()
+            }
+            if Thread.isMainThread {
+                apply()
             } else {
-                shouldNotify = false
+                DispatchQueue.main.async(execute: apply)
             }
-            let newStatusHighlight = Self.determinePumpStatusHighlight(state: state, latestAnnunciationType: annunciationType, isPumpConnected: isPumpConnected, now: dateGenerator)
-            let newStatusHighlightCopy = newStatusHighlight
-            let oldStatusHighlight = self.pumpStatusHighlight
-            if !newStatusHighlightCopy.isEqual(to: oldStatusHighlight) || annunciationType?.statusBadge != insulinDeliveryPumpStatusBadge {
-                pumpStatusHighlight = newStatusHighlightCopy
-                // Status badge should persist until replacement workflow, so unless `annunciationType` is nil (which
-                // means there are no outstanding, unretracted, annunciations) keep the badge persistent.
-                if annunciationType == nil || annunciationType?.statusBadge != nil {
-                    // NOTE: if we ever have more than one type of badge, we may need to add a prioritization scheme
-                    // here.  Right now there's only one, so last one wins.
-                    insulinDeliveryPumpStatusBadge = annunciationType?.statusBadge
-                }
-                shouldNotify = true
-            }
-            
-            if insulinDeliveryPumpStatusBadge == nil, isClockOffset {
-                insulinDeliveryPumpStatusBadge = .timeSyncNeeded
-                shouldNotify = true
-            }
-            
-            if state.shouldDisplayLifeCycleProgress {
-                shouldNotify = true
-            }
+        }
+    }
 
-            if shouldNotify {
-                self.notifyStatusObservers(oldStatus: self.status(for: oldState ?? self.state))
+    /// Must be called on .main
+    private func applyStatusHighlight(annunciationType: AnnunciationType?, oldState: InsulinDeliveryPumpManagerState?) {
+        var shouldNotify = oldState.map { status(for: $0) != status(for: state) } ?? false
+
+        let newStatusHighlight = Self.determinePumpStatusHighlight(state: state, latestAnnunciationType: annunciationType, isPumpConnected: isPumpConnected, now: dateGenerator)
+        if !newStatusHighlight.isEqual(to: pumpStatusHighlight) || annunciationType?.statusBadge != insulinDeliveryPumpStatusBadge {
+            pumpStatusHighlight = newStatusHighlight
+            // Status badge should persist until replacement workflow, so unless `annunciationType` is nil (which
+            // means there are no outstanding, unretracted, annunciations) keep the badge persistent.
+            if annunciationType == nil || annunciationType?.statusBadge != nil {
+                // NOTE: if we ever have more than one type of badge, we may need to add a prioritization scheme
+                // here.  Right now there's only one, so last one wins.
+                insulinDeliveryPumpStatusBadge = annunciationType?.statusBadge
             }
-            completion?()
+            shouldNotify = true
+        }
+
+        if insulinDeliveryPumpStatusBadge == nil, isClockOffset {
+            insulinDeliveryPumpStatusBadge = .timeSyncNeeded
+            shouldNotify = true
+        }
+
+        if state.shouldDisplayLifeCycleProgress {
+            shouldNotify = true
+        }
+
+        if shouldNotify {
+            notifyStatusObservers(oldStatus: status(for: oldState ?? state))
         }
     }
     
