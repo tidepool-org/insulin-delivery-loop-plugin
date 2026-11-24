@@ -32,6 +32,9 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     private var alertExpectation: XCTestExpectation?
     private var lookupExpectation: XCTestExpectation?
     private var statusUpdateExpectation: XCTestExpectation?
+    // When set, only status updates matching the filter fulfill `statusUpdateExpectation`, so a late
+    // update from setup can't satisfy a test waiting for a specific change.
+    private var statusUpdateFilter: ((_ status: PumpManagerStatus, _ oldStatus: PumpManagerStatus) -> Bool)?
     private var statusUpdates = [(status: PumpManagerStatus, oldStatus: PumpManagerStatus)]()
     private var newPumpEventsExpectation: XCTestExpectation?
     private var lastError: PumpManagerError?
@@ -58,6 +61,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         alertExpectation = nil
         lookupExpectation = nil
         statusUpdateExpectation = nil
+        statusUpdateFilter = nil
         newPumpEventsExpectation = nil
         lastError = nil
         statusUpdates = []
@@ -98,6 +102,7 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
         alertExpectation = nil
         lookupExpectation = nil
         statusUpdateExpectation = nil
+        statusUpdateFilter = nil
         newPumpEventsExpectation = nil
     }
     
@@ -748,25 +753,25 @@ class InsulinDeliveryPumpManagerTests: XCTestCase {
     }
 
     func testPumpStatusHighlightReplacementWorkflowIncomplete() {
-        lookupExpectation = expectation(description: "alert lookup")
-        lookupExpectation?.assertForOverFulfill = false
-
         completedOnboarding()
-        pumpManager.replacementWorkflowState = incompleteWorkflow
+        let alertCountBeforeWorkflowChange = issuedAlerts.count
 
-        wait(for: [lookupExpectation!], timeout: expectationTimeout)
-
-        setUpExpectations()
-        // No alert is expected
-        alertExpectation?.isInverted = true
-        lookupExpectation?.assertForOverFulfill = false
+        statusUpdates = []
+        statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.assertForOverFulfill = false
-        wait(for: [alertExpectation!, lookupExpectation!, statusUpdateExpectation!], timeout: expectationTimeout)
+        // Wait for the update that reflects the incomplete workflow; updates from onboarding may still be in flight
+        statusUpdateFilter = { [unowned self] _, _ in
+            pumpManager.pumpStatusHighlight?.localizedMessage == "Incomplete\nReplacement"
+        }
+        pumpManager.replacementWorkflowState = incompleteWorkflow
+        wait(for: [statusUpdateExpectation!], timeout: expectationTimeout)
         waitOnThread()
 
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.imageName, "exclamationmark.circle.fill")
         XCTAssertEqual(pumpManager.pumpStatusHighlight?.localizedMessage, "Incomplete\nReplacement")
         XCTAssertGreaterThanOrEqual(statusUpdates.count, 1)
+        // No alert is expected for an incomplete workflow
+        XCTAssertEqual(issuedAlerts.count, alertCountBeforeWorkflowChange)
     }
 
     func testStartPrimingReservoir() {
@@ -1955,25 +1960,24 @@ extension InsulinDeliveryPumpManagerTests {
     func testStatusUpdateForDifferentBasalDeliveryState() {
         statusUpdates = []
         statusUpdateExpectation = expectation(description: #function)
-        statusUpdateExpectation?.expectedFulfillmentCount = 2
         statusUpdateExpectation?.assertForOverFulfill = false
+        // Wait for the update where basalDeliveryState actually changes; other updates may still be in flight
+        statusUpdateFilter = { $0.basalDeliveryState != $1.basalDeliveryState }
         pumpManager.enactTempBasal(decisionId: nil, unitsPerHour: 2.0, for: .minutes(30), completion: { _ in })
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        XCTAssertNotNil(statusUpdates.last?.status.basalDeliveryState)
-        XCTAssertNotNil(statusUpdates.last?.oldStatus.basalDeliveryState)
-        XCTAssertNotEqual(statusUpdates.last?.status.basalDeliveryState, statusUpdates.last?.oldStatus.basalDeliveryState)
+        let basalStateChange = statusUpdates.first(where: { $0.status.basalDeliveryState != $0.oldStatus.basalDeliveryState })
+        XCTAssertNotNil(basalStateChange?.status.basalDeliveryState)
+        XCTAssertNotNil(basalStateChange?.oldStatus.basalDeliveryState)
     }
 
     func testStatusUpdateForDifferentBolusState() {
         statusUpdates = []
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.assertForOverFulfill = false
+        // Wait for the update where bolusState actually changes; other updates may still be in flight
+        statusUpdateFilter = { $0.bolusState != $1.bolusState }
         pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        waitOnThread()
-        // Assert on the update where bolusState actually changed rather than `last`: the bolus
-        // state machine may emit further updates (e.g. .initiating → .inProgress, or an update
-        // that leaves bolusState unchanged), so `last` is nondeterministic.
         let bolusStateChange = statusUpdates.first(where: { $0.status.bolusState != $0.oldStatus.bolusState })
         XCTAssertNotNil(bolusStateChange)
         XCTAssertEqual(bolusStateChange?.oldStatus.bolusState, .noBolus)
@@ -1984,13 +1988,11 @@ extension InsulinDeliveryPumpManagerTests {
         statusUpdates = []
         statusUpdateExpectation = expectation(description: #function)
         statusUpdateExpectation?.assertForOverFulfill = false
+        // Wait for the update where deliveryIsUncertain actually changes; other updates may still be in flight
+        statusUpdateFilter = { $0.deliveryIsUncertain != $1.deliveryIsUncertain }
         pumpManager.enactBolus(decisionId: nil, units: 1, activationType: .manualRecommendationAccepted, completion: { _ in })
         pump.handleCBError(CBError(.peripheralDisconnected))
         wait(for: [statusUpdateExpectation!], timeout: 30)
-        waitOnThread()
-        // Assert on the update where deliveryIsUncertain actually changed rather than `last`: the
-        // bolus/disconnect flow may emit further updates that leave deliveryIsUncertain unchanged,
-        // so `last` is nondeterministic.
         let uncertainChange = statusUpdates.first(where: { $0.status.deliveryIsUncertain != $0.oldStatus.deliveryIsUncertain })
         XCTAssertNotNil(uncertainChange)
         XCTAssertEqual(uncertainChange?.oldStatus.deliveryIsUncertain, false)
@@ -2378,7 +2380,9 @@ extension InsulinDeliveryPumpManagerTests: PumpManagerDelegate {
     
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
         statusUpdates.append((status: status, oldStatus: oldStatus))
-        statusUpdateExpectation?.fulfill()
+        if statusUpdateFilter?(status, oldStatus) ?? true {
+            statusUpdateExpectation?.fulfill()
+        }
     }
     
     func issueAlert(_ alert: Alert) {

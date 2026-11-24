@@ -264,9 +264,22 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     public var tidepoolSecurity: TidepoolSecurity?
 
-    // NOTE: Must only be updated on .main
-    public var pumpStatusHighlight: PumpStatusHighlight?
-    public var insulinDeliveryPumpStatusBadge: InsulinDeliveryPumpStatusBadge?
+    // Read by the HUD on .main while updated from pump comms threads; the lock prevents torn reads.
+    private struct StatusIndicators {
+        var highlight: PumpStatusHighlight?
+        var badge: InsulinDeliveryPumpStatusBadge?
+    }
+    private let lockedStatusIndicators = LoopKit.Locked(StatusIndicators())
+
+    public var pumpStatusHighlight: PumpStatusHighlight? {
+        get { lockedStatusIndicators.value.highlight }
+        set { lockedStatusIndicators.mutate { $0.highlight = newValue } }
+    }
+
+    public var insulinDeliveryPumpStatusBadge: InsulinDeliveryPumpStatusBadge? {
+        get { lockedStatusIndicators.value.badge }
+        set { lockedStatusIndicators.mutate { $0.badge = newValue } }
+    }
     
     @discardableResult private func mutateState(_ changes: (_ state: inout InsulinDeliveryPumpManagerState) -> Void) -> InsulinDeliveryPumpManagerState {
         return setStateWithResult({ state -> InsulinDeliveryPumpManagerState in
@@ -415,40 +428,37 @@ open class InsulinDeliveryPumpManager: PumpManager, InsulinDeliveryPumpDelegate 
     
     private func maybeUpdateStatusHighlight(oldState: InsulinDeliveryPumpManagerState? = nil, completion: (() -> Void)? = nil) {
         lookupLatestAnnunciation { [weak self] annunciationType in
-            // The lookup completes off-main. `pumpStatusHighlight` and the badge are read by the HUD on
-            // the main thread, so compare-and-write them there (synchronously if already on main).
-            let apply = { [weak self] in
-                self?.applyStatusHighlight(annunciationType: annunciationType, oldState: oldState)
-                completion?()
-            }
-            if Thread.isMainThread {
-                apply()
-            } else {
-                DispatchQueue.main.async(execute: apply)
-            }
+            self?.applyStatusHighlight(annunciationType: annunciationType, oldState: oldState)
+            completion?()
         }
     }
 
-    /// Must be called on .main
     private func applyStatusHighlight(annunciationType: AnnunciationType?, oldState: InsulinDeliveryPumpManagerState?) {
+        // Snapshot once so the notify decision, highlight, and reported old status agree
+        let state = self.state
         var shouldNotify = oldState.map { status(for: $0) != status(for: state) } ?? false
 
         let newStatusHighlight = Self.determinePumpStatusHighlight(state: state, latestAnnunciationType: annunciationType, isPumpConnected: isPumpConnected, now: dateGenerator)
-        if !newStatusHighlight.isEqual(to: pumpStatusHighlight) || annunciationType?.statusBadge != insulinDeliveryPumpStatusBadge {
-            pumpStatusHighlight = newStatusHighlight
-            // Status badge should persist until replacement workflow, so unless `annunciationType` is nil (which
-            // means there are no outstanding, unretracted, annunciations) keep the badge persistent.
-            if annunciationType == nil || annunciationType?.statusBadge != nil {
-                // NOTE: if we ever have more than one type of badge, we may need to add a prioritization scheme
-                // here.  Right now there's only one, so last one wins.
-                insulinDeliveryPumpStatusBadge = annunciationType?.statusBadge
-            }
-            shouldNotify = true
-        }
+        let isClockOffset = self.isClockOffset
 
-        if insulinDeliveryPumpStatusBadge == nil, isClockOffset {
-            insulinDeliveryPumpStatusBadge = .timeSyncNeeded
-            shouldNotify = true
+        // Compare-and-set under the lock so a concurrent reader never sees a half-updated pair
+        lockedStatusIndicators.mutate { indicators in
+            if !newStatusHighlight.isEqual(to: indicators.highlight) || annunciationType?.statusBadge != indicators.badge {
+                indicators.highlight = newStatusHighlight
+                // Status badge should persist until replacement workflow, so unless `annunciationType` is nil (which
+                // means there are no outstanding, unretracted, annunciations) keep the badge persistent.
+                if annunciationType == nil || annunciationType?.statusBadge != nil {
+                    // NOTE: if we ever have more than one type of badge, we may need to add a prioritization scheme
+                    // here.  Right now there's only one, so last one wins.
+                    indicators.badge = annunciationType?.statusBadge
+                }
+                shouldNotify = true
+            }
+
+            if indicators.badge == nil, isClockOffset {
+                indicators.badge = .timeSyncNeeded
+                shouldNotify = true
+            }
         }
 
         if state.shouldDisplayLifeCycleProgress {
